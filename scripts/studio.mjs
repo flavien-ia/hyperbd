@@ -76,6 +76,10 @@
 //   sources-public <projet> [--off]        ouvrir (ou fermer) la page publique
 //   sources-public <projet> --etat         est-elle ouverte ?
 //
+//   -- le cadre de génération (la DA verrouillée) --
+//   get-template <projet>                  le cadre en vigueur
+//   set-template <projet> --file cadre.txt [--label "DA v2"] [--double-page "..."]
+//
 // Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1).
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -567,6 +571,23 @@ const commandes = {
           method: "PUT",
           body: { ouvert: !o.off },
         }),
+  // ── Le cadre de génération (la DA verrouillée) ──────────────────────────
+
+  "get-template": () => appel(`/projects/${arg(0)}/prompt-template`),
+
+  "set-template"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un fichier texte>.");
+    return appel(`/projects/${arg(0)}/prompt-template`, {
+      method: "PUT",
+      body: {
+        content: readFileSync(o.file, "utf8"),
+        ...(typeof o["double-page"] === "string"
+          ? { doublePage: o["double-page"] }
+          : {}),
+        ...(typeof o.label === "string" ? { label: o.label } : {}),
+      },
+    });
+  },
 };
 
 const fn = commandes[commande];
@@ -586,6 +607,6 @@ fn()
     console.log(JSON.stringify({ erreur: e.message }, null, 2));
     // `exitCode` et non `exit()` : couper le processus pendant qu'une requête
     // se referme fait planter libuv sous Windows, et le code de sortie devient
-    // 127 au lieu de 1 — un appelant qui teste l'échec s'y trompe.
+    // 127 au lieu de 1, et un appelant qui teste l'échec s'y trompe.
     process.exitCode = 1;
   });

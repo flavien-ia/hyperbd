@@ -14,7 +14,7 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 
 ## État
 
-**Version 0.2.0, en construction.** Ce qui fonctionne aujourd'hui :
+**Version 0.3.0, en construction.** Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |
 |---|---|
@@ -24,9 +24,12 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 | `/bd-univers` | la prémisse (par pistes contrastées) et la bible du monde |
 | `/bd-personnages` | le casting comme graphe de forces, fiches et variantes |
 | `/bd-scenario` | actes, scènes, mise en scène, rappels, budget, audit et pitch |
+| `/bd-da` | la direction artistique : pistes contrastées générées, jugées, verrouillées |
+| `/bd-design` | personnages, décors et motifs dessinés, puis la planche test |
+| `/bd-audit` | l'album passé au crible par lots parallèles, à tout moment |
 
-Les temps 2 à 4 (direction artistique, dialogues, production des planches)
-arrivent ensuite. Le plan complet vit dans `Plan du harnais HyperBD.md`.
+Les temps 3 et 4 (dialogues, production complète des planches) arrivent
+ensuite. Le plan complet vit dans `Plan du harnais HyperBD.md`.
 
 ## Comment il travaille
 

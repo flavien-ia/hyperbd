@@ -144,6 +144,8 @@ async function controlerProjet(projet) {
     );
   }
 
+  await controlerVisuel(projet, nodes);
+
   const budget = scenes.reduce(
     (t, s) => t + (s.meta?.budgetPlanches ?? 0),
     0,
@@ -160,6 +162,67 @@ async function controlerProjet(projet) {
       budgetPlanches: budget,
     },
   };
+}
+
+/**
+ * Ce qui se vérifie du côté visuel et documentaire.
+ *
+ * Trois choses qui ne se voient pas en lisant, et qui coûtent cher plus tard :
+ * dessiner sans direction artistique arrêtée, une source qui ne mène nulle
+ * part, et un QR imprimé qui vise une fiche disparue.
+ */
+async function controlerVisuel(projet, nodes) {
+  const { docs } = await appel(`/projects/${projet}/docs`);
+  const aBibleGraphique = (docs ?? []).some(
+    (d) => d.kind === "bible-graphique",
+  );
+
+  // On dessine des personnages sans avoir arrêté le style : chaque image
+  // produite maintenant sera à refaire quand la DA sera posée.
+  const { essais } = await appel(`/projects/${projet}/essais`);
+  const dessine = (essais ?? []).some((e) =>
+    ["personnage", "decor", "motif"].includes(e.kind),
+  );
+  if (dessine && !aBibleGraphique) {
+    signaler(
+      "erreur",
+      "des personnages ou des décors sont dessinés sans bible graphique",
+      "le projet",
+      "poser la direction artistique avant de produire : sinon ces images seront à refaire",
+    );
+  }
+
+  const { sources } = await appel(`/projects/${projet}/sources`);
+  const vivantes = new Set((sources ?? []).map((s) => s.id));
+
+  for (const src of sources ?? []) {
+    if (!src.url?.trim()) {
+      signaler(
+        "avertissement",
+        "source sans lien vers le document d'origine",
+        `source « ${src.title || src.slug} »`,
+        "une fiche qui ne mène à rien remplace la source au lieu d'y conduire",
+      );
+    }
+  }
+
+  // Un QR imprimé vise une ancre pour toujours : si la source a disparu, le
+  // lecteur tombera sur du vide, et les albums sont déjà tirés.
+  const { planches } = await appel(`/projects/${projet}/planches`);
+  for (const p of (planches ?? []).filter((x) => x.kind === "planche")) {
+    const { lettrage } = await appel(`/planches/${p.id}/lettrage`);
+    for (const b of lettrage?.bulles ?? []) {
+      if (b.kind !== "qrcode" || !b.sourceId) continue;
+      if (!vivantes.has(b.sourceId)) {
+        signaler(
+          "erreur",
+          "QR code lié à une source retirée",
+          `planche « ${p.title || p.code || p.id} »`,
+          "remettre la source, ou refaire pointer le QR ailleurs AVANT le tirage",
+        );
+      }
+    }
+  }
 }
 
 function controlerFichier(chemin) {
