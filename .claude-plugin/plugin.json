@@ -1,8 +1,10 @@
 {
   "name": "hyperbd",
   "description": "Turn a message into a finished comic book. HyperBD guides (or runs on its own) the four movements of the craft: scenario, art direction, dialogue and page production, working hand in hand with the Studio Entremondes workshop.",
-  "version": "0.1.0",
-  "author": { "name": "Flavien Chervet" },
+  "version": "0.2.0",
+  "author": {
+    "name": "Flavien Chervet"
+  },
   "homepage": "https://hyperbd.fr",
   "repository": "https://github.com/flavien-ia/hyperbd",
   "license": "Apache-2.0",

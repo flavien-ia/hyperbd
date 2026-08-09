@@ -28,6 +28,27 @@
 //   set-lettrage <planche> [--text-file F] [--valider|--devalider]
 //   costs <projet>                         ce que le projet a coûté
 //
+//   -- la Toile (le scénario) --
+//   nodes <projet> [--ecartes]             les blocs et les liens
+//   node <id>                              un bloc, corps compris
+//   new-node <projet> --file <json>        poser un bloc
+//   scenario <projet> --file <json>        poser un lot de blocs et de liens
+//   write-node <id> --file <json>          écrire un bloc
+//   set-status <id> --status S [--raison R] valider ou écarter
+//   promote <id> [--acte]                  une note devient une scène
+//   reorder-scenes <projet> --file <json>  l'ordre du récit
+//   edges <projet>                         les liens
+//   new-edge --from A --to B [--type T] [--label L]
+//   drop-edge <id>
+//   docs <projet> [--kind K]               les textes du projet
+//   doc <id>                               un texte, corps compris
+//   new-doc <projet> --file <json>         en écrire un
+//   write-doc <id> --file <json>           le réécrire
+//   journal <projet> [--limite N]          les décisions
+//   journal-add <projet> --file <json>     en consigner une
+//   version <projet>                       le numéro du dernier changement
+//   changes <projet> [--since N]           ce qui a changé
+//
 // Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1).
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -220,6 +241,122 @@ const commandes = {
         remplacer: Boolean(o.remplacer),
       },
     }),
+
+  // ── La Toile ────────────────────────────────────────────────────────────
+
+  nodes: () =>
+    appel(`/projects/${arg(0)}/nodes${o.ecartes ? "?ecartes=1" : ""}`),
+  node: () => appel(`/nodes/${arg(0)}`),
+
+  "new-node"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/projects/${arg(0)}/nodes`, {
+      method: "POST",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  /**
+   * Pose un lot de blocs (et leurs liens) d'un coup.
+   *
+   * C'est la façon de proposer : les cinq prémisses arrivent ensemble, la
+   * personne les voit d'un regard et arbitre. Les positions sont facultatives,
+   * l'atelier range la grappe en grille.
+   */
+  scenario() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/projects/${arg(0)}/scenario`, {
+      method: "POST",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  "write-node"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/nodes/${arg(0)}`, {
+      method: "PATCH",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  "set-status": () =>
+    appel(`/nodes/${arg(0)}/status`, {
+      method: "POST",
+      body: {
+        status: typeof o.status === "string" ? o.status : "valide",
+        ...(typeof o.raison === "string" ? { raison: o.raison } : {}),
+      },
+    }),
+
+  promote: () =>
+    appel(`/nodes/${arg(0)}/promote`, {
+      method: "POST",
+      body: { type: o.acte ? "acte" : "scene" },
+    }),
+
+  "drop-node": () => appel(`/nodes/${arg(0)}`, { method: "DELETE" }),
+
+  "reorder-scenes"() {
+    if (!o.file) throw new Error("Il faut --file <JSON : { orderedIds: [] }>.");
+    return appel(`/projects/${arg(0)}/nodes/reorder`, {
+      method: "POST",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  edges: () => appel(`/projects/${arg(0)}/edges`),
+
+  "new-edge": () =>
+    appel(`/projects/${o.projet ?? "_"}/edges`, {
+      method: "POST",
+      body: {
+        from: o.from,
+        to: o.to,
+        type: typeof o.type === "string" ? o.type : "libre",
+        label: typeof o.label === "string" ? o.label : "",
+      },
+    }),
+
+  "drop-edge": () => appel(`/edges/${arg(0)}`, { method: "DELETE" }),
+
+  docs: () =>
+    appel(
+      `/projects/${arg(0)}/docs${typeof o.kind === "string" ? `?kind=${o.kind}` : ""}`,
+    ),
+  doc: () => appel(`/docs/${arg(0)}`),
+
+  "new-doc"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/projects/${arg(0)}/docs`, {
+      method: "POST",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  "write-doc"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/docs/${arg(0)}`, {
+      method: "PATCH",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  journal: () =>
+    appel(
+      `/projects/${arg(0)}/journal${o.limite ? `?limite=${o.limite}` : ""}`,
+    ),
+
+  "journal-add"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/projects/${arg(0)}/journal`, {
+      method: "POST",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  version: () => appel(`/projects/${arg(0)}/version`),
+  changes: () =>
+    appel(`/projects/${arg(0)}/changes?since=${o.since ?? 0}`),
 
   "set-lettrage": () =>
     appel(`/planches/${arg(0)}/lettrage`, {

@@ -1,18 +1,27 @@
 {
   "name": "hyperbd",
-  "owner": { "name": "Flavien Chervet" },
+  "owner": {
+    "name": "Flavien Chervet"
+  },
   "description": "Open-source distribution of the HyperBD plugin for Claude Code.",
   "plugins": [
     {
       "name": "hyperbd",
       "source": "./",
-      "version": "0.1.0",
-      "description": "Turn a message into a finished comic book, with Claude Code and the Studio Entremondes workshop.",
-      "author": { "name": "Flavien Chervet" },
+      "version": "0.2.0",
+      "description": "Turn a message into a finished comic book: scenario, art direction, dialogue and pages, with Claude Code and the Studio Entremondes workshop.",
+      "author": {
+        "name": "Flavien Chervet"
+      },
       "homepage": "https://hyperbd.fr",
       "repository": "https://github.com/flavien-ia/hyperbd",
       "license": "Apache-2.0",
-      "keywords": ["claude-code", "comics", "storytelling", "gpt-image"]
+      "keywords": [
+        "claude-code",
+        "comics",
+        "storytelling",
+        "gpt-image"
+      ]
     }
   ]
 }
