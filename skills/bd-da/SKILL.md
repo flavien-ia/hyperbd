@@ -165,7 +165,18 @@ node "$S" set-template <projet> --file cadre.txt
 node "$S" new-doc <projet> --kind bible-graphique --file bible-graphique.md
 ```
 
-3. **Les images de la piste retenue** promues en entrées `style` de l'univers :
+3. **Les images de la piste retenue** promues en entrées `style` de l'univers.
+
+   **Avant de promouvoir, relis chaque image contre les négatifs que tu viens
+   d'écrire.** Une planche de style est ce que le modèle imitera soixante fois :
+   si elle contient précisément ce que la bible interdit, elle enseigne le
+   contraire de la consigne, et aucun prompt ne rattrapera cela. Le cas s'est
+   produit à CP2 : la planche retenue portait une grande masse blanche flottant
+   au milieu du décor, que les négatifs du même document venaient d'interdire.
+
+   Une image qui contredit un négatif se recadre, ou se remplace. Ne la promeus
+   pas en te disant que le prompt corrigera : le prompt dit, l'image montre, et
+   c'est l'image qui gagne.
 
 ```bash
 node "$S" promote-image <imageId> --style "<nom de la piste>"

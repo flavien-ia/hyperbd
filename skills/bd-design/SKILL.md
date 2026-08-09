@@ -66,6 +66,21 @@ Par variante, **deux images** :
 Le prompt : **le cadre de la DA** + la fiche d'apparence + ce qui distingue
 cette variante. Toujours dans cet ordre : le style d'abord, le sujet ensuite.
 
+**Ne fais jamais porter à la planche de style l'identité d'un personnage.**
+Elle dit à quoi ressemble l'ALBUM, pas à quoi ressemble quelqu'un. Si tu la
+passes seule en référence pour dessiner Mira, le modèle y prend aussi le
+costume, le front, la valeur du pull — et le juge, faute de mieux, jugera la
+ressemblance à cette aune. Le remède est un détourage : recadre la figure du
+personnage dans la planche de style et donne-le comme référence SÉPARÉE de
+costume et de visage. Deux références qui disent chacune une chose valent
+mieux qu'une qui en dit deux.
+
+**Décris le costume en matière et en coupe, pas en nom.** « Veste de toile »
+donne un blouson de cuir court une fois sur deux ; « long manteau de toile de
+travail usée descendant à mi-cuisse, col montant à patte boutonnée, tissu
+froissé et mat » ne laisse pas le choix. Les deux planches de références de la
+recette ont dérivé exactement là, et rien d'autre.
+
 ```bash
 node "$S" essai <projet> --kind personnage \
   --prompt "<cadre>, <apparence>, <variante>" --size paysage --wait

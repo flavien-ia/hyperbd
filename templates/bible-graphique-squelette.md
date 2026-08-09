@@ -76,6 +76,11 @@ et le noter évite qu'on en invente un plus tard.]
 - [les tics du modèle repérés pendant les essais : rendu lisse par défaut,
   éclairage de studio, symétrie de visage, texte parasite...]
 
+> **Relis les planches de style retenues contre cette liste.** Une image de
+> référence qui contient ce que les négatifs interdisent enseigne le contraire
+> de la consigne, et le modèle suivra l’image, pas le texte. Si l’une d’elles
+> contredit un négatif, recadre-la ou remplace-la avant de la promouvoir.
+
 ---
 
 ## Grammaire de mise en page
