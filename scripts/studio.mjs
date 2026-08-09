@@ -124,7 +124,16 @@ async function appel(chemin, options = {}) {
   }
   if (!reponse.ok) {
     const m = data?.error?.message ?? `HTTP ${reponse.status}`;
-    throw new Error(m);
+    /**
+     * Le DÉTAIL, pas seulement le message.
+     *
+     * L'atelier renvoie les champs fautifs (« status : valeur attendue parmi
+     * idee, discute, valide, ecarte ») ; les jeter laissait « Requête
+     * invalide. » tout seul, et un agent n'a plus qu'à deviner lequel des
+     * quarante champs il a mal rempli. Chaque devinette est un aller-retour.
+     */
+    const d = data?.error?.details;
+    throw new Error(d ? `${m} ${JSON.stringify(d)}` : m);
   }
   return data;
 }
