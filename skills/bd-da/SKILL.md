@@ -116,8 +116,30 @@ En guidé : montre les grappes, les verdicts, et laisse trancher. Rappelle,
 sans insister, que le critère qui coûte le plus cher plus tard est la
 robustesse, pas la beauté.
 
-En `--auto` : retiens la piste au meilleur `robustesse`, à `lisibilite` égale
-ou supérieure à 7. Consigne le choix et sa raison au journal.
+En `--auto`, suis le verdict du juge, pas une seconde règle de ton cru :
+
+1. **Une seule piste `PORTEUSE`** : c'est elle. Applique ses trois ajustements
+   de bloc avant de verrouiller : « porteuse » veut dire « porteuse une fois
+   corrigée », jamais « bonne telle quelle ».
+2. **Plusieurs `PORTEUSE`** : la meilleure `robustesse` l'emporte, puis la
+   meilleure `lisibilite`.
+3. **Aucune `PORTEUSE`** : ne choisis pas. Prends la meilleure `robustesse`,
+   applique ses ajustements, **et refais un tour d'images** avec le bloc
+   corrigé. Verrouiller une DA qu'aucun juge n'a trouvée porteuse, c'est
+   installer pour soixante planches un problème que deux images auraient
+   suffi à voir.
+
+Consigne le choix et sa raison au journal.
+
+Deux garde-fous appris en conditions réelles :
+
+- **Une note faible sur une dimension ne disqualifie pas une piste porteuse.**
+  Une lisibilité moyenne est un défaut du BLOC (contraste, hiérarchie des
+  valeurs), pas du style : elle se corrige en une phrase. Une robustesse
+  faible, elle, est une propriété du style, et rien ne la corrige.
+- **Ne double jamais la règle du juge par un seuil à toi.** Si tu ajoutes un
+  filtre que la grille ignore, tu peux écarter la seule piste que le juge a
+  déclarée porteuse, et personne ne saura pourquoi.
 
 Une piste peut être choisie **contre** l'avis du juge : c'est légitime, et cela
 se consigne comme tel. Le juge écarte ce qui est faux, l'humain choisit ce qui
