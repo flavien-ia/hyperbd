@@ -49,6 +49,33 @@
 //   version <projet>                       le numéro du dernier changement
 //   changes <projet> [--since N]           ce qui a changé
 //
+//   -- le laboratoire (images sans planche) --
+//   essai <projet> --prompt-file F [--kind K] [--label L] [--n 1]
+//         [--quality low] [--size WxH] [--refs id,id] [--essais id,id] [--wait]
+//   essais <projet> [--kind K]             ce que le laboratoire a produit
+//   essai-detail <id>                      un essai et ses images
+//   keep <imageId> [--off]                 retenir une image (survit à la purge)
+//   promote-image <imageId> --entry <id>   la verser dans la bibliothèque
+//   promote-image <imageId> --style "N"    en faire une planche de style
+//   drop-essai <id>
+//
+//   -- écrire dans la bibliothèque de l'univers --
+//   new-entry <projet> --kind K --name N [--parent id] [--color hex] [--snippet "..."]
+//   set-entry <projet> <entryId> --file patch.json
+//   drop-entry <projet> <entryId>
+//   entry-image <projet> <entryId> --file image.png    dépose et inscrit
+//   star <projet> <imageId>                            bascule l'étoile (max 3)
+//   drop-image <projet> <imageId>
+//
+//   -- les sources (ce à quoi les affirmations de l'album renvoient) --
+//   sources <projet>                       la liste, sans les fiches
+//   source <id>                            une source, fiche comprise
+//   new-source <projet> --file s.json      { title, slug?, url?, replique?, body? }
+//   write-source <id> --file patch.json
+//   drop-source <id>
+//   sources-public <projet> [--off]        ouvrir (ou fermer) la page publique
+//   sources-public <projet> --etat         est-elle ouverte ?
+//
 // Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1).
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -134,6 +161,24 @@ async function attendre(generationId, { intervalleMs = 8000, maxMs = 900000 } = 
       throw new Error(
         `Toujours en cours après ${Math.round(maxMs / 60000)} minutes : ` +
           `suivre \`generation ${generationId}\`.`,
+      );
+    }
+    await new Promise((r) => setTimeout(r, intervalleMs));
+  }
+}
+
+/** Même attente que pour une génération : un essai se fabrique en minutes. */
+async function attendreEssai(essaiId, { intervalleMs = 8000, maxMs = 900000 } = {}) {
+  const debut = Date.now();
+  for (;;) {
+    const { essai, images } = await appel(`/essais/${essaiId}`);
+    if (essai.status === "done") return { essai, images };
+    if (essai.status === "error") {
+      throw new Error(essai.errorMessage ?? "L'essai a échoué.");
+    }
+    if (Date.now() - debut > maxMs) {
+      throw new Error(
+        `Toujours en cours : suivre \`essai-detail ${essaiId}\`.`,
       );
     }
     await new Promise((r) => setTimeout(r, intervalleMs));
@@ -358,6 +403,126 @@ const commandes = {
   changes: () =>
     appel(`/projects/${arg(0)}/changes?since=${o.since ?? 0}`),
 
+  // ── Le laboratoire ──────────────────────────────────────────────────────
+
+  /**
+   * Lance un essai : une image qui n'appartient à aucune planche.
+   *
+   * Le prompt vient d'un FICHIER : un cadre de direction artistique fait des
+   * paragraphes, avec des accents et des retours à la ligne que la ligne de
+   * commande abîme.
+   */
+  async essai() {
+    if (!o["prompt-file"]) {
+      throw new Error("Il faut --prompt-file <chemin d'un texte>.");
+    }
+    const lancement = await appel(`/projects/${arg(0)}/essais`, {
+      method: "POST",
+      body: {
+        kind: typeof o.kind === "string" ? o.kind : "libre",
+        label: typeof o.label === "string" ? o.label : "",
+        prompt: readFileSync(o["prompt-file"], "utf8"),
+        n: o.n ? Number(o.n) : 1,
+        quality: typeof o.quality === "string" ? o.quality : "low",
+        ...(typeof o.size === "string" ? { size: o.size } : {}),
+        ...(typeof o.refs === "string"
+          ? { universeImageIds: o.refs.split(",") }
+          : {}),
+        ...(typeof o.essais === "string"
+          ? { essaiImageIds: o.essais.split(",") }
+          : {}),
+      },
+    });
+    if (!o.wait) return lancement;
+    return { ...lancement, ...(await attendreEssai(lancement.essaiId)) };
+  },
+
+  essais: () =>
+    appel(
+      `/projects/${arg(0)}/essais${typeof o.kind === "string" ? `?kind=${o.kind}` : ""}`,
+    ),
+  "essai-detail": () => appel(`/essais/${arg(0)}`),
+
+  keep: () =>
+    appel(`/essai-images/${arg(0)}/keep`, {
+      method: "POST",
+      body: { kept: !o.off },
+    }),
+
+  "promote-image": () =>
+    appel(`/essai-images/${arg(0)}/promote`, {
+      method: "POST",
+      body:
+        typeof o.style === "string"
+          ? { styleEntry: { name: o.style } }
+          : { entryId: o.entry },
+    }),
+
+  "drop-essai": () => appel(`/essais/${arg(0)}`, { method: "DELETE" }),
+
+  // ── Écrire dans la bibliothèque ─────────────────────────────────────────
+
+  "new-entry": () =>
+    appel(`/projects/${arg(0)}/universe/entries`, {
+      method: "POST",
+      body: {
+        kind: typeof o.kind === "string" ? o.kind : "character",
+        name: o.name,
+        ...(typeof o.snippet === "string" ? { promptSnippet: o.snippet } : {}),
+        ...(typeof o.parent === "string" ? { parentId: o.parent } : {}),
+        ...(typeof o.color === "string" ? { bubbleColor: o.color } : {}),
+      },
+    }),
+
+  "set-entry"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/projects/${arg(0)}/universe/entries/${arg(1)}`, {
+      method: "PATCH",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  "drop-entry": () =>
+    appel(`/projects/${arg(0)}/universe/entries/${arg(1)}`, {
+      method: "DELETE",
+    }),
+
+  /**
+   * Dépose une image sur une entrée, en trois temps : demander l'adresse,
+   * pousser le fichier vers le stockage, inscrire la clé. L'application ne
+   * voit jamais passer les octets.
+   */
+  async "entry-image"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'une image>.");
+    const ext = (o.file.split(".").pop() ?? "png").toLowerCase();
+    const type = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : "image/png";
+    const { key, uploadUrl } = await appel(
+      `/projects/${arg(0)}/universe/entries/${arg(1)}/upload`,
+      { method: "POST", body: { contentType: type, ext } },
+    );
+    const octets = readFileSync(o.file);
+    const envoi = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "content-type": type },
+      body: octets,
+    });
+    if (!envoi.ok) throw new Error(`Dépôt refusé (${envoi.status}).`);
+    return appel(`/projects/${arg(0)}/universe/entries/${arg(1)}/images`, {
+      method: "POST",
+      body: { key },
+    });
+  },
+
+  star: () =>
+    appel(`/projects/${arg(0)}/universe/images/${arg(1)}/default`, {
+      method: "POST",
+    }),
+
+  "drop-image": () =>
+    appel(`/projects/${arg(0)}/universe/images/${arg(1)}`, {
+      method: "DELETE",
+    }),
+
   "set-lettrage": () =>
     appel(`/planches/${arg(0)}/lettrage`, {
       method: "PUT",
@@ -369,6 +534,39 @@ const commandes = {
         ...(o.devalider ? { validated: false } : {}),
       },
     }),
+  // ── Les sources : ce à quoi les affirmations de l'album renvoient ───────
+
+  sources: () => appel(`/projects/${arg(0)}/sources`),
+
+  "source": () => appel(`/sources/${arg(0)}`),
+
+  "new-source"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/projects/${arg(0)}/sources`, {
+      method: "POST",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  "write-source"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    return appel(`/sources/${arg(0)}`, {
+      method: "PATCH",
+      body: JSON.parse(readFileSync(o.file, "utf8")),
+    });
+  },
+
+  "drop-source": () => appel(`/sources/${arg(0)}`, { method: "DELETE" }),
+
+  // Ouvrir la page publique avant le tirage : un QR imprimé qui pointe une
+  // page fermée ne se rattrape pas.
+  "sources-public": () =>
+    o.etat
+      ? appel(`/projects/${arg(0)}/sources-public`)
+      : appel(`/projects/${arg(0)}/sources-public`, {
+          method: "PUT",
+          body: { ouvert: !o.off },
+        }),
 };
 
 const fn = commandes[commande];
@@ -386,5 +584,8 @@ fn()
   })
   .catch((e) => {
     console.log(JSON.stringify({ erreur: e.message }, null, 2));
-    process.exit(1);
+    // `exitCode` et non `exit()` : couper le processus pendant qu'une requête
+    // se referme fait planter libuv sous Windows, et le code de sortie devient
+    // 127 au lieu de 1 — un appelant qui teste l'échec s'y trompe.
+    process.exitCode = 1;
   });
