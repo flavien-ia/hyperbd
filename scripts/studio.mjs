@@ -599,7 +599,13 @@ if (!fn) {
   process.exit(2);
 }
 
-fn()
+// `Promise.resolve().then(fn)` et non `fn()` : plusieurs commandes valident
+// leurs arguments AVANT tout appel réseau (« il faut --file »). Ce jet
+// synchrone passait à côté du `.catch()` et sortait une trace de pile sur
+// stderr, avec un stdout vide : tout appelant qui lit du JSON s'y cassait.
+// Le contrat est « du JSON, toujours », y compris pour dire non.
+Promise.resolve()
+  .then(fn)
   .then((r) => {
     console.log(JSON.stringify(r, null, 2));
   })
