@@ -18,6 +18,8 @@
 //   planche <id>                           une planche en détail
 //   create-planche <projet> [--title T] [--after ID] [--separator]
 //   drop-planche <plancheId>               retirer une planche de l'album
+//   rendu <plancheId> --out f.png          la planche lettrée, en image
+//         [--largeur 1536] [--locale en] [--sans-texte] [--calque]
 //   write <planche> --file <json>          écrit titre / script / casting
 //   generate <planche> [--n 1] [--quality medium] [--mode planche] [--case ID]
 //                      [--extra "..."] [--wait]
@@ -320,6 +322,58 @@ const commandes = {
 
   /** Retirer une planche de l'album (elle emporte son lettrage). */
   "drop-planche": () => appel(`/planches/${arg(0)}`, { method: "DELETE" }),
+
+  /**
+   * La planche lettrée, en image, fabriquée par l'atelier.
+   *
+   * C'est la seule façon de VOIR ce qu'on vient de composer sans navigateur.
+   * Le juge du placement s'en sert : on ne juge pas des coordonnées, on juge
+   * ce qu'on voit.
+   *
+   *   rendu <plancheId> --out <fichier.png> [--largeur 1536] [--locale en]
+   *                     [--sans-texte] [--calque]
+   *
+   * Le corps est une image : cette commande sort du chemin JSON du CLI et
+   * écrit les octets elle-même. Les avertissements du serveur (une police
+   * absente, un lettrage non validé) voyagent en en-tête et sont remontés
+   * ici : un rendu approximatif qui ne s'annonce pas est pire qu'un échec.
+   */
+  async rendu() {
+    if (!o.out) throw new Error("Il faut --out <fichier.png>.");
+    const { url, token } = lireAcces();
+    const q = new URLSearchParams();
+    if (o.largeur) q.set("largeur", String(o.largeur));
+    if (typeof o.locale === "string") q.set("locale", o.locale);
+    if (o["sans-texte"]) q.set("texte", "0");
+    if (o.calque) q.set("calque", "1");
+    const qs = q.toString();
+
+    const r = await fetch(
+      `${url.replace(/\/$/, "")}/api/v1/planches/${arg(0)}/rendu${qs ? `?${qs}` : ""}`,
+      { headers: { authorization: `Bearer ${token}` } },
+    );
+    if (!r.ok) {
+      const t = await r.text();
+      let m = `HTTP ${r.status}`;
+      try {
+        m = JSON.parse(t)?.error?.message ?? JSON.parse(t)?.error ?? m;
+      } catch {
+        /* le corps n'est pas du JSON : on garde le code */
+      }
+      throw new Error(typeof m === "string" ? m : JSON.stringify(m));
+    }
+
+    const octets = Buffer.from(await r.arrayBuffer());
+    writeFileSync(o.out, octets);
+    const avertissements = r.headers.get("x-avertissements");
+    return {
+      ok: true,
+      fichier: o.out,
+      octets: octets.length,
+      dimensions: r.headers.get("x-dimensions"),
+      ...(avertissements ? { avertissements: avertissements.split(" | ") } : {}),
+    };
+  },
 
   /**
    * Écrit une planche depuis un fichier JSON (titre, script, casting).

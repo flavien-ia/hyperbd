@@ -28,10 +28,11 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 | `/bd-design` | personnages, décors et motifs dessinés, puis la planche test |
 | `/bd-voix` | la bible de voix, éprouvée en aveugle : on retire les noms, on attribue, on compte |
 | `/bd-dialogues` | une scène découpée en planches et en cases, dialogues écrits dans les cases |
+| `/bd-planches` | le gros œuvre : les planches produites une par une, regardées, validées |
+| `/bd-lettrage` | le texte posé sur les planches, jugé sur ce qui se voit, validé |
 | `/bd-audit` | l'album passé au crible par lots parallèles, à tout moment |
 
-Le temps 4 (production complète des planches et lettrage) arrive ensuite. Le
-plan complet vit dans `Plan du harnais HyperBD.md`.
+Le plan complet vit dans `Plan du harnais HyperBD.md`.
 
 ## Comment il travaille
 
