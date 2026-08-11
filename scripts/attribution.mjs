@@ -9,6 +9,7 @@
 // Deux temps, volontairement séparés :
 //
 //   prepare  --in <repliques.json> --anon <sortie.md> --cle <cle.json>
+//            [--bible <bible-de-voix.md>] [--ordre] [--graine <n>]
 //   score    --cle <cle.json> --reponses <reponses.json>
 //
 // Le juge qui attribue ne voit JAMAIS la clé : elle est écrite dans un fichier
@@ -38,6 +39,19 @@ const ECHANTILLON_MIN = 12;
 /** Ce qu'il faut dépasser pour parler de voix différenciées. */
 const SEUIL_KAPPA = 0.55;
 const SEUIL_TAUX = 0.7;
+
+/**
+ * Deux textes se comparent à la ponctuation près : une réplique recopiée depuis
+ * la bible traverse souvent une retypographie (apostrophe droite devenue
+ * typographique) qui la rendrait méconnaissable à une comparaison stricte.
+ */
+const aplatir = (t) =>
+  t
+    .toLowerCase()
+    .replace(/[’‘‛]/g, "'")
+    .replace(/[«»“”]/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
 
 // ── Mélange déterministe ────────────────────────────────────────────────────
 
@@ -114,6 +128,28 @@ function preparer() {
     ? repliques.slice()
     : melanger(repliques, graine);
 
+  /**
+   * Les répliques recopiées depuis la bible de voix.
+   *
+   * Le piège est facile et sournois : on écrit une scène en reprenant les
+   * échantillons canoniques, l'attribution monte à 100 %, et on croit avoir
+   * prouvé que les voix tiennent. On a prouvé qu'un lecteur reconnaît des
+   * phrases déjà lues. La mesure ne dit alors rien de la scène.
+   *
+   * Passer `--bible <fichier>` (plusieurs séparés par des virgules) fait le
+   * recoupement. Sans lui, on ne peut pas savoir, et on le dit.
+   */
+  const bibles = (lire("bible") ?? "")
+    .split(",")
+    .map((f) => f.trim())
+    .filter(Boolean);
+  const reference = bibles.map((f) => aplatir(readFileSync(f, "utf8"))).join("\n");
+  const recyclees = bibles.length
+    ? ordre
+        .filter((r) => reference.includes(aplatir(r.text)))
+        .map((r) => ({ name: r.name, text: r.text }))
+    : [];
+
   const cle = {};
   const lignes = ordre.map((r, i) => {
     const n = String(i + 1);
@@ -136,10 +172,19 @@ function preparer() {
     "",
   ].join("\n");
 
+  const recyclage = !bibles.length
+    ? "non vérifié (passer --bible <fichier> pour recouper avec la bible de voix)"
+    : recyclees.length === 0
+      ? "aucune réplique ne vient de la bible"
+      : `${recyclees.length} réplique(s) sur ${ordre.length} recopiée(s) de la bible : la mesure est CONTAMINÉE, elle dira si on reconnaît des phrases déjà lues, pas si les voix tiennent dans cette scène`;
+
   writeFileSync(sortieAnon, anon, "utf8");
+  // Le recyclage voyage dans la clé, donc jusque dans le rapport final : c'est
+  // ce rapport que lit le juge, et une contamination qui s'arrête à l'étape de
+  // préparation ne prévient personne.
   writeFileSync(
     sortieCle,
-    JSON.stringify({ personnages, graine, cle }, null, 2),
+    JSON.stringify({ personnages, graine, recyclage, cle }, null, 2),
     "utf8",
   );
 
@@ -154,6 +199,8 @@ function preparer() {
       ordre.length < ECHANTILLON_MIN
         ? `échantillon court (${ordre.length} répliques) : le taux sera bruité, à lire comme une indication`
         : "suffisant",
+    recyclage,
+    recyclees,
   };
 }
 
@@ -164,7 +211,7 @@ function noter() {
   const fRep = lire("reponses");
   if (!fCle || !fRep) throw new Error("Il faut --cle <cle.json> --reponses <reponses.json>.");
 
-  const { personnages, cle } = JSON.parse(readFileSync(fCle, "utf8"));
+  const { personnages, cle, recyclage } = JSON.parse(readFileSync(fCle, "utf8"));
   const brut = JSON.parse(readFileSync(fRep, "utf8"));
   const reponses = brut.reponses ?? brut;
 
@@ -258,6 +305,9 @@ function noter() {
       total < ECHANTILLON_MIN
         ? `échantillon court (${total} répliques) : à lire comme une indication, pas comme un verdict`
         : "suffisant",
+    recyclage:
+      recyclage ??
+      "non vérifié (l'épreuve a été préparée sans --bible : impossible de savoir si les répliques viennent des échantillons canoniques)",
     lecture: differencie
       ? "Les voix se distinguent nettement du réflexe majoritaire."
       : kappa === null

@@ -46,6 +46,14 @@ Donc, quand le taux est haut, fais ce contrôle et dis-le dans ton rapport :
 mesure est probablement portée par le sujet, et juge le registre d'autant plus
 sévèrement : c'est lui qui devient la seule preuve.
 
+Second contrôle, du même ordre : **les répliques jugées sont-elles reprises de
+la bible de voix ?** Une scène écrite en recopiant les échantillons canoniques
+obtient 100 % et ne prouve rien : on mesure si un lecteur reconnaît des phrases
+déjà lues. Le rapport d'attribution porte un champ `recyclage` quand le
+recoupement a été fait ; s'il annonce des répliques recyclées, ou s'il indique
+que le recoupement n'a pas eu lieu, dis-le franchement : la mesure ne peut pas
+servir de preuve pour cette scène.
+
 ## Les trois dimensions que tu juges vraiment (chacune sur 10)
 
 ### 1. REGISTRE (10 = chacun tient sa langue, 0 = la bible est ignorée)

@@ -106,8 +106,16 @@ taise sur cette scène.
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" repliques <projet> --scene <sceneId>
 node "${CLAUDE_SKILL_DIR}/../../scripts/attribution.mjs" prepare \
-  --in <repliques.json> --anon <anonyme.md> --cle <cle.json>
+  --in <repliques.json> --anon <anonyme.md> --cle <cle.json> \
+  --bible <bible-de-voix.md>
 ```
+
+**`--bible` n'est pas optionnel en pratique.** Il recoupe les répliques de la
+scène avec les échantillons canoniques. Écrire une scène en reprenant ces
+échantillons fait monter l'attribution à 100 % sans rien prouver : on mesure
+alors si un lecteur reconnaît des phrases déjà lues. Si le rapport annonce des
+répliques recyclées, la mesure est contaminée : réécris ces répliques avant de
+la lire.
 
 La sortie de la première commande se passe telle quelle à la seconde. Lance un
 attributeur (subagent, type general-purpose) qui reçoit **l'énoncé anonyme et la

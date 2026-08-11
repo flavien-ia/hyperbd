@@ -208,8 +208,35 @@ async function controlerDialogue(projet) {
   );
   if (!planches?.length) return { planchesEcrites: 0, repliques: 0 };
 
+  // Un personnage nommé de deux façons, ce sont deux personnages : deux
+  // couleurs de bulle, deux voix, et un juge qui ne peut plus rien attribuer.
+  // C'est le cas typique d'une planche écrite avant que le casting soit posé,
+  // ou d'un nom raccourci en cours de route.
+  const { personnages } = await appel(`/projects/${projet}/universe`);
+  const connus = new Set(
+    (personnages ?? []).flatMap((p) => [
+      (p.name ?? "").trim().toLowerCase(),
+      ...(p.variantes ?? []).map((v) => (v.name ?? "").trim().toLowerCase()),
+    ]),
+  );
+  const inconnus = new Map();
   for (const r of repliques ?? []) {
-    typographie(r.text, `réplique de ${r.name} (${r.plancheTitre})`);
+    if (connus.size && !connus.has(r.name.trim().toLowerCase())) {
+      inconnus.set(r.name, (inconnus.get(r.name) ?? 0) + 1);
+    }
+  }
+  for (const [nom, n] of inconnus) {
+    signaler(
+      "avertissement",
+      `« ${nom} » parle ${n} fois sans être au casting`,
+      "les dialogues",
+      "un nom qui ne correspond à aucun personnage de la bibliothèque prend la couleur de bulle par défaut : le renommer, ou l'ajouter au casting",
+    );
+  }
+
+  for (const r of repliques ?? []) {
+    const ou = `${r.plancheTitre}, « ${r.text.slice(0, 40)}${r.text.length > 40 ? "…" : ""} »`;
+    typographie(r.text, `réplique de ${r.name} (${ou})`);
     if (r.mots > BULLE_MOTS_MAX) {
       signaler(
         "avertissement",
