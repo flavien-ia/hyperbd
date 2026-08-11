@@ -9,6 +9,9 @@
 //   node bd-lint.mjs --projet <slug>          contrôle la Toile d'un projet
 //   node bd-lint.mjs --fichier <chemin>       contrôle un texte
 //
+//   --largeur-mm <n>   largeur de la page imprimée (défaut : 240, format
+//                      d'album courant). Sert à dire si le lettrage se lira.
+//
 // Sortie : JSON { drapeaux: [...], compte: {...} }. Exit 0 même s'il y a des
 // drapeaux : c'est un rapport, pas un échec de commande.
 
@@ -43,6 +46,29 @@ const BULLE_MOTS_MAX = 25;
  * la description ne dit rien du cadrage laisse le modèle choisir, et il
  * choisit toujours le plan moyen de face.
  */
+/**
+ * Largeur de la page imprimée, en millimètres.
+ *
+ * Format d'album le plus courant. Sert à traduire une taille de police (donnée
+ * en fraction de la largeur de l'image) en millimètres réels : c'est le seul
+ * chiffre qui dise si le texte se lira. Surchargeable par `--largeur-mm`, et
+ * toujours rappelé dans le message pour qu'on sache sur quoi le calcul porte.
+ */
+const LARGEUR_PAGE_MM = 240;
+
+/** En dessous, un lecteur adulte peine sur une bulle. */
+const CAPITALE_MIN_MM = 2;
+
+/**
+ * Écart de couleur en dessous duquel deux bulles ne se distinguent plus.
+ *
+ * Mesuré en ΔE (CIE76) : deux bleus voisins d'un même album tombent à 8, deux
+ * gris proches à 16, deux couleurs franchement distinctes au-delà de 80.
+ */
+const DELTA_E_MIN = 25;
+/** Même écart, une fois la vision des couleurs simulée : on tolère un peu moins. */
+const DELTA_E_MIN_DALTONIEN = 18;
+
 const PLANS = [
   /\[(?:tgp|gp|pm|pa|pl|pe|pt|ps)\]/i,
   /\b(?:tr[èe]s )?gros plan\b/i,
@@ -92,6 +118,55 @@ function typographie(texte, ou) {
       "utiliser l'apostrophe typographique",
     );
   }
+}
+
+// ── La couleur des bulles ───────────────────────────────────────────────────
+//
+// La doctrine dit depuis le début que les couleurs de bulles doivent se
+// distinguer, y compris pour un lecteur qui distingue mal les couleurs. Rien
+// ne le vérifiait : deux bleus voisins sont passés jusqu'au tirage d'essai, et
+// c'est un juge qui les a repérés, par hasard.
+
+const composantes = (hex) =>
+  [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+
+/** sRGB vers linéaire : les moyennes de couleur n'ont de sens que là. */
+const lineaire = (c) =>
+  c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+
+/** Vers L*a*b*, l'espace où une distance ressemble à une différence perçue. */
+function versLab([r, g, b]) {
+  const X = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047;
+  const Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const Z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883;
+  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
+}
+
+const ecart = (a, b) => {
+  const [A, B] = [versLab(a), versLab(b)];
+  return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]);
+};
+
+/**
+ * Simule une vision dichromate (méthode de Viénot, en RGB linéaire).
+ *
+ * `deuteranope` (pas de cônes M) et `protanope` (pas de cônes L) couvrent
+ * l'immense majorité des cas : environ un homme sur douze.
+ */
+function simuler([r, g, b], type) {
+  const L = 17.8824 * r + 43.5161 * g + 4.11935 * b;
+  const M = 3.45565 * r + 27.1554 * g + 3.86714 * b;
+  const S = 0.0299566 * r + 0.184309 * g + 1.46709 * b;
+  const [L2, M2, S2] =
+    type === "deuteranope"
+      ? [L, 0.494207 * L + 1.24827 * S, S]
+      : [2.02344 * M - 2.52581 * S, M, S];
+  return [
+    0.080944 * L2 - 0.130504 * M2 + 0.116721 * S2,
+    -0.010248 * L2 + 0.054019 * M2 - 0.113614 * S2,
+    -0.000365 * L2 - 0.004122 * M2 + 0.693513 * S2,
+  ];
 }
 
 async function appel(chemin) {
@@ -219,6 +294,43 @@ async function controlerDialogue(projet) {
       ...(p.variantes ?? []).map((v) => (v.name ?? "").trim().toLowerCase()),
     ]),
   );
+  // Deux couleurs de bulle trop proches, ce sont deux personnages qu'on ne
+  // distingue plus d'un coup d'œil dans une case où ils parlent tous les deux.
+  const colores = (personnages ?? []).filter((p) =>
+    /^#[0-9a-f]{6}$/i.test(p.bubbleColor ?? ""),
+  );
+  for (let i = 0; i < colores.length; i++) {
+    for (let j = i + 1; j < colores.length; j++) {
+      const [a, b] = [colores[i], colores[j]];
+      const [ra, rb] = [a.bubbleColor, b.bubbleColor].map((h) =>
+        composantes(h).map(lineaire),
+      );
+      const ou = `« ${a.name} » et « ${b.name} »`;
+      const d = ecart(ra, rb);
+      if (d < DELTA_E_MIN) {
+        signaler(
+          "avertissement",
+          `couleurs de bulle trop proches (écart ${Math.round(d)}, il en faut ${DELTA_E_MIN})`,
+          ou,
+          `${a.bubbleColor} et ${b.bubbleColor} se confondront dans une case où ils parlent tous les deux : écarter la teinte, pas seulement la nuance`,
+        );
+        continue;
+      }
+      for (const type of ["deuteranope", "protanope"]) {
+        const dd = ecart(simuler(ra, type), simuler(rb, type));
+        if (dd < DELTA_E_MIN_DALTONIEN) {
+          signaler(
+            "avertissement",
+            `couleurs de bulle confondues en vision ${type} (écart ${Math.round(dd)} contre ${Math.round(d)} en vision courante)`,
+            ou,
+            "environ un homme sur douze les verra identiques : jouer aussi sur la clarté, pas seulement sur la teinte",
+          );
+          break;
+        }
+      }
+    }
+  }
+
   const inconnus = new Map();
   for (const r of repliques ?? []) {
     if (connus.size && !connus.has(r.name.trim().toLowerCase())) {
@@ -347,16 +459,39 @@ async function controlerVisuel(projet, nodes) {
 
   // Un QR imprimé vise une ancre pour toujours : si la source a disparu, le
   // lecteur tombera sur du vide, et les albums sont déjà tirés.
+  const largeurMm = Number(lire("largeur-mm")) || LARGEUR_PAGE_MM;
+
   const { planches } = await appel(`/projects/${projet}/planches`);
   for (const p of (planches ?? []).filter((x) => x.kind === "planche")) {
     const { lettrage } = await appel(`/planches/${p.id}/lettrage`);
+    const ou = `planche « ${p.title || p.code || p.id} »`;
+
+    // La plus PETITE police de la planche décide si le lecteur peine, pas la
+    // moyenne. Le nombre de pixels ne dit rien : seule la taille au tirage le
+    // dit, et elle se calcule.
+    const polices = (lettrage?.bulles ?? [])
+      .filter((b) => b.kind === "bulle" && b.placed)
+      .map((b) => b.fontSize)
+      .filter((f) => typeof f === "number" && f > 0);
+    if (polices.length) {
+      const mm = Math.min(...polices) * largeurMm;
+      if (mm < CAPITALE_MIN_MM) {
+        signaler(
+          "avertissement",
+          `texte à ${mm.toFixed(2)} mm de capitale sur une page de ${largeurMm / 10} cm`,
+          ou,
+          `en dessous de ${CAPITALE_MIN_MM} mm un lecteur adulte peine : agrandir la police, ou dire que l'album s'imprime plus grand (--largeur-mm)`,
+        );
+      }
+    }
+
     for (const b of lettrage?.bulles ?? []) {
       if (b.kind !== "qrcode" || !b.sourceId) continue;
       if (!vivantes.has(b.sourceId)) {
         signaler(
           "erreur",
           "QR code lié à une source retirée",
-          `planche « ${p.title || p.code || p.id} »`,
+          ou,
           "remettre la source, ou refaire pointer le QR ailleurs AVANT le tirage",
         );
       }
