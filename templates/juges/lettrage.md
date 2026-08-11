@@ -84,6 +84,29 @@ Une bulle ne se pose jamais sur :
 Le reste (un mur, un ciel, un meuble, un vêtement) est de la place disponible.
 Une bulle posée sur du décor n'est pas un défaut : c'est le métier.
 
+**Cette dimension se PROUVE, elle ne se déclare pas.** Écrire « aucune bulle ne
+gêne un visage » sans avoir fait le relevé ci-dessous n'est pas un jugement,
+c'est une supposition, et elle est fausse assez souvent pour qu'on l'interdise.
+
+Procédure, à rendre dans ton rapport :
+
+1. **Situe les visages.** Pour chaque personnage visible dans une case, dis où
+   est son visage, en coordonnées approximatives et en mots (« Tobias, case 4 :
+   visage vers x 0,59 / y 0,74, il est penché, le bas du visage est dégagé sur
+   le pull sombre »).
+2. **Dis ce qu'il y a SOUS chaque bulle.** Une ligne par bulle numérotée, avec
+   ce qu'elle recouvre réellement : « bulle 5 : recouvre le ciel de la fenêtre
+   et le haut de l'épaule droite de Tobias ». Nomme ce que tu vois, pas ce que
+   la géométrie laisse supposer.
+3. **Compare les deux relevés**, bulle par visage, et seulement alors note.
+
+Attention aux bulles proches d'une tête : une bulle **au-dessus** d'un crâne est
+correcte, une bulle **sur** le front, la bouche ou le menton ne l'est pas, et
+quelques centièmes de hauteur séparent les deux cas. Quand tu hésites, regarde
+la vue de bande à résolution native, jamais la planche entière réduite : à cette
+taille, une bulle posée en travers d'un visage ressemble à une bulle posée à
+côté.
+
 ### 4. QUEUES (10 = chacune désigne son locuteur, 0 = on ne sait pas qui parle)
 
 - Chaque queue pointe la personne qui parle, vers sa bouche ou, si elle est
@@ -115,6 +138,11 @@ VERDICT: VALIDER | AJUSTER | REFAIRE
 
 ## Ordre de lecture
 (les deux suites, perçue et voulue, côte à côte)
+
+## Ce que recouvre chaque bulle
+(où sont les visages, puis une ligne par bulle numérotée disant ce qu'elle
+recouvre réellement. Ce relevé est obligatoire : c'est lui qui fait la note de
+la dimension VISAGES, et sans lui elle ne vaut rien.)
 
 ## Ce qui ne va pas
 (par bulle NUMÉROTÉE : ce qui cloche, et pourquoi c'est un problème)
