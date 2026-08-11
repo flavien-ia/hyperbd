@@ -27,6 +27,13 @@ ce qui est écrit.
 | `coherence` | faits, mécaniques, personnages, canon | dès qu'une bible existe |
 | `fidelite` | thèses portées, exactitude, nuance, traçabilité | projets à source SEULEMENT |
 | `incarnation` | montré plutôt que dit, forces incarnées, émotion, sous-texte | univers, personnages, scènes |
+| `voix` | différenciation MESURÉE, registre, oralité, fonction | bible de voix, dialogues |
+| `grammaire` | variété, rythme, raccords, signature | découpage d'une planche, AVANT génération |
+
+Le juge `voix` ne fonctionne pas seul : sa dimension `differenciation` lui est
+fournie **mesurée** par `scripts/attribution.mjs`, et il la reporte sans la
+réviser. Le protocole de cette épreuve d'aveugle est décrit dans `/bd-voix` et
+`/bd-dialogues` ; ne le lance pas depuis ici.
 
 ## Étape 1 : préparer le dossier du juge
 

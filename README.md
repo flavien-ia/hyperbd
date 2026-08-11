@@ -26,18 +26,29 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 | `/bd-scenario` | actes, scènes, mise en scène, rappels, budget, audit et pitch |
 | `/bd-da` | la direction artistique : pistes contrastées générées, jugées, verrouillées |
 | `/bd-design` | personnages, décors et motifs dessinés, puis la planche test |
+| `/bd-voix` | la bible de voix, éprouvée en aveugle : on retire les noms, on attribue, on compte |
+| `/bd-dialogues` | une scène découpée en planches et en cases, dialogues écrits dans les cases |
 | `/bd-audit` | l'album passé au crible par lots parallèles, à tout moment |
 
-Les temps 3 et 4 (dialogues, production complète des planches) arrivent
-ensuite. Le plan complet vit dans `Plan du harnais HyperBD.md`.
+Le temps 4 (production complète des planches et lettrage) arrive ensuite. Le
+plan complet vit dans `Plan du harnais HyperBD.md`.
 
 ## Comment il travaille
 
 **Rien ne s'invente en vase clos.** À chaque bifurcation, plusieurs pistes sont
 produites sous des angles imposés, puis jugées par des relecteurs en aveugle
-(originalité, dramaturgie, cohérence, fidélité au message, incarnation) qui ne
-savent ni qui a écrit ni ce qu'on espérait. Le gagnant est greffé de ce que les
-autres avaient de meilleur ; les écartés vont au journal avec leur raison.
+(originalité, dramaturgie, cohérence, fidélité au message, incarnation, voix,
+grammaire visuelle) qui ne savent ni qui a écrit ni ce qu'on espérait. Le
+gagnant est greffé de ce que les autres avaient de meilleur ; les écartés vont
+au journal avec leur raison.
+
+**Ce qui peut se mesurer n'est pas confié à un juge.** Un modèle qui s'auto-note
+se trouve toujours bon. La différenciation des voix, par exemple, ne se déclare
+pas : on retire les noms des répliques, un juge les attribue à l'aveugle, et le
+taux est compté par du code, corrigé du réflexe qui consiste à toujours répondre
+le personnage qui parle le plus. Le juge reporte ce chiffre sans le réviser, et
+consacre son travail à ce qu'aucun compteur ne fait : dire POURQUOI deux voix se
+confondent.
 
 **Les recettes sont transcendables.** Le harnais porte des méthodes éprouvées,
 pas des lois : un écart motivé et consigné n'est pas une faute. Les juges
