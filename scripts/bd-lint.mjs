@@ -28,6 +28,30 @@ const lire = (nom) => {
 const SYNOPSIS_MAX = 240;
 /** Une question ouverte depuis plus longtemps mérite qu'on la relance. */
 const QUESTION_JOURS = 7;
+/**
+ * Au-delà, une bulle mange sa case. Ce n'est pas un interdit : une tirade peut
+ * valoir sa place. C'est un prix, et on le signale pour qu'il soit payé
+ * sciemment.
+ */
+const BULLE_MOTS_MAX = 25;
+
+/**
+ * Les marques de valeur de plan reconnues.
+ *
+ * Volontairement large : abréviations de scénario, formulations en toutes
+ * lettres, et l'anglais qu'on croise souvent dans les prompts. Une case dont
+ * la description ne dit rien du cadrage laisse le modèle choisir, et il
+ * choisit toujours le plan moyen de face.
+ */
+const PLANS = [
+  /\[(?:tgp|gp|pm|pa|pl|pe|pt|ps)\]/i,
+  /\b(?:tr[èe]s )?gros plan\b/i,
+  /\bplan (?:large|moyen|am[ée]ricain|d['’]ensemble|rapproch[ée]|serr[ée]|taille|italien|g[ée]n[ée]ral|fixe|s[ée]quence)\b/i,
+  /\bplong[ée]e\b|\bcontre-?plong[ée]e\b/i,
+  /\ben plan\b|\bcadr[ée]\w* (?:serr|large|sur)/i,
+  /\b(?:close-?up|wide shot|medium shot|establishing shot|extreme close)\b/i,
+  /\bvue (?:a[ée]rienne|de dessus|du dessus|subjective)\b/i,
+];
 
 const drapeaux = [];
 const signaler = (gravite, quoi, ou, quoiFaire) =>
@@ -145,6 +169,7 @@ async function controlerProjet(projet) {
   }
 
   await controlerVisuel(projet, nodes);
+  const dialogue = await controlerDialogue(projet);
 
   const budget = scenes.reduce(
     (t, s) => t + (s.meta?.budgetPlanches ?? 0),
@@ -160,7 +185,94 @@ async function controlerProjet(projet) {
       ).length,
       rappels: rappels.length,
       budgetPlanches: budget,
+      ...dialogue,
     },
+  };
+}
+
+/**
+ * Ce qui se vérifie dans le découpage et les dialogues.
+ *
+ * Aucune de ces règles ne dit si c'est bien écrit : elles disent qu'une bulle
+ * déborde de sa case, qu'une planche ne raconte rien, qu'un cadrage n'a pas été
+ * choisi. Toutes sont des AVERTISSEMENTS : la doctrine se transcende, et un
+ * linter n'a pas à trancher à la place d'un auteur.
+ *
+ * Les répliques ne sont pas parsées ici : l'atelier les extrait avec le code
+ * qui sert à dériver le lettrage. Une seule implémentation de la convention,
+ * donc aucune dérive possible entre ce que le linter voit et ce qui sera lettré.
+ */
+async function controlerDialogue(projet) {
+  const { planches, repliques } = await appel(
+    `/projects/${projet}/repliques?scripts=1`,
+  );
+  if (!planches?.length) return { planchesEcrites: 0, repliques: 0 };
+
+  for (const r of repliques ?? []) {
+    typographie(r.text, `réplique de ${r.name} (${r.plancheTitre})`);
+    if (r.mots > BULLE_MOTS_MAX) {
+      signaler(
+        "avertissement",
+        `réplique de ${r.mots} mots`,
+        `${r.plancheTitre}, « ${r.text.slice(0, 48)}${r.text.length > 48 ? "…" : ""} »`,
+        `au-delà de ${BULLE_MOTS_MAX} mots la bulle mange sa case : couper, ou assumer la tirade`,
+      );
+    }
+  }
+
+  // Une ligne de style (l'ambiance de la planche) : on ne la réclame jamais
+  // dans l'absolu. Un projet peut très bien s'en passer. Mais si LES AUTRES
+  // planches en ont une, celle qui n'en a pas partira ailleurs en couleur.
+  const avecAmbiance = planches.filter((p) => (p.footer ?? "").trim()).length;
+  const majoriteEnA = avecAmbiance > planches.length / 2;
+
+  for (const p of planches) {
+    const cases = p.cases ?? [];
+    const description = cases
+      .map((c) => c.script ?? "")
+      .join("\n")
+      .split(/\r?\n/)
+      // Une ligne de réplique n'est pas une description d'action : c'est
+      // justement ce qui distingue une planche muette d'une planche vide.
+      .filter((l) => l.trim() && !/^[^:(\n#>*|[]{1,45}?\s*(?:\([^)\n]*\))?\s*:\s+\S/.test(l.trim()))
+      .join(" ")
+      .trim();
+
+    const sansParole = p.nbRepliques === 0;
+    const sansAction = description.length < 40;
+
+    if (sansParole && sansAction) {
+      signaler(
+        "avertissement",
+        "planche sans parole et sans action décrite",
+        `planche « ${p.title || p.slug || p.id} »`,
+        "écrire ce qui s'y passe : une planche vide se générera au hasard",
+      );
+    }
+
+    if (cases.length && !PLANS.some((re) => cases.some((c) => re.test(c.script ?? "")))) {
+      signaler(
+        "avertissement",
+        "aucune valeur de plan dans le découpage",
+        `planche « ${p.title || p.slug || p.id} »`,
+        "dire les cadrages (plan large, gros plan…) : sans eux le modèle choisit, et il choisit le plan moyen de face",
+      );
+    }
+
+    if (majoriteEnA && !(p.footer ?? "").trim()) {
+      signaler(
+        "avertissement",
+        "planche sans ligne d'ambiance alors que l'album en a partout",
+        `planche « ${p.title || p.slug || p.id} »`,
+        "reprendre la ligne d'ambiance des voisines, ou assumer la rupture",
+      );
+    }
+  }
+
+  return {
+    planchesEcrites: planches.length,
+    repliques: (repliques ?? []).length,
+    locuteurs: new Set((repliques ?? []).map((r) => r.name)).size,
   };
 }
 

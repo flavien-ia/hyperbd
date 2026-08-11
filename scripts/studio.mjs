@@ -17,6 +17,7 @@
 //   planches <projet>                      l'album, dans l'ordre
 //   planche <id>                           une planche en détail
 //   create-planche <projet> [--title T] [--after ID] [--separator]
+//   drop-planche <plancheId>               retirer une planche de l'album
 //   write <planche> --file <json>          écrit titre / script / casting
 //   generate <planche> [--n 1] [--quality medium] [--mode planche] [--case ID]
 //                      [--extra "..."] [--wait]
@@ -28,6 +29,7 @@
 //   set-lettrage <planche> [--text-file F] [--file bulles.json] [--locale xx]
 //                          [--valider|--devalider]
 //   locales <projet>                       les langues, et où elles en sont
+//   repliques <projet> [--scene <id>]      les répliques du script, case par case
 //   shares <projet>                        les liens de lecture
 //   share-locale <lienId> [--locale xx]    la langue qu'un lien sert
 //   costs <projet>                         ce que le projet a coûté
@@ -284,6 +286,28 @@ const commandes = {
   /** Les langues de l'album, et où chacune en est. */
   locales: () => appel(`/projects/${arg(0)}/locales`),
 
+  /**
+   * Les répliques telles que le script les porte, case par case.
+   *
+   * C'est l'atelier qui les extrait, avec le code qui sert à dériver le
+   * lettrage : la convention d'écriture n'a qu'une seule implémentation, et
+   * ni le linter ni les juges ne la réécrivent dans leur coin.
+   *
+   *   repliques <projet> [--scene <id>] [--planche <id>] [--scripts]
+   *
+   * `--scripts` ajoute le découpage (en-tête, ambiance, script des cases). Il
+   * pèse : ne le demander que pour le contrôle mécanique, qui doit lire les
+   * descriptions.
+   */
+  repliques: () => {
+    const q = new URLSearchParams();
+    if (typeof o.scene === "string") q.set("scene", o.scene);
+    if (typeof o.planche === "string") q.set("planche", o.planche);
+    if (o.scripts) q.set("scripts", "1");
+    const qs = q.toString();
+    return appel(`/projects/${arg(0)}/repliques${qs ? `?${qs}` : ""}`);
+  },
+
   "create-planche": () =>
     appel(`/projects/${arg(0)}/planches`, {
       method: "POST",
@@ -293,6 +317,9 @@ const commandes = {
         ...(typeof o.after === "string" ? { afterId: o.after } : {}),
       },
     }),
+
+  /** Retirer une planche de l'album (elle emporte son lettrage). */
+  "drop-planche": () => appel(`/planches/${arg(0)}`, { method: "DELETE" }),
 
   /**
    * Écrit une planche depuis un fichier JSON (titre, script, casting).
