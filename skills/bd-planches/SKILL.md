@@ -58,6 +58,15 @@ Le mode `planche` produit la double page d'un coup. `page-left`, `page-right`
 et `case` servent aux reprises ciblées : quand une seule case cloche, on ne
 repaie pas toute la planche.
 
+**Le texte ne se dessine jamais dans l'image.** La commande demande d'office
+des planches sans lettrage : le modèle réserve les espaces, et rien d'autre.
+C'est ce qui rend possible tout ce qui suit : dériver les répliques du script,
+les composer dans la police de l'album, les traduire, sortir un export sans
+texte pour l'imprimeur. Un dialogue peint dans les pixels est définitif, et il
+arrive dans une police que personne n'a choisie. Ne passe `--dialogue-mode
+model` que si quelqu'un veut délibérément une planche où le modèle écrit, en
+sachant qu'elle sort alors de la chaîne de lettrage.
+
 ### 2. Regarder
 
 Fais examiner l'image par `_vision-qa`, avec les références SOUS LES YEUX du

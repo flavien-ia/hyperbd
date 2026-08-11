@@ -22,6 +22,9 @@
 //         [--largeur 1536] [--locale en] [--sans-texte] [--calque]
 //   write <planche> --file <json>          écrit titre / script / casting
 //   generate <planche> [--n 1] [--quality medium] [--mode planche] [--case ID]
+//            [--dialogue-mode overlay|empty-bubbles|model]
+//            (défaut overlay : le texte se compose ensuite, il ne se cuit
+//             jamais dans l'image)
 //                      [--extra "..."] [--wait]
 //   generation <id>                        où en est une génération
 //   validate <variante> [--case ID]        retenir une variante
@@ -396,6 +399,22 @@ const commandes = {
         n: o.n ? Number(o.n) : 1,
         quality: typeof o.quality === "string" ? o.quality : "medium",
         mode: typeof o.mode === "string" ? o.mode : "planche",
+        /**
+         * Le texte ne se dessine PAS dans l'image.
+         *
+         * L'atelier connaît trois modes, et son défaut historique
+         * (« model ») demande au modèle d'écrire lui-même les dialogues. Il
+         * les écrit alors dans une police de son invention, définitivement
+         * cuite dans les pixels : plus de dérivation depuis le script, plus
+         * de police d'album, plus de traduction, plus d'export sans texte.
+         * Toute la chaîne de lettrage devient inatteignable.
+         *
+         * Le harnais impose donc « overlay » : le modèle réserve les espaces
+         * et n'écrit rien. Surchargeable par --dialogue-mode pour qui veut
+         * délibérément une planche où le modèle écrit.
+         */
+        dialogueMode:
+          typeof o["dialogue-mode"] === "string" ? o["dialogue-mode"] : "overlay",
         ...(typeof o.case === "string" ? { caseId: o.case } : {}),
         ...(typeof o.extra === "string" ? { extraPrompt: o.extra } : {}),
         ...(typeof o.base === "string"
