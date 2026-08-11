@@ -25,7 +25,11 @@
 //   upscale <variante> [--scale 2|4]       agrandir (Topaz)
 //   lettrage <planche>                     lire le lettrage
 //   derive-lettrage <planche> [--positional] [--remplacer]
-//   set-lettrage <planche> [--text-file F] [--valider|--devalider]
+//   set-lettrage <planche> [--text-file F] [--file bulles.json] [--locale xx]
+//                          [--valider|--devalider]
+//   locales <projet>                       les langues, et où elles en sont
+//   shares <projet>                        les liens de lecture
+//   share-locale <lienId> [--locale xx]    la langue qu'un lien sert
 //   costs <projet>                         ce que le projet a coûté
 //
 //   -- la Toile (le scénario) --
@@ -79,6 +83,16 @@
 //   -- le cadre de génération (la DA verrouillée) --
 //   get-template <projet>                  le cadre en vigueur
 //   set-template <projet> --file cadre.txt [--label "DA v2"] [--double-page "..."]
+//
+//   -- les travaux longs (agrandissement, exports) --
+//   upscale-batch <projet> [--model M] [--scale 2|4] [--planches id,id]
+//                 [--force] [--yes] [--wait]   sans --yes : chiffre, ne lance rien
+//   jobs <projet>                          les travaux du projet
+//   job <id>                               où en est un travail
+//   job-continue <id>                      relancer une tranche arrêtée
+//   job-cancel <id>
+//   export <projet> --kind avec-texte|sans-texte|calques|pdf|master
+//          [--locale xx] [--planches id,id] [--exige-upscale] [--wait]
 //
 // Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1).
 
@@ -213,6 +227,34 @@ const arg = (i) => {
   return valeurs[i];
 };
 
+/**
+ * Attend qu'un travail long se termine.
+ *
+ * Les tranches s'enchaînent toutes seules : on ne fait que regarder. Si rien
+ * ne bouge pendant longtemps, on relance une tranche plutôt que d'abandonner,
+ * parce qu'une tranche morte se ressuscite par un simple appel.
+ */
+async function attendreJob(jobId, maxMs = 900000) {
+  const debut = Date.now();
+  let dernierMouvement = Date.now();
+  let dernierFait = -1;
+  while (Date.now() - debut < maxMs) {
+    await new Promise((r) => setTimeout(r, 3000));
+    const { job } = await appel(`/jobs/${jobId}`);
+    if (job.progress?.fait !== dernierFait) {
+      dernierFait = job.progress?.fait;
+      dernierMouvement = Date.now();
+    }
+    if (job.status === "done" || job.status === "cancelled") return { job };
+    if (job.status === "error") return { job };
+    if (Date.now() - dernierMouvement > 120000) {
+      await appel(`/jobs/${jobId}/continue`, { method: "POST" });
+      dernierMouvement = Date.now();
+    }
+  }
+  return { job: { id: jobId, status: "timeout" } };
+}
+
 const commandes = {
   async connect() {
     if (!o.url || !o.token) {
@@ -232,7 +274,15 @@ const commandes = {
   planches: () => appel(`/projects/${arg(0)}/planches`),
   planche: () => appel(`/planches/${arg(0)}`),
   costs: () => appel(`/projects/${arg(0)}/costs`),
-  lettrage: () => appel(`/planches/${arg(0)}/lettrage`),
+  lettrage: () =>
+    appel(
+      `/planches/${arg(0)}/lettrage${
+        typeof o.locale === "string" ? `?locale=${o.locale}` : ""
+      }`,
+    ),
+
+  /** Les langues de l'album, et où chacune en est. */
+  locales: () => appel(`/projects/${arg(0)}/locales`),
 
   "create-planche": () =>
     appel(`/projects/${arg(0)}/planches`, {
@@ -536,6 +586,13 @@ const commandes = {
       method: "DELETE",
     }),
 
+  /**
+   * Écrit le lettrage d'une planche.
+   *
+   * `--file` porte les bulles complètes (c'est par là qu'on pose un QR ou
+   * qu'on écrit une traduction), `--text-file` le seul texte source.
+   * `--locale` écrit dans une langue au lieu de celle du script.
+   */
   "set-lettrage": () =>
     appel(`/planches/${arg(0)}/lettrage`, {
       method: "PUT",
@@ -543,10 +600,23 @@ const commandes = {
         ...(o["text-file"]
           ? { text: readFileSync(o["text-file"], "utf8") }
           : {}),
+        ...(o.file ? JSON.parse(readFileSync(o.file, "utf8")) : {}),
+        ...(typeof o.locale === "string" ? { locale: o.locale } : {}),
         ...(o.valider ? { validated: true } : {}),
         ...(o.devalider ? { validated: false } : {}),
       },
     }),
+
+  /** Les liens de lecture de l'album. */
+  shares: () => appel(`/projects/${arg(0)}/shares`),
+
+  /** La langue qu'un lien de partage sert. Sans `--locale` : celle du script. */
+  "share-locale": () =>
+    appel(`/shares/${arg(0)}/locale`, {
+      method: "PUT",
+      body: { locale: typeof o.locale === "string" ? o.locale : null },
+    }),
+
   // ── Les sources : ce à quoi les affirmations de l'album renvoient ───────
 
   sources: () => appel(`/projects/${arg(0)}/sources`),
@@ -596,6 +666,78 @@ const commandes = {
         ...(typeof o.label === "string" ? { label: o.label } : {}),
       },
     });
+  },
+  // ── Les travaux longs (agrandissement, exports) ─────────────────────────
+
+  jobs: () => appel(`/projects/${arg(0)}/jobs`),
+  job: () => appel(`/jobs/${arg(0)}`),
+  "job-continue": () => appel(`/jobs/${arg(0)}/continue`, { method: "POST" }),
+  "job-cancel": () => appel(`/jobs/${arg(0)}`, { method: "DELETE" }),
+
+  /**
+   * Agrandir les planches validées, pour le tirage.
+   *
+   * En DEUX temps par défaut : sans --yes, la commande chiffre ce que cela
+   * coûterait et ne lance rien. Des crédits Topaz ne se dépensent pas par
+   * surprise.
+   */
+  async "upscale-batch"() {
+    const body = {
+      kind: "upscale-batch",
+      params: {
+        model: typeof o.model === "string" ? o.model : "High Fidelity V2",
+        scale: o.scale ? Number(o.scale) : 2,
+        ...(o.force ? { force: true } : {}),
+        ...(typeof o.planches === "string"
+          ? { plancheIds: o.planches.split(",") }
+          : {}),
+      },
+      confirmer: Boolean(o.yes),
+    };
+    const lancement = await appel(`/projects/${arg(0)}/jobs`, {
+      method: "POST",
+      body,
+    });
+    if (!o.wait || !lancement.jobId) return lancement;
+    return { ...lancement, ...(await attendreJob(lancement.jobId)) };
+  },
+  /**
+   * Sortir l'album de l'atelier.
+   *
+   * Cinq sorties : les planches lettrées, les planches nues, les calques de
+   * texte (PNG transparent et SVG vectoriel), le PDF de lecture, et le master
+   * de tirage avec sa page de titre et ses mentions.
+   */
+  async export() {
+    const genres = {
+      "avec-texte": "export-avec-texte",
+      "sans-texte": "export-sans-texte",
+      calques: "export-calques",
+      pdf: "export-pdf-lecture",
+      master: "export-master",
+    };
+    const kind = genres[o.kind ?? "pdf"];
+    if (!kind) {
+      throw new Error(
+        `Genre inconnu. Au choix : ${Object.keys(genres).join(", ")}.`,
+      );
+    }
+    const lancement = await appel(`/projects/${arg(0)}/jobs`, {
+      method: "POST",
+      body: {
+        kind,
+        params: {
+          ...(typeof o.locale === "string" ? { locale: o.locale } : {}),
+          ...(typeof o.planches === "string"
+            ? { plancheIds: o.planches.split(",") }
+            : {}),
+          ...(o["exige-upscale"] ? { exigeUpscale: true } : {}),
+        },
+        confirmer: true,
+      },
+    });
+    if (!o.wait || !lancement.jobId) return lancement;
+    return { ...lancement, ...(await attendreJob(lancement.jobId)) };
   },
 };
 
