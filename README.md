@@ -14,7 +14,8 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 
 ## État
 
-**Version 0.3.0, en construction.** Ce qui fonctionne aujourd'hui :
+**Version 0.4.0.** Les quatre temps du métier sont là, du message de départ à
+l'album exporté. Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |
 |---|---|
