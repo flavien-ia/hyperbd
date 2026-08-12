@@ -48,6 +48,7 @@
 //   set-status <id> --status S [--raison R] valider ou écarter
 //   promote <id> [--acte]                  une note devient une scène
 //   reorder-scenes <projet> --file <json>  l'ordre du récit
+//   drop-node <id>                         retirer un bloc de la Toile
 //   edges <projet>                         les liens
 //   new-edge --from A --to B [--type T] [--label L]
 //   drop-edge <id>
