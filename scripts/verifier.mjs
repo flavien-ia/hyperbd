@@ -20,7 +20,7 @@ const plugin = JSON.parse(readFileSync(join(RACINE, ".claude-plugin/plugin.json"
 const marche = JSON.parse(readFileSync(join(RACINE, ".claude-plugin/marketplace.json"), "utf8"));
 ok(plugin.name === "hyperbd", "nom du plugin", plugin.name);
 ok(plugin.version === marche.plugins[0].version, "versions en phase", `${plugin.version} / ${marche.plugins[0].version}`);
-ok(plugin.version === "0.4.0", "version attendue", plugin.version);
+ok(plugin.version === "0.4.1", "version attendue", plugin.version);
 ok(plugin.repository === "https://github.com/flavien-ia/hyperbd", "URL du dépôt dans le manifeste");
 
 // ── 2. Chaque skill : dossier = frontmatter, description non vide ───────────

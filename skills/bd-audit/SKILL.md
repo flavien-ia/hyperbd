@@ -1,7 +1,7 @@
 ---
 name: bd-audit
 description: Passe l'album entier au crible, par lots traités en parallèle : dates et âges, noms et orthographes, mécaniques du monde, arcs des personnages, rappels sans écho ou sans mise en place, et fidélité aux sources s'il y en a. Consolide, corrige par l'atelier, et consigne ce qui a été propagé. Utiliser à tout moment, et recommandé avant la planche test et avant toute production. Quand la personne dit « vérifie tout », « /bd-audit », « est-ce que ça tient ».
-argument-hint: "[projet] [--auto] [--lot acte-2]"
+argument-hint: "[projet] [--auto] [--lot chapitre-2]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
 
@@ -38,7 +38,8 @@ agent qui ne l'a pas lu la signalera à tort.
 
 ## Étape 2 : découper en lots disjoints
 
-Un lot = un acte, plus un lot pour les annexes (bibles, univers, sources).
+Un lot = un chapitre (type `acte`), plus un lot pour les annexes (bibles,
+univers, sources).
 
 Les lots doivent être **disjoints** : deux agents qui voient la même scène
 rendront deux fois la même remarque, et la consolidation devient un travail de

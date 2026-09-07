@@ -188,7 +188,7 @@ node "$S" promote-image <imageId> --style "<nom de la piste>"
    paramètres de l'univers.
 
 5. **Les pistes perdantes** écartées avec leur raison, sur la Toile (statut
-   `ecarte` + raison, qui apparaît dans les Coulisses) et au journal.
+   `ecarte` + raison, qui se lit dans la corbeille du rail) et au journal.
 
 ## Étape 7 : livrer
 

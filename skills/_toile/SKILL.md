@@ -29,7 +29,38 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" scenario <projet> --file <lo
 
 Le lot contient les blocs et leurs liens (les liens désignent les blocs par
 leur rang dans le tableau). Les positions sont facultatives : l'atelier range
-la grappe en grille. N'essaie pas de calculer une mise en page.
+les blocs libres en grille, et une scène n'en a pas besoin (voir plus bas).
+N'essaie pas de calculer une mise en page.
+
+## Comment la Toile est faite
+
+La Toile est une partition. **Le récit court en largeur** : une colonne par
+scène, dans l'ordre du récit. **La hauteur est une lentille** que la personne
+choisit : le temps (une scène datée descend à sa date), les personnages ou les
+lieux en rangées, le statut, ou rien. Une scène n'a donc pas de position à
+elle : son rang dans le récit et sa date suffisent. Les positions ne comptent
+que pour les blocs libres (notes, images, décors, personnages, documents,
+questions).
+
+**Les chapitres** (type `acte` dans l'atelier, « chapitre » à l'écran) sont
+des bandes qui couvrent des scènes consécutives. Un chapitre que tu poses
+prend les scènes qui le suivent dans l'ordre, jusqu'au chapitre suivant.
+Quand la personne trace ou étire une bande à la souris, le chapitre reçoit
+des bornes (`meta.premiere` et `meta.derniere`, la première et la dernière
+scène) : ce sont elles qui font foi. Tu peux les poser toi-même en écrivant
+le bloc, une fois ses scènes créées.
+
+**Les images** sont un module : un bloc `image` peut désigner une image du
+laboratoire (`refId`) ou recevoir un fichier :
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" node-image <bloc> --file <image.png>
+```
+
+**Un personnage ou un décor posé sur la Toile** est un repère du récit, à
+côté des fils de présence et des rangées que le casting des scènes dessine
+(`meta.castingIds`, `meta.decorIds`). C'est le casting qui fait les fils,
+pas les blocs.
 
 **Une grappe s'annonce.** Quand tu poses un ensemble de propositions qui vont
 ensemble, ouvre-la par un bloc `note` qui dit ce que c'est (« Trois pistes de
@@ -57,9 +88,12 @@ Ce que tu en tires :
   est `ecarte` est mort, tu ne le ressors pas (et le journal dit pourquoi).
 - **La provenance** : ce qui vient de `humain` est le travail de la personne.
   Tu ne le modifies pas sans le dire, jamais silencieusement.
-- **Les positions** : ce que la personne a RAPPROCHÉ, elle le considère lié.
-  Une grappe serrée est une intention, même sans lien tracé. Tiens-en compte
-  quand tu proposes la suite.
+- **L'ordre et les chapitres** : l'ordre du récit et les bornes des chapitres
+  sont des décisions d'auteur. Une scène déplacée, un chapitre étiré, c'est la
+  personne qui a tranché.
+- **Les positions des blocs libres** : ce que la personne a RAPPROCHÉ (une
+  note contre une autre, un décor près d'une image), elle le considère lié.
+  Une grappe serrée est une intention, même sans lien tracé.
 - **Ce qui traîne** : un bloc `discute` depuis longtemps, ou une `question`
   sans réponse, mérite d'être relancé plutôt qu'ignoré.
 
@@ -67,8 +101,10 @@ Ce que tu en tires :
 
 - **Écraser un bloc validé par la personne.** Si tu crois qu'il faut le changer,
   pose un bloc à côté et dis-le.
-- **Écarter un bloc sans raison.** La raison part au journal ; c'est elle qui
-  empêchera d'y revenir dans trois semaines.
+- **Écarter un bloc sans raison.** La raison part au journal et se lit dans la
+  corbeille du rail ; c'est elle qui empêchera d'y revenir dans trois semaines.
+  Un bloc JETÉ (retiré de la Toile) attend trente jours dans la même corbeille
+  avant de disparaître pour de bon, avec le fichier d'une image envoyée.
 - **Réordonner la structure sans le dire.** L'ordre du récit est une décision
   d'auteur.
 - **Poser cinquante blocs d'un coup.** Au-delà d'une dizaine, la personne ne

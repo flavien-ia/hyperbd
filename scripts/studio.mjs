@@ -46,9 +46,10 @@
 //   scenario <projet> --file <json>        poser un lot de blocs et de liens
 //   write-node <id> --file <json>          écrire un bloc
 //   set-status <id> --status S [--raison R] valider ou écarter
-//   promote <id> [--acte]                  une note devient une scène
+//   promote <id> [--acte]                  une note devient une scène (un chapitre avec --acte)
 //   reorder-scenes <projet> --file <json>  l'ordre du récit
-//   drop-node <id>                         retirer un bloc de la Toile
+//   node-image <id> --file <image.png>     déposer un fichier sur un bloc image
+//   drop-node <id>                         retirer un bloc de la Toile (corbeille, 30 jours)
 //   edges <projet>                         les liens
 //   new-edge --from A --to B [--type T] [--label L]
 //   drop-edge <id>
@@ -469,8 +470,9 @@ const commandes = {
    * Pose un lot de blocs (et leurs liens) d'un coup.
    *
    * C'est la façon de proposer : les cinq prémisses arrivent ensemble, la
-   * personne les voit d'un regard et arbitre. Les positions sont facultatives,
-   * l'atelier range la grappe en grille.
+   * personne les voit d'un regard et arbitre. Les positions sont facultatives :
+   * l'atelier range les blocs libres en grille, et une scène n'en a pas (elle
+   * prend son rang dans le récit, sa hauteur vient de la lentille).
    */
   scenario() {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
@@ -504,6 +506,38 @@ const commandes = {
     }),
 
   "drop-node": () => appel(`/nodes/${arg(0)}`, { method: "DELETE" }),
+
+  /**
+   * Dépose un fichier sur un bloc image, en trois temps comme pour une entrée
+   * de la bibliothèque : demander l'adresse, pousser le fichier vers le
+   * stockage, inscrire la clé dans la méta du bloc. La carte montre l'image au
+   * rafraîchissement suivant.
+   */
+  async "node-image"() {
+    if (!o.file) throw new Error("Il faut --file <chemin d'une image>.");
+    const ext = (o.file.split(".").pop() ?? "png").toLowerCase();
+    const type =
+      ext === "jpg" || ext === "jpeg"
+        ? "image/jpeg"
+        : ext === "webp"
+          ? "image/webp"
+          : "image/png";
+    const { key, uploadUrl } = await appel(`/nodes/${arg(0)}/image`, {
+      method: "POST",
+      body: { contentType: type, ext },
+    });
+    const octets = readFileSync(o.file);
+    const envoi = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "content-type": type },
+      body: octets,
+    });
+    if (!envoi.ok) throw new Error(`Dépôt refusé (${envoi.status}).`);
+    return appel(`/nodes/${arg(0)}`, {
+      method: "PATCH",
+      body: { meta: { imageKey: key } },
+    });
+  },
 
   "reorder-scenes"() {
     if (!o.file) throw new Error("Il faut --file <JSON : { orderedIds: [] }>.");

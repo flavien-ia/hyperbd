@@ -14,7 +14,7 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 
 ## État
 
-**Version 0.4.0.** Les quatre temps du métier sont là, du message de départ à
+**Version 0.4.1.** Les quatre temps du métier sont là, du message de départ à
 l'album exporté. Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |
@@ -24,7 +24,7 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 | `/bd-brief` | le point de départ : source, message, format, distance de transposition, devis |
 | `/bd-univers` | la prémisse (par pistes contrastées) et la bible du monde |
 | `/bd-personnages` | le casting comme graphe de forces, fiches et variantes |
-| `/bd-scenario` | actes, scènes, mise en scène, rappels, budget, audit et pitch |
+| `/bd-scenario` | chapitres, scènes, mise en scène, rappels, budget, audit et pitch |
 | `/bd-da` | la direction artistique : pistes contrastées générées, jugées, verrouillées |
 | `/bd-design` | personnages, décors et motifs dessinés, puis la planche test |
 | `/bd-voix` | la bible de voix, éprouvée en aveugle : on retire les noms, on attribue, on compte |

@@ -1,6 +1,6 @@
 ---
 name: bd-scenario
-description: Construit le récit : les actes, les scènes dans leur ordre, leur mise en scène, les rappels qui relient un setup à son écho, les documents du monde, et le budget de planches qui doit tomber sur le format visé. Se termine par un audit de cohérence mené par plusieurs relecteurs en parallèle, et par le pitch d'une page à valider. Utiliser après les personnages, quand la personne dit « écris le scénario », « /bd-scenario », « on structure l'histoire ».
+description: Construit le récit : les chapitres, les scènes dans leur ordre, leur mise en scène, les rappels qui relient un setup à son écho, les documents du monde, et le budget de planches qui doit tomber sur le format visé. Se termine par un audit de cohérence mené par plusieurs relecteurs en parallèle, et par le pitch d'une page à valider. Utiliser après les personnages, quand la personne dit « écris le scénario », « /bd-scenario », « on structure l'histoire ».
 argument-hint: "[projet] [--auto]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
@@ -13,9 +13,10 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js
 - Parle un langage simple et concret. N'expose jamais de nom de script ni de jargon technique.
 - Montre l'avancement sous forme d'une courte liste à cocher, scène par scène quand tu écris.
 
-Tu construis le récit. À la fin, la Structure porte les actes et les scènes dans
-leur ordre, chacune avec son synopsis, son budget et sa mise en scène, et le
-total tombe sur le format annoncé au brief.
+Tu construis le récit. À la fin, la Toile porte les chapitres et les scènes dans
+leur ordre (une colonne par scène, les chapitres en bandes), chacune avec son
+synopsis, son budget et sa mise en scène, et le total tombe sur le format
+annoncé au brief.
 
 ## Étape 0 : reprendre le fil
 
@@ -31,16 +32,21 @@ Une skill qui ressort une idée abandonnée fait perdre confiance.
 
 ## Étape 1 : la charpente
 
-Propose 2 ou 3 découpages en actes contrastés (pas trois variantes du même),
-posés sur la Toile comme propositions. Chacun tient en quelques lignes : ce que
-chaque acte fait, et sur quoi il bascule.
+Propose 2 ou 3 découpages en chapitres contrastés (pas trois variantes du
+même), posés sur la Toile comme propositions (des notes, une par découpage).
+Chacun tient en quelques lignes : ce que chaque chapitre fait, et sur quoi il
+bascule.
 
 Fais juger par `dramaturgie`. Fais trancher, ou tranche en `--auto`.
 
 ## Étape 2 : les scènes
 
-Pose les scènes dans l'ordre, sous leurs actes (la Structure est une seule liste
-où les actes séparent : une scène appartient à celui qui la précède).
+Pose les chapitres (type `acte`) et les scènes dans l'ordre, chaque chapitre
+juste avant ses scènes : un chapitre prend les scènes qui le suivent jusqu'au
+suivant. Une fois les scènes créées, tu peux fixer ses bornes en écrivant le
+bloc (`meta.premiere`, `meta.derniere` : les identifiants de sa première et
+de sa dernière scène) ; c'est ce que la personne fait quand elle trace une
+bande à la souris, et ce sont ces bornes qui font foi.
 
 Pour chaque scène, dès sa création :
 
@@ -55,10 +61,15 @@ faut couper ou fusionner des scènes maintenant. Dis-le, chiffres à l'appui.
 
 ## Étape 3 : la mise en scène
 
-Pour chaque scène, écris son corps : qui est là, ce qui s'y passe, ce que ça
-déplace, l'atmosphère. C'est de la prose de travail, lue par la direction
-artistique et par le découpage : elle doit être précise sur les gestes et les
-lieux, sans décrire les cases (ce sera le temps suivant).
+Pour chaque scène, écris son corps (`body`, la mise en forme) : qui est là, ce
+qui s'y passe, ce que ça déplace, l'atmosphère. C'est de la prose de travail,
+lue par la direction artistique et par le découpage : elle doit être précise
+sur les gestes et les lieux, sans décrire les cases (ce sera le temps suivant).
+Une scène porte deux autres textes : `dialogue` pour les répliques d'esquisse
+(en markdown, « **Nom** : réplique »), `notes` pour ce qu'on se dit à
+soi-même (ce que la scène doit faire, ce qui reste à trancher). Le casting
+(`meta.castingIds`) et les décors (`meta.decorIds`) se donnent dès la
+création : ce sont eux qui dessinent les fils de présence sur la Toile.
 
 Ajoute, quand c'est utile :
 - des **notes de direction artistique** (ce qu'il faut voir, ce qu'il ne faut
@@ -91,7 +102,7 @@ est : sa nature, sa date dans la fiction, et comment il apparaîtra dans l'album
 ## Étape 6 : l'audit
 
 Le contrôle final, mené par plusieurs relecteurs EN PARALLÈLE sur des lots
-disjoints (un par acte). Chacun vérifie sur son lot : les dates et les âges, les
+disjoints (un par chapitre). Chacun vérifie sur son lot : les dates et les âges, les
 noms, les mécaniques du monde, les arcs, les rappels, et la fidélité au message
 si le projet a une source.
 
