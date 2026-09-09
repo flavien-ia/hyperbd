@@ -56,11 +56,14 @@ s'écrit comme les autres champs. Dès qu'elle est découpée, l'atelier n'a plu
 qu'un texte : celui qui est lettré sur ses planches, ce qu'on imprime.
 `GET /nodes/<id>` le rend assemblé, un intertitre `## <titre de planche>` par
 planche, avec `dialogueDesPlanches: true` ; l'écrire par `PATCH` réécrit le
-lettrage de chaque planche, les bulles gardant leur place sur l'image. Tu peux
-donc corriger une réplique depuis la scène. Tu ne peux pas en AJOUTER ni en
-retirer par là : l'atelier refuse et nomme la planche, parce que lui seul
-saurait dans quelle case poser la bulle. Pour cela, passe par le découpage
-(`/bd-dialogues`) ou par le lettrage (`/bd-lettrage`).
+lettrage de chaque planche, par la même réconciliation que l'éditeur de
+lettrage : une réplique corrigée garde sa bulle et sa place, une réplique
+ajoutée sous un intertitre fait naître sa bulle au bord droit de cette
+planche, une réplique retirée emporte la sienne. Une planche qui gagne une
+bulle perd sa validation : la bulle est au bord, pas encore à sa place, et
+quelqu'un devra la poser dans la vue Lettrage. Garde donc les intertitres
+intacts, et n'ajoute une réplique que si tu sais dans quelle planche elle
+tombe ; le découpage case par case, lui, reste `/bd-dialogues`.
 
 **Les images** sont un module : un bloc `image` peut désigner une image du
 laboratoire (`refId`) ou recevoir un fichier :
