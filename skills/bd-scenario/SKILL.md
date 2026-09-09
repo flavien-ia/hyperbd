@@ -65,9 +65,12 @@ Pour chaque scène, écris son corps (`body`, la mise en forme) : qui est là, c
 qui s'y passe, ce que ça déplace, l'atmosphère. C'est de la prose de travail,
 lue par la direction artistique et par le découpage : elle doit être précise
 sur les gestes et les lieux, sans décrire les cases (ce sera le temps suivant).
-Une scène porte deux autres textes : `dialogue` pour les répliques d'esquisse
-(en markdown, « **Nom** : réplique »), `notes` pour ce qu'on se dit à
-soi-même (ce que la scène doit faire, ce qui reste à trancher). Le casting
+Une scène porte deux autres textes : `notes` pour ce qu'on se dit à soi-même
+(ce que la scène doit faire, ce qui reste à trancher), et `dialogue` pour les
+répliques d'esquisse (une ligne par réplique, « Nom : texte »). Ce
+`dialogue`-là ne vit que TANT QUE la scène n'a pas de planche : dès qu'elle
+est découpée, l'atelier n'affiche plus que le texte lettré sur ses planches,
+et c'est lui qu'on corrige (voir `_toile`). Le casting
 (`meta.castingIds`) et les décors (`meta.decorIds`) se donnent dès la
 création : ce sont eux qui dessinent les fils de présence sur la Toile.
 

@@ -50,6 +50,18 @@ des bornes (`meta.premiere` et `meta.derniere`, la première et la dernière
 scène) : ce sont elles qui font foi. Tu peux les poser toi-même en écrivant
 le bloc, une fois ses scènes créées.
 
+**Le dialogue d'une scène est celui de ses planches.** Tant qu'une scène n'a
+pas de planche, son champ `dialogue` porte les répliques d'esquisse et
+s'écrit comme les autres champs. Dès qu'elle est découpée, l'atelier n'a plus
+qu'un texte : celui qui est lettré sur ses planches, ce qu'on imprime.
+`GET /nodes/<id>` le rend assemblé, un intertitre `## <titre de planche>` par
+planche, avec `dialogueDesPlanches: true` ; l'écrire par `PATCH` réécrit le
+lettrage de chaque planche, les bulles gardant leur place sur l'image. Tu peux
+donc corriger une réplique depuis la scène. Tu ne peux pas en AJOUTER ni en
+retirer par là : l'atelier refuse et nomme la planche, parce que lui seul
+saurait dans quelle case poser la bulle. Pour cela, passe par le découpage
+(`/bd-dialogues`) ou par le lettrage (`/bd-lettrage`).
+
 **Les images** sont un module : un bloc `image` peut désigner une image du
 laboratoire (`refId`) ou recevoir un fichier :
 
