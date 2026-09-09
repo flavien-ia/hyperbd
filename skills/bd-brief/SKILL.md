@@ -1,7 +1,7 @@
 ---
 name: bd-brief
-description: Le point de départ d'une bande dessinée. Part d'une idée ou d'un document de référence (rapport, programme, thèse), en extrait l'architecture du message, pose les questions qui comptent (à qui on parle, sur quel canal, quel format, quel ton), fait choisir la distance de transposition (du didactique incarné au mythopoétique), chiffre ce que ça coûtera, et crée le projet dans l'atelier. Utiliser quand la personne dit « je veux faire une BD sur... », « /bd-brief », « on part de ce rapport », ou au tout début d'un projet.
-argument-hint: "[chemin d'un document source, ou rien]"
+description: Le point de départ d'une bande dessinée. Part d'une idée ou d'un document de référence (rapport, programme, thèse), en extrait l'architecture du message, pose les questions qui comptent (à qui on parle, sur quel canal, quel format, quel ton), fait choisir la distance de transposition (du didactique incarné au mythopoétique), chiffre ce que ça coûtera, et crée le projet dans l'atelier. Le plus souvent on y arrive par /new-bd, qui a déjà créé le projet. Utiliser quand la personne dit « je veux faire une BD sur... », « /bd-brief », « on part de ce rapport », ou au tout début d'un projet.
+argument-hint: "[projet] [chemin d'un document source, ou rien]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
 
@@ -96,7 +96,14 @@ personne en mode guidé. En `--auto`, tranche et consigne pourquoi.
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects
 ```
 
-Crée le projet s'il n'existe pas, puis écris deux documents dans l'atelier :
+Si tu viens de `/new-bd`, le projet existe déjà : c'est lui. Sinon, crée-le
+maintenant (un titre de travail suffit, il se change ensuite dans l'atelier) :
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-project --title "<titre de travail>"
+```
+
+Puis écris deux documents dans l'atelier :
 
 - le **brief** (`kind: brief`) : ce qui a été décidé aux étapes 1 à 3, en clair,
   y compris la distance retenue et le devis annoncé ;

@@ -14,11 +14,13 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 
 ## État
 
-**Version 0.5.0.** Les quatre temps du métier sont là, du message de départ à
+**Version 0.6.0.** Les quatre temps du métier sont là, du message de départ à
 l'album exporté. Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |
 |---|---|
+| `/bd-start` | prépare tout, une fois : Node.js s'il manque, le jeton, le tour des trois clés en expliquant chacune |
+| `/new-bd` | commence une bande dessinée : crée le projet dans l'atelier et enchaîne sur le brief |
 | `/bd-connect` | relie Claude Code à l'atelier (jeton d'accès, état des clés) |
 | `/bd-status` | fait le point sur un album : avancement, coûts, prochaines planches |
 | `/bd-brief` | le point de départ : source, message, format, distance de transposition, devis |
@@ -77,11 +79,8 @@ Ou en ligne de commande, dans Claude Code :
 /plugin install hyperbd
 ```
 
-Puis, dans les deux cas :
-
-```
-/bd-connect
-```
+Puis, dans les deux cas, `/bd-start` prépare tout (Node.js s'il manque, le
+jeton d'accès, le tour des clés), et `/new-bd` commence un album.
 
 ## Mise à jour
 
@@ -94,8 +93,8 @@ Puis, dans les deux cas :
 
 - Un compte sur l'atelier, ouvert sur
   [app.studio-entremondes.fr/inscription](https://app.studio-entremondes.fr/inscription).
-- Claude Desktop (ou Claude Code) avec un abonnement Claude Pro au minimum, et
-  Node.js.
+- Claude Desktop (ou Claude Code) avec un abonnement Claude Pro au minimum.
+  Node.js est installé par `/bd-start` s'il manque.
 - **Trois clés**, renseignées dans « Mon compte », qui restent celles de la
   personne : OpenAI pour dessiner, Cloudflare R2 pour ranger les images, Topaz
   pour les agrandir avant impression. L'atelier ne dépense jamais rien à la

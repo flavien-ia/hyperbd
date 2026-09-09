@@ -16,8 +16,10 @@ que vous avez installé est bien ce qui a été publié.
 - **Aucun serveur MCP, aucun réglage modifié.** Le plugin n'écrit rien dans
   votre `settings.json` et ne s'accorde aucun droit : ses skills tournent avec
   les outils que votre session autorise déjà.
-- **Il n'installe rien.** Node.js est nécessaire et c'est vous qui le mettez en
-  place ; le plugin ne télécharge aucun outil.
+- **Il n'installe qu'une chose, et le dit.** `/bd-start` installe Node.js s'il
+  manque, par le gestionnaire de paquets du système (winget sur Windows,
+  Homebrew sur macOS), et rien d'autre : aucune bibliothèque, aucun outil
+  tiers, aucun script téléchargé.
 
 ## Ce qu'il touche sur votre machine
 

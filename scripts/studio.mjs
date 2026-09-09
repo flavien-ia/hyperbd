@@ -13,6 +13,7 @@
 //   me                                     qui suis-je, quelles clés j'ai
 //   projects                               mes projets
 //   project <id|slug>                      un projet et ce qu'il permet
+//   new-project --title T [--universe ID]  créer un projet de bande dessinée
 //   universe <projet>                      personnages, décors, styles
 //   planches <projet>                      l'album, dans l'ordre
 //   planche <id>                           une planche en détail
@@ -279,6 +280,19 @@ const commandes = {
   me: () => appel("/me"),
   projects: () => appel("/projects"),
   project: () => appel(`/projects/${arg(0)}`),
+
+  /** Un projet neuf. Sans --universe, l'atelier lui ouvre un univers à lui. */
+  "new-project"() {
+    if (typeof o.title !== "string" || !o.title.trim()) throw new Error("Il faut --title <titre de travail>.");
+    return appel("/projects", {
+      method: "POST",
+      body: {
+        title: o.title.trim(),
+        kind: typeof o.kind === "string" ? o.kind : "bd",
+        ...(typeof o.universe === "string" ? { universeId: o.universe } : {}),
+      },
+    });
+  },
   universe: () => appel(`/projects/${arg(0)}/universe`),
   planches: () => appel(`/projects/${arg(0)}/planches`),
   planche: () => appel(`/planches/${arg(0)}`),

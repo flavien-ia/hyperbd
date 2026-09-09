@@ -4,6 +4,19 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.6.0 (9 septembre 2026)
+
+### Nouveautés
+- **`/bd-start`** : prépare tout, une seule fois. Installe Node.js s'il manque (winget sur Windows, Homebrew sur macOS), relie l'atelier avec un jeton d'accès, puis fait le tour des trois clés d'API en expliquant pour chacune à quoi elle sert, ce qu'elle coûte et comment l'obtenir.
+- **`/new-bd`** : la commande pour commencer une bande dessinée. Un titre de travail, un univers neuf ou réutilisé, le projet créé dans l'atelier, et le brief qui s'enchaîne aussitôt.
+
+### Améliorations
+- **`/bd-brief`** sait qu'un projet peut déjà exister (quand on vient de `/new-bd`) et, sinon, le crée lui-même.
+- **Publication vérifiée par l'atelier** : chaque version est désormais annoncée à l'atelier, qui télécharge l'archive, recalcule son empreinte et ne la sert que si elle correspond. La page de téléchargement et `/update-hyperbd` lisent cette version vérifiée.
+
+### Coulisses
+- Le client de l'atelier gagne `new-project`.
+
 ## v0.5.0 (9 septembre 2026)
 
 ### Nouveautés
