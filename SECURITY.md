@@ -16,7 +16,7 @@ que vous avez installé est bien ce qui a été publié.
 - **Aucun serveur MCP, aucun réglage modifié.** Le plugin n'écrit rien dans
   votre `settings.json` et ne s'accorde aucun droit : ses skills tournent avec
   les outils que votre session autorise déjà.
-- **Il n'installe qu'une chose, et voici toute la liste.** `/bd-start` met en
+- **Il n'installe qu'une chose, et voici toute la liste.** `/start-hyperbd` met en
   place **Node.js**, et rien d'autre : aucune bibliothèque, aucun outil de
   développement, aucune dépendance du plugin. Node.js s'installe par le
   gestionnaire de paquets du système, et c'est là qu'il faut être précis,
@@ -46,7 +46,7 @@ que vous avez installé est bien ce qui a été publié.
   la sauvegarde de la version précédente à côté du plugin.
 - Le dossier courant, uniquement quand vous demandez un export, un rendu ou une
   épreuve d'aveugle, et sous le nom que vous avez donné.
-- Votre `~/.zprofile`, **sur macOS et seulement si `/bd-start` a dû installer
+- Votre `~/.zprofile`, **sur macOS et seulement si `/start-hyperbd` a dû installer
   Homebrew** : une ligne y est ajoutée pour rendre `brew` trouvable. C'est la
   seule fois où le plugin écrit dans un fichier de configuration de votre
   shell, et il ne touche jamais votre `PATH` autrement.

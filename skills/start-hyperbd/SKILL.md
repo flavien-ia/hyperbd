@@ -1,6 +1,6 @@
 ---
-name: bd-start
-description: Prépare tout, une seule fois, pour travailler avec HyperBD : installe Node.js s'il manque (winget sur Windows, Homebrew sur macOS), relie Claude Code à l'atelier avec un jeton d'accès, puis fait le tour des trois clés d'API (OpenAI, Cloudflare R2, Topaz) en expliquant pour chacune à quoi elle sert, ce qu'elle coûte et comment l'obtenir. Utiliser quand la personne dit « /bd-start », « installe HyperBD », « prépare tout », « on commence », ou juste après avoir installé le plugin.
+name: start-hyperbd
+description: Prépare tout, une seule fois, pour travailler avec HyperBD : installe Node.js s'il manque (winget sur Windows, Homebrew sur macOS), relie Claude Code à l'atelier avec un jeton d'accès, puis fait le tour des trois clés d'API (OpenAI, Cloudflare R2, Topaz) en expliquant pour chacune à quoi elle sert, ce qu'elle coûte et comment l'obtenir. Utiliser quand la personne dit « /start-hyperbd », « installe HyperBD », « prépare tout », « on commence », ou juste après avoir installé le plugin.
 compatibility: "Agent Skills standard (Claude Code ou Codex). Installe Node.js si nécessaire, rien d'autre."
 ---
 
@@ -37,7 +37,7 @@ S'il manque, installe-le par PowerShell :
 powershell.exe -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -OutFile \"$env:TEMP\\winget.msixbundle\"; Add-AppxPackage -Path \"$env:TEMP\\winget.msixbundle\""
 ```
 
-Revérifie. S'il manque toujours, dis-le : « L'installation automatique de winget a échoué. Installe-le à la main depuis https://aka.ms/getwinget (App Installer, dans le Microsoft Store), puis relance `/bd-start`. » Et arrête-toi là.
+Revérifie. S'il manque toujours, dis-le : « L'installation automatique de winget a échoué. Installe-le à la main depuis https://aka.ms/getwinget (App Installer, dans le Microsoft Store), puis relance `/start-hyperbd`. » Et arrête-toi là.
 
 Puis Node.js :
 
@@ -63,7 +63,7 @@ eval "$("$BREW" shellenv)" && brew install node && node --version
 
 **Linux.** Installe Node.js LTS par le gestionnaire de paquets de la distribution (ou depuis https://nodejs.org), puis revérifie.
 
-Si `node --version` ne répond toujours pas, explique ce qui a été tenté et demande à la personne de **fermer et rouvrir Claude Code** (le PATH d'une installation neuve n'est pas toujours visible par la session en cours), puis de relancer `/bd-start`.
+Si `node --version` ne répond toujours pas, explique ce qui a été tenté et demande à la personne de **fermer et rouvrir Claude Code** (le PATH d'une installation neuve n'est pas toujours visible par la session en cours), puis de relancer `/start-hyperbd`.
 
 ## Étape 2 : l'atelier
 

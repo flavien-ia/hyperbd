@@ -2,7 +2,7 @@
 name: new-bd
 description: Commence une nouvelle bande dessinée : crée le projet dans l'atelier (un titre de travail, un univers neuf ou réutilisé), puis enchaîne sur le brief (/bd-brief) sans que la personne ait à retaper quoi que ce soit. C'est la commande à taper quand on a une idée ou un document et qu'on veut en faire un album. Utiliser quand la personne dit « /new-bd », « nouvelle BD », « on commence une BD », « je veux faire une BD sur… », « nouveau projet ».
 argument-hint: "[titre de travail] [--source <chemin d'un document>] [--univers <id>]"
-compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et un accès à l'atelier (/bd-start)."
+compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et un accès à l'atelier (/start-hyperbd)."
 ---
 
 # Une nouvelle bande dessinée
@@ -21,7 +21,7 @@ Une phrase suffit pour commencer. À la fin de cette skill, le projet existe dan
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" me
 ```
 
-En cas d'erreur : « Il faut d'abord relier l'atelier : tape `/bd-start`, il prépare tout. » Et arrête-toi là.
+En cas d'erreur : « Il faut d'abord relier l'atelier : tape `/start-hyperbd`, il prépare tout. » Et arrête-toi là.
 
 Si la réponse dit qu'OpenAI ou R2 manquent, continue quand même (le scénario s'écrit sans image), mais dis-le en une phrase : rien ne pourra être dessiné tant que ces deux clés ne sont pas dans Mon compte.
 

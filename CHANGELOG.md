@@ -4,6 +4,15 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.7.0 (9 septembre 2026)
+
+### Améliorations
+- **`/bd-start` devient `/start-hyperbd`.** Deux commandes se ressemblaient trop : celle qui prépare la machine et celle qui commence un album (`/new-bd`). Le nouveau nom fait paire avec `/update-hyperbd` : ces deux-là s'occupent du plugin, toutes les autres du métier.
+- **Connexion par compte Google** dans l'atelier, en plus de l'adresse et du mot de passe. C'est Google qui atteste l'adresse ; se connecter ainsi avec l'adresse d'un compte existant ouvre ce compte, projets compris.
+
+### Coulisses
+- La licence porte le nom de l'auteur.
+
 ## v0.6.1 (9 septembre 2026)
 
 ### Améliorations
