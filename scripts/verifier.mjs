@@ -20,13 +20,19 @@ const plugin = JSON.parse(readFileSync(join(RACINE, ".claude-plugin/plugin.json"
 const marche = JSON.parse(readFileSync(join(RACINE, ".claude-plugin/marketplace.json"), "utf8"));
 ok(plugin.name === "hyperbd", "nom du plugin", plugin.name);
 ok(plugin.version === marche.plugins[0].version, "versions en phase", `${plugin.version} / ${marche.plugins[0].version}`);
-ok(plugin.version === "0.4.1", "version attendue", plugin.version);
+// La version vit à trois endroits lisibles par les gens, en plus des manifestes.
+const readme = readFileSync(join(RACINE, "README.md"), "utf8");
+ok(readme.includes(`**Version ${plugin.version}.**`), "le README annonce la version du manifeste", plugin.version);
+const changelog = readFileSync(join(RACINE, "CHANGELOG.md"), "utf8");
+const derniereEntree = /^## v(\S+)/m.exec(changelog)?.[1];
+ok(derniereEntree === plugin.version, "la dernière entrée du CHANGELOG est celle de la version", derniereEntree ?? "aucune");
+for (const f of ["LICENSE", "SECURITY.md", "CHANGELOG.md"]) ok(existsSync(join(RACINE, f)), `${f} présent`);
 ok(plugin.repository === "https://github.com/flavien-ia/hyperbd", "URL du dépôt dans le manifeste");
 
 // ── 2. Chaque skill : dossier = frontmatter, description non vide ───────────
 const skillsDir = join(RACINE, "skills");
 const skills = readdirSync(skillsDir).filter((d) => statSync(join(skillsDir, d)).isDirectory());
-ok(skills.length === 16, "16 skills", String(skills.length));
+ok(skills.length === 17, "17 skills", String(skills.length));
 for (const s of skills) {
   const f = join(skillsDir, s, "SKILL.md");
   if (!existsSync(f)) { ok(false, `SKILL.md manquant`, s); continue; }
@@ -37,8 +43,12 @@ for (const s of skills) {
   const desc = /(?:^|\n)description:\s*(.+)/.exec(fm[1])?.[1];
   if (nom !== s) ok(false, `nom ≠ dossier`, `${s} vs ${nom}`);
   if (!desc || desc.trim().length < 20) ok(false, `description trop courte`, s);
+  // Le dialogue « Téléverser un plugin » de Claude Desktop refuse tout zip dont
+  // une description porte un chevron, flèches comprises, sans que rien d'autre
+  // ne le signale.
+  if (desc && /[<>]/.test(desc)) ok(false, `chevron dans la description (Claude Desktop refuse le zip)`, s);
 }
-console.log("  ok   frontmatters des 16 skills (nom = dossier, description)");
+console.log("  ok   frontmatters des 17 skills (nom = dossier, description, sans chevron)");
 
 // ── 3. Chaque chemin ${CLAUDE_SKILL_DIR}/../../<x> référencé EXISTE ─────────
 const refs = new Set();
@@ -63,12 +73,19 @@ for (const s of skills) {
 ok(absolus === 0, "aucun chemin absolu dans les skills");
 
 // ── 5. Les scripts passent node --check ─────────────────────────────────────
-const scripts = readdirSync(join(RACINE, "scripts")).filter((f) => f.endsWith(".mjs"));
+function* scriptsDe(dir) {
+  for (const e of readdirSync(dir)) {
+    const p = join(dir, e);
+    if (statSync(p).isDirectory()) yield* scriptsDe(p);
+    else if (e.endsWith(".mjs")) yield p;
+  }
+}
+const scripts = [...scriptsDe(join(RACINE, "scripts"))];
 for (const f of scripts) {
   try {
-    execFileSync(process.execPath, ["--check", join(RACINE, "scripts", f)], { stdio: "pipe" });
+    execFileSync(process.execPath, ["--check", f], { stdio: "pipe" });
   } catch (e) {
-    ok(false, "syntaxe", `${f} : ${String(e.stderr).slice(0, 100)}`);
+    ok(false, "syntaxe", `${f.replace(RACINE, "")} : ${String(e.stderr).slice(0, 100)}`);
   }
 }
 ok(true, `syntaxe des ${scripts.length} scripts (node --check)`);

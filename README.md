@@ -14,7 +14,7 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 
 ## État
 
-**Version 0.4.1.** Les quatre temps du métier sont là, du message de départ à
+**Version 0.5.0.** Les quatre temps du métier sont là, du message de départ à
 l'album exporté. Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |
@@ -32,6 +32,7 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 | `/bd-planches` | le gros œuvre : les planches produites une par une, regardées, validées |
 | `/bd-lettrage` | le texte posé sur les planches, jugé sur ce qui se voit, validé |
 | `/bd-audit` | l'album passé au crible par lots parallèles, à tout moment |
+| `/update-hyperbd` | met le plugin à jour quand il a été téléversé dans Claude Desktop : vérifie, télécharge, contrôle l'empreinte, remplace |
 
 Le plan complet vit dans `Plan du harnais HyperBD.md`.
 
@@ -63,25 +64,49 @@ par l'API. Ce que Claude propose arrive en trait interrompu, à adopter ou à
 
 ## Installation
 
+Le plus simple : depuis l'atelier. La page
+[app.studio-entremondes.fr/documentation/hyperbd](https://app.studio-entremondes.fr/documentation/hyperbd)
+donne l'archive de la version publiée, avec son empreinte SHA-256, et les cinq
+clics pour la téléverser dans Claude Desktop : onglet **Code**,
+**Personnaliser**, **Plugins**, **Ajouter**, **Téléverser un plugin**.
+
+Ou en ligne de commande, dans Claude Code :
+
 ```
 /plugin marketplace add flavien-ia/hyperbd
 /plugin install hyperbd
 ```
 
-Puis, dans Claude Code :
+Puis, dans les deux cas :
 
 ```
 /bd-connect
 ```
 
+## Mise à jour
+
+- Plugin téléversé dans Claude Desktop : `/update-hyperbd` vérifie s'il existe
+  une version plus récente, la télécharge, contrôle son empreinte et la met en
+  place en gardant l'ancienne de côté.
+- Plugin installé par la ligne de commande : `/plugin marketplace update hyperbd`.
+
 ## Ce qu'il faut avoir
 
-- Un compte sur l'atelier (accès sur invitation pour l'instant).
+- Un compte sur l'atelier, ouvert sur
+  [app.studio-entremondes.fr/inscription](https://app.studio-entremondes.fr/inscription).
+- Claude Desktop (ou Claude Code) avec un abonnement Claude Pro au minimum, et
+  Node.js.
 - **Trois clés**, renseignées dans « Mon compte », qui restent celles de la
   personne : OpenAI pour dessiner, Cloudflare R2 pour ranger les images, Topaz
   pour les agrandir avant impression. L'atelier ne dépense jamais rien à la
   place de quiconque, et les images produites vivent dans l'espace de stockage
   de leur auteur.
+
+## Sécurité
+
+Ce que le plugin touche, ce qu'il ne fait jamais, et comment vérifier qu'une
+archive est bien celle qui a été publiée : [SECURITY.md](SECURITY.md). Les
+versions sont dans [CHANGELOG.md](CHANGELOG.md).
 
 ## Auteur
 
@@ -89,4 +114,4 @@ Flavien Chervet, [Studio Entremondes](https://studio-entremondes.fr).
 
 ## Licence
 
-Apache-2.0.
+Apache-2.0 ([LICENSE](LICENSE)).
