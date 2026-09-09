@@ -4,6 +4,12 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.6.1 (9 septembre 2026)
+
+### Améliorations
+- **La page de sécurité dit tout ce que l'installation fait.** Elle annonçait « aucun outil tiers, aucun script téléchargé » alors que `/bd-start`, sur une machine où winget ou Homebrew manquent, installe d'abord ce gestionnaire de paquets depuis sa source officielle, et ajoute sur macOS une ligne à `~/.zprofile`. La liste est maintenant complète, système par système : une page de sécurité incomplète vaut moins que pas de page, parce qu'on agit dessus.
+- **L'adresse du plugin** pointe vers sa documentation, qui existe, au lieu d'un domaine qui ne répond pas encore.
+
 ## v0.6.0 (9 septembre 2026)
 
 ### Nouveautés

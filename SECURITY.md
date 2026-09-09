@@ -16,10 +16,25 @@ que vous avez installé est bien ce qui a été publié.
 - **Aucun serveur MCP, aucun réglage modifié.** Le plugin n'écrit rien dans
   votre `settings.json` et ne s'accorde aucun droit : ses skills tournent avec
   les outils que votre session autorise déjà.
-- **Il n'installe qu'une chose, et le dit.** `/bd-start` installe Node.js s'il
-  manque, par le gestionnaire de paquets du système (winget sur Windows,
-  Homebrew sur macOS), et rien d'autre : aucune bibliothèque, aucun outil
-  tiers, aucun script téléchargé.
+- **Il n'installe qu'une chose, et voici toute la liste.** `/bd-start` met en
+  place **Node.js**, et rien d'autre : aucune bibliothèque, aucun outil de
+  développement, aucune dépendance du plugin. Node.js s'installe par le
+  gestionnaire de paquets du système, et c'est là qu'il faut être précis,
+  parce que ce gestionnaire peut manquer :
+  - **Windows** : `winget install OpenJS.NodeJS.LTS`. Si winget est absent, la
+    skill le télécharge depuis les releases officielles de
+    `microsoft/winget-cli` et l'installe (PowerShell, `Add-AppxPackage`).
+  - **macOS** : `brew install node`. Si Homebrew est absent, la skill exécute
+    son script d'installation officiel (`curl` puis `bash`, la commande
+    publiée par Homebrew), puis ajoute une ligne à votre `~/.zprofile` pour
+    que `brew` soit trouvable ensuite.
+  - **Linux** : rien d'automatique, la skill vous renvoie vers le gestionnaire
+    de paquets de votre distribution.
+
+  Autrement dit : sur une machine où winget ou Homebrew existent déjà, rien
+  n'est téléchargé en dehors de Node.js lui-même. Sur une machine où ils
+  manquent, un installeur tiers l'est, depuis sa source officielle, et la
+  skill vous montre la commande avant de la lancer.
 
 ## Ce qu'il touche sur votre machine
 
@@ -31,6 +46,10 @@ que vous avez installé est bien ce qui a été publié.
   la sauvegarde de la version précédente à côté du plugin.
 - Le dossier courant, uniquement quand vous demandez un export, un rendu ou une
   épreuve d'aveugle, et sous le nom que vous avez donné.
+- Votre `~/.zprofile`, **sur macOS et seulement si `/bd-start` a dû installer
+  Homebrew** : une ligne y est ajoutée pour rendre `brew` trouvable. C'est la
+  seule fois où le plugin écrit dans un fichier de configuration de votre
+  shell, et il ne touche jamais votre `PATH` autrement.
 
 ## Ce qu'il fait sur le réseau
 

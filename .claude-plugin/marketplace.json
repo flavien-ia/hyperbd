@@ -8,12 +8,12 @@
     {
       "name": "hyperbd",
       "source": "./",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "description": "Turn a message into a finished comic book: scenario, art direction, dialogue and pages, with Claude Code and the Studio Entremondes workshop.",
       "author": {
         "name": "Flavien Chervet"
       },
-      "homepage": "https://hyperbd.fr",
+      "homepage": "https://app.studio-entremondes.fr/documentation/hyperbd",
       "repository": "https://github.com/flavien-ia/hyperbd",
       "license": "Apache-2.0",
       "keywords": [
