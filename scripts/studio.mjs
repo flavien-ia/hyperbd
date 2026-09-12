@@ -10,7 +10,8 @@
 //   node studio.mjs <commande> [options]
 //
 //   connect --url <url> --token <jeton>   enregistre l'accès et le vérifie
-//   me                                     qui suis-je, quelles clés j'ai
+//   me                                     qui suis-je, quelles clés j'ai, le tuto
+//   parcours [--activer [--projet ID]] [--arreter] [--vu <etape>]   le tuto, étape par étape
 //   projects                               mes projets
 //   project <id|slug>                      un projet et ce qu'il permet
 //   new-project --title T [--universe ID]  créer un projet de bande dessinée
@@ -285,6 +286,31 @@ const commandes = {
     return { ok: true, fichier: FICHIER_ACCES, ...moi };
   },
   me: () => appel("/me"),
+
+  /**
+   * Le parcours d'accueil : les onze étapes, avec pour chacune le texte du
+   * Guide de l'atelier et celui du harnais, ce qui est fait (dérivé des
+   * données) et l'étape courante. `--activer` lance le tuto, `--arreter` le
+   * suspend, `--vu` marque une étape « à regarder » comme vue.
+   */
+  parcours: () => {
+    if (o.activer) {
+      return appel("/parcours", {
+        method: "POST",
+        body: {
+          action: "activer",
+          ...(typeof o.projet === "string" ? { projetId: o.projet } : {}),
+        },
+      });
+    }
+    if (o.arreter) {
+      return appel("/parcours", { method: "POST", body: { action: "arreter" } });
+    }
+    if (typeof o.vu === "string") {
+      return appel("/parcours", { method: "POST", body: { action: "vu", etape: o.vu } });
+    }
+    return appel("/parcours");
+  },
   projects: () => appel("/projects"),
   project: () => appel(`/projects/${arg(0)}`),
 

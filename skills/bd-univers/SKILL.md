@@ -104,3 +104,12 @@ Termine par `🎉 UNIVERS POSÉ`.
 - **N'invente pas de faits sur le monde réel.** Si le projet a une source, ce
   qui vient d'elle doit rester vrai, y compris transposé.
 - Ce que la personne a validé sur la Toile ne se réécrit pas sans le dire.
+
+## En mode tuto
+
+Si `me` dit `parcours.actif`, suis le protocole de
+`${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par le contexte
+(« Étape n sur 11 : ... »), termine par l'instruction miroir (où aller dans
+l'atelier, quoi regarder, puis quoi taper), marque un « vu » quand la
+personne dit qu'elle a regardé, une étape à la fois. En `--auto`, dis que le
+tuto ne s'applique pas, et déroule.

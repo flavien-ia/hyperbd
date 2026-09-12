@@ -133,3 +133,12 @@ Termine par `🎉 BRIEF POSÉ`.
 - Si le sujet touche à des personnes réelles, à des données sensibles ou à un
   sujet où l'erreur porte à conséquence, dis-le maintenant : cela changera la
   façon de travailler, et il vaut mieux le savoir avant d'écrire.
+
+## En mode tuto
+
+Si `me` dit `parcours.actif`, suis le protocole de
+`${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par le contexte
+(« Étape n sur 11 : ... »), termine par l'instruction miroir (où aller dans
+l'atelier, quoi regarder, puis quoi taper), marque un « vu » quand la
+personne dit qu'elle a regardé, une étape à la fois. En `--auto`, dis que le
+tuto ne s'applique pas, et déroule.

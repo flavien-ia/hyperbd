@@ -135,3 +135,12 @@ face au format visé.
 - Ne rédige pas les dialogues finaux ici : ils naissent avec le découpage, case
   par case, au temps suivant. Des répliques d'esquisse dans la mise en scène,
   oui ; le dialogue canonique, non.
+
+## En mode tuto
+
+Si `me` dit `parcours.actif`, suis le protocole de
+`${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par le contexte
+(« Étape n sur 11 : ... »), termine par l'instruction miroir (où aller dans
+l'atelier, quoi regarder, puis quoi taper), marque un « vu » quand la
+personne dit qu'elle a regardé, une étape à la fois. En `--auto`, dis que le
+tuto ne s'applique pas, et déroule.

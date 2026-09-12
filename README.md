@@ -37,6 +37,7 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 | `/bd-traduire` | l'album dans une autre langue : mêmes bulles, textes traduits avec la bible de voix, jugés, rendus, validés ; rien n'est redessiné |
 | `/bd-album` | le pilote : toutes les scènes dans l'ordre (dialogues, planches, lettrage), puis la relecture, la couverture et le point final, sous un budget global, avec trois signatures et la reprise |
 | `/bd-audit` | l'album passé au crible par lots parallèles, à tout moment |
+| `/tuto-hyperbd` | le mode tuto, en miroir du Guide de l'atelier : où l'on en est du premier album, l'étape courante, le geste des deux côtés |
 | `/update-hyperbd` | met le plugin à jour quand il a été téléversé dans Claude Desktop : vérifie, télécharge, contrôle l'empreinte, remplace |
 
 Le plan complet vit dans `Plan du harnais HyperBD.md`.

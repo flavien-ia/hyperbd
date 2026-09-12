@@ -62,3 +62,12 @@ Sans attendre, **charge la skill `bd-brief` et suis-la** pour ce projet (donne-l
 - **Une seule question à la fois**, et le moins possible : le titre, l'univers s'il y a un choix, c'est tout. Les vraies questions (à qui on parle, quel format, quel ton) sont celles du brief, pas celles-ci.
 - **Ne crée jamais deux projets pour une même demande.** Si la création répond une erreur, dis-la et arrête-toi ; ne réessaie pas en boucle.
 - **Le titre de travail n'engage à rien** : ne fais pas attendre la personne pour le trouver bon.
+
+## En mode tuto
+
+Si `me` dit `parcours.actif`, suis le protocole de
+`${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par le contexte
+(« Étape n sur 11 : ... »), termine par l'instruction miroir (où aller dans
+l'atelier, quoi regarder, puis quoi taper), marque un « vu » quand la
+personne dit qu'elle a regardé, une étape à la fois. En `--auto`, dis que le
+tuto ne s'applique pas, et déroule.

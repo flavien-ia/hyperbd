@@ -213,3 +213,12 @@ Termine par `🎉 DIRECTION ARTISTIQUE POSÉE`.
   identiques.** Si l'un change, l'autre change dans la même séance.
 - N'invente pas un style « inspiré de » un auteur vivant nommément. Décris des
   qualités graphiques, pas une signature à imiter.
+
+## En mode tuto
+
+Si `me` dit `parcours.actif`, suis le protocole de
+`${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par le contexte
+(« Étape n sur 11 : ... »), termine par l'instruction miroir (où aller dans
+l'atelier, quoi regarder, puis quoi taper), marque un « vu » quand la
+personne dit qu'elle a regardé, une étape à la fois. En `--auto`, dis que le
+tuto ne s'applique pas, et déroule.

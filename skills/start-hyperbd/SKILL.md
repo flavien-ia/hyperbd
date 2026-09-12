@@ -126,7 +126,25 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects
 
 Présente les projets sous forme de courte liste (titre, nombre de planches), ou dis qu'il n'y en a pas encore.
 
-Termine par `🎉 PRÊT`, puis une phrase : « Pour commencer une bande dessinée, tape `/new-bd`. »
+Termine par `🎉 PRÊT`.
+
+## Étape 5 : l'accompagnement
+
+Si la personne n'a encore aucun projet, propose le mode tuto, en une question :
+
+> Veux-tu que je t'accompagne pour ton premier album ? Je te dirai quoi faire
+> ici, et quoi aller voir dans l'atelier, étape par étape, jusqu'à ta première
+> planche. Le Guide de l'atelier suivra les mêmes étapes.
+
+Oui :
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" parcours --activer
+```
+
+puis : « C'est parti. Tape `/new-bd`. » Non : « Pour commencer une bande
+dessinée, tape `/new-bd` ; `/tuto-hyperbd` si tu changes d'avis. » Le
+protocole du tuto est dans `${CLAUDE_SKILL_DIR}/../../templates/tuto.md`.
 
 ## Règles
 

@@ -193,3 +193,12 @@ Termine par `🎉 DESIGN POSÉ, PLANCHE TEST FAITE`.
   reviendra sur soixante planches.
 - **La planche test se fait sur un vrai script**, pas sur une image d'ambiance.
   Une jolie illustration ne prouve rien du pipeline.
+
+## En mode tuto
+
+Si `me` dit `parcours.actif`, suis le protocole de
+`${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par le contexte
+(« Étape n sur 11 : ... »), termine par l'instruction miroir (où aller dans
+l'atelier, quoi regarder, puis quoi taper), marque un « vu » quand la
+personne dit qu'elle a regardé, une étape à la fois. En `--auto`, dis que le
+tuto ne s'applique pas, et déroule.
