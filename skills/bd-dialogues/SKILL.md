@@ -90,6 +90,15 @@ juger la scène entière, de la reprendre, et de la retrouver.
 
 ## Étape 3 : la relecture, avant de payer quoi que ce soit
 
+**0. Le pré-contrôle des refus.** Relis chaque case contre
+`${CLAUDE_SKILL_DIR}/../../templates/refus.md` : un acte violent explicite,
+un corps dénudé, une personne réelle reconnaissable, une marque, un mineur en
+situation ambiguë, se réécrivent MAINTENANT, en choisissant ce que l'image
+montre et ce qu'elle laisse deviner. C'est un choix de mise en scène (hors
+champ, suggestion, conséquence plutôt qu'acte), pas une édulcoration du
+récit, et il se consigne. Une case refusée par le fournisseur coûte un tour
+payé et trois reprises ; une case relue ici ne coûte rien.
+
 **1. Le contrôle mécanique.**
 
 ```bash

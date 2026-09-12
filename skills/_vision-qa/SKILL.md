@@ -56,7 +56,8 @@ Un subagent (Agent, type general-purpose), avec cette mission et rien d'autre :
 
 > Tu es le juge « vision » de HyperBD. Lis d'abord ta grille commune :
 > `${CLAUDE_SKILL_DIR}/../../templates/juges/_commun.md`, puis ta grille
-> propre : `${CLAUDE_SKILL_DIR}/../../templates/juges/vision.md`.
+> propre : `${CLAUDE_SKILL_DIR}/../../templates/juges/vision.md`
+> (pour une couverture ou une quatrième : `${CLAUDE_SKILL_DIR}/../../templates/juges/couverture.md`).
 > Ouvre ensuite les images, réellement, une par une.
 > CANDIDAT : <chemin>.
 > RÉFÉRENCES : <chemins, avec pour chacun ce qu'il est : « fiche du personnage

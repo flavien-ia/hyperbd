@@ -96,6 +96,16 @@ Deux pièges appris à la production, qui coûtent cher si on les ignore :
 - **ITÉRER** : un défaut localisé. Repasse le delta du juge en `--extra`, sans
   toucher au reste du prompt. **Trois tours par planche au maximum**, et le
   coût cumulé s'affiche à chaque tour.
+- **RETOUCHER** : quand le delta du juge ne concerne qu'une case (un visage,
+  une main, un objet, un détail de décor), ne régénère pas la planche :
+  repeins la case sur l'image elle-même, le reste est gardé tel quel.
+  ```bash
+  node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" retouch <varianteId> --case <caseId> --consigne "<le delta, tel quel>" --wait
+  ```
+  Une image en retour, une variante de plus dans la mosaïque, l'originale
+  intacte. C'est le tour le moins cher et le plus sûr : à préférer à ITÉRER
+  dès que le juge nomme une case. Une image de case se retouche avec
+  `--rect x,y,w,h` (fractions de l'image) ; une couverture aussi.
 - **REGÉNÉRER** : le rendu est à côté. Reprends depuis le prompt, jamais depuis
   un « presque » : partir d'une image ratée pour la rattraper coûte plus cher
   que recommencer, et donne moins bien.
@@ -108,6 +118,26 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" derive-lettrage <plancheId>
 
 Le lettrage suit la production : les bulles naissent avec la planche. Les
 PLACER et les valider, c'est le travail de `/bd-lettrage` : ne le fais pas ici.
+
+## Quand le fournisseur refuse
+
+Une génération peut revenir en erreur avec une **raison** (`errorReason`) :
+`refus_securite`, `credit_epuise`, `plafond_facturation`, `limite_debit`,
+`cle_refusee`, `autre`. La conduite pour chacune est fixée dans
+`${CLAUDE_SKILL_DIR}/../../templates/refus.md` : lis-la au premier refus, et
+applique-la sans la réinterpréter. En deux lignes :
+
+- **`refus_securite`** : ne relance jamais à l'identique. Reformule ce que
+  l'image montre (suggérer, hors champ, retirer les mots qui déclenchent,
+  aucune personne réelle, vérifier les références), trois tours au maximum,
+  puis fais la planche autrement (une case, un autre cadrage, un import) et
+  écris-le au journal.
+- **`credit_epuise`, `plafond_facturation`, `cle_refusee`** : arrête la
+  scène proprement, dis ce qu'il faut faire, ne marque rien comme raté.
+  `limite_debit` : attends une minute, une fois. `autre` : un essai, puis
+  montre le message brut.
+
+Dis toujours la raison en clair à la personne, et ce que ça a coûté.
 
 ## Étape 2 : le rythme du travail
 

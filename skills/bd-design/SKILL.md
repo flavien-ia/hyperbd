@@ -176,6 +176,13 @@ Termine par `🎉 DESIGN POSÉ, PLANCHE TEST FAITE`.
 
 ## Règles
 
+- **Un refus du fournisseur se traite selon la doctrine commune**
+  (`${CLAUDE_SKILL_DIR}/../../templates/refus.md`) : un `refus_securite` se
+  reformule et ne se relance jamais à l'identique, un arrêt pour crédit,
+  plafond ou clé n'est pas un échec de l'image. Une fiche de personnage qui
+  déclenche le filtre (une arme, une blessure, un corps) se décrit autrement :
+  c'est elle qui partira en référence dans chaque planche, et le refus
+  suivrait.
 - **Une variante non castée ne se dessine pas.** C'est de l'argent dépensé pour
   une image que personne ne verra.
 - **Trois images étoilées au plus par entrée.** Au-delà, les références se

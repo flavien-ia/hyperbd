@@ -48,6 +48,25 @@ Une planche passe par quatre états, et c'est **le plus bas qui compte** : une p
 | lettrage validé | la planche est finie |
 
 Les blocs `separator` sont les chapitres, pas des planches : compte-les à part.
+La `couverture` et la `quatrieme`, quand l'album en a, sont des pages à part
+elles aussi : dis si elles existent et où elles en sont (mêmes états qu'une
+planche), sans les compter dans les planches.
+
+**Les refus.** Chaque planche porte sa dernière génération
+(`derniereGeneration`) : quand son `status` est `error`, la raison
+(`errorReason`) dit ce qui s'est passé, et la conduite est celle de
+`${CLAUDE_SKILL_DIR}/../../templates/refus.md`. Relève-les :
+
+| `errorReason` | Ce que tu dis |
+|---|---|
+| `refus_securite` | « refusée par le filtre de sécurité : à reformuler » (et vers `/bd-planches`) |
+| `credit_epuise` | « le compte OpenAI n'a plus de crédit : rien ne se génèrera avant un rechargement » |
+| `plafond_facturation` | « plafond de dépense OpenAI atteint : à relever, ou attendre le mois suivant » |
+| `cle_refusee` | « la clé OpenAI est refusée : à remplacer dans Mon compte » |
+| `limite_debit`, `autre` | « un échec passager : à relancer » |
+
+Un crédit épuisé, un plafond ou une clé refusée valent pour TOUT l'album, pas
+pour une planche : dis-le une fois, en tête, plutôt que planche par planche.
 
 ## Étape 3 : présenter
 
@@ -57,6 +76,7 @@ Donne, dans cet ordre :
 2. **Ce qui a coûté** : le total, et la part encore en cours s'il y en a une (une génération en cours n'est qu'une estimation, dis-le).
 3. **Les prochaines planches à traiter** : les 3 à 5 premières dans l'ordre de l'album qui ne sont pas finies, avec ce qui leur manque.
 4. **S'il y a des retours de relecteurs non traités**, signale-le : c'est du travail en attente que les chiffres ne montrent pas.
+5. **Les planches refusées ou arrêtées**, avec leur raison en clair et ce qu'il faut faire (voir « Les refus » plus haut). Une planche refusée par le filtre ne se compte pas « à dessiner » comme les autres : elle demande une reformulation, et le dire évite de la relancer telle quelle.
 
 Reste factuel et court. Si l'album est terminé, dis-le franchement et propose la suite (agrandir les images, exporter).
 

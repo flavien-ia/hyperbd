@@ -32,7 +32,7 @@ ok(plugin.repository === "https://github.com/flavien-ia/hyperbd", "URL du dépô
 // ── 2. Chaque skill : dossier = frontmatter, description non vide ───────────
 const skillsDir = join(RACINE, "skills");
 const skills = readdirSync(skillsDir).filter((d) => statSync(join(skillsDir, d)).isDirectory());
-ok(skills.length === 19, "19 skills", String(skills.length));
+ok(skills.length === 22, "22 skills", String(skills.length));
 for (const s of skills) {
   const f = join(skillsDir, s, "SKILL.md");
   if (!existsSync(f)) { ok(false, `SKILL.md manquant`, s); continue; }
@@ -48,7 +48,7 @@ for (const s of skills) {
   // ne le signale.
   if (desc && /[<>]/.test(desc)) ok(false, `chevron dans la description (Claude Desktop refuse le zip)`, s);
 }
-console.log("  ok   frontmatters des 19 skills (nom = dossier, description, sans chevron)");
+console.log("  ok   frontmatters des 22 skills (nom = dossier, description, sans chevron)");
 
 // ── 3. Chaque chemin ${CLAUDE_SKILL_DIR}/../../<x> référencé EXISTE ─────────
 const refs = new Set();
@@ -130,7 +130,7 @@ ok(fantomes.length === 0, "aucune commande documentée sans implémentation", fa
 
 // ── 8. Les grilles de juges portent le format strict ────────────────────────
 const juges = readdirSync(join(RACINE, "templates/juges")).filter((f) => f.endsWith(".md") && !f.startsWith("_"));
-ok(juges.length === 10, "10 grilles de juges", juges.join(", "));
+ok(juges.length === 12, "12 grilles de juges", juges.join(", "));
 const commun = readFileSync(join(RACINE, "templates/juges/_commun.md"), "utf8");
 ok(/SCORES:/.test(commun) && /VERDICT:/.test(commun), "la grille commune porte le format parsable");
 // Le juge lettrage a son propre verdict et sa procédure des visages.

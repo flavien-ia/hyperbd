@@ -61,7 +61,7 @@ toi-même et justifie chaque réponse au journal.
 
    | Format | Planches | Pour quoi | Ordre de grandeur |
    |---|---|---|---|
-   | Strip | 1 à 4 | réseaux, campagne | quelques euros |
+   | Strip | 1 à 4 | une histoire courte, un tract, une campagne | quelques euros |
    | Livret | 8 à 16 | PDF, print léger | quelques dizaines d'euros |
    | Album | 48 à 64 | édition, librairie | une à trois centaines d'euros |
    | Série | plusieurs tomes | univers au long cours | par tome |

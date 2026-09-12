@@ -82,6 +82,16 @@ Les défauts propres à la machine, ceux qu'on ne voit qu'en regardant de près 
 - Les artefacts : membres fondus, objets qui traversent, symétries impossibles ;
 - Les raccords de cases : gouttières irrégulières, cadres qui bavent.
 
+## Si le type est `album`
+
+On te donne alors PLUSIEURS pages lettrées, dans l'ordre de lecture, allégées,
+et une seule question : **la dérive**. Compare la première et la dernière
+apparition de chaque personnage principal aux fiches ; compare la palette et
+le trait du premier chapitre à ceux du dernier. Nomme les pages où ça
+décroche (numéro, ce qui a changé). Les dimensions `script` et `continuite`
+se lisent alors à l'échelle de l'album, et le verdict désigne les pages à
+reprendre, pas l'album entier.
+
 ## Le garde-fou
 
 Une planche peut s'écarter du gabarit demandé et être **meilleure**. Si c'est

@@ -18,6 +18,7 @@
 //   planches <projet>                      l'album, dans l'ordre
 //   planche <id>                           une planche en détail
 //   create-planche <projet> [--title T] [--after ID] [--separator]
+//                  [--kind couverture|quatrieme]  (uniques, place fixe)
 //   drop-planche <plancheId>               retirer une planche de l'album
 //   rendu <plancheId> --out f.png          la planche lettrée, en image
 //         [--largeur 1536] [--locale en] [--sans-texte] [--calque]
@@ -28,6 +29,8 @@
 //             jamais dans l'image)
 //                      [--extra "..."] [--wait]
 //   generation <id>                        où en est une génération
+//   retouch <variante> --consigne "..." [--case ID | --rect x,y,w,h]
+//           [--quality medium] [--wait]    repeint une zone, garde le reste
 //   validate <variante> [--case ID]        retenir une variante
 //   upscale <variante> [--scale 2|4]       agrandir (Topaz)
 //   lettrage <planche>                     lire le lettrage
@@ -35,6 +38,7 @@
 //   set-lettrage <planche> [--text-file F] [--file bulles.json] [--locale xx]
 //                          [--valider|--devalider]
 //   locales <projet>                       les langues, et où elles en sont
+//   add-locale <projet> --locale xx        ouvre une langue : copie la source de chaque planche
 //   repliques <projet> [--scene <id>]      les répliques du script, case par case
 //   shares <projet>                        les liens de lecture
 //   share-locale <lienId> [--locale xx]    la langue qu'un lien sert
@@ -101,7 +105,10 @@
 //   job <id>                               où en est un travail
 //   job-continue <id>                      relancer une tranche arrêtée
 //   job-cancel <id>
+//   preflight <projet> [--rognage 210x297] [--locale xx]   le contrôle avant tirage
 //   export <projet> --kind avec-texte|sans-texte|calques|pdf|master
+//          master : [--rognage 210x297] [--fond-perdu 3] [--sans-traits] [--rgb]
+//                   [--sans-pages-de-garde] [--exige-upscale]
 //          [--locale xx] [--planches id,id] [--exige-upscale] [--wait]
 //
 // Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1).
@@ -308,6 +315,20 @@ const commandes = {
   locales: () => appel(`/projects/${arg(0)}/locales`),
 
   /**
+   * Ouvre une langue sur l'album : chaque planche qui a un lettrage source
+   * reçoit une copie (même géométrie, mêmes textes, non validée) ; on la
+   * traduit ensuite planche par planche. Les planches déjà traduites ne
+   * bougent pas.
+   */
+  "add-locale": () => {
+    if (typeof o.locale !== "string") throw new Error("Il faut --locale <code> (en, de, es…).");
+    return appel(`/projects/${arg(0)}/locales/amorcer`, {
+      method: "POST",
+      body: { locale: o.locale },
+    });
+  },
+
+  /**
    * Les répliques telles que le script les porte, case par case.
    *
    * C'est l'atelier qui les extrait, avec le code qui sert à dériver le
@@ -334,7 +355,12 @@ const commandes = {
       method: "POST",
       body: {
         title: typeof o.title === "string" ? o.title : "",
-        kind: o.separator ? "separator" : "planche",
+        kind:
+          typeof o.kind === "string"
+            ? o.kind
+            : o.separator
+              ? "separator"
+              : "planche",
         ...(typeof o.after === "string" ? { afterId: o.after } : {}),
       },
     }),
@@ -444,6 +470,36 @@ const commandes = {
   },
 
   generation: () => appel(`/generations/${arg(0)}`),
+
+  /**
+   * Retouche locale d'une variante : la case (ou le rectangle) est repeinte
+   * selon la consigne, le reste de l'image est gardé par un masque. Une
+   * variante de plus revient dans la planche ; l'originale reste intacte.
+   */
+  async retouch() {
+    if (typeof o.consigne !== "string" || !o.consigne.trim()) {
+      throw new Error('Il faut --consigne "ce qu\'il faut changer dans la zone".');
+    }
+    const rect =
+      typeof o.rect === "string"
+        ? (() => {
+            const [x, y, w, h] = o.rect.split(",").map(Number);
+            return { x, y, w, h };
+          })()
+        : undefined;
+    const lancement = await appel(`/outputs/${arg(0)}/retouch`, {
+      method: "POST",
+      body: {
+        consigne: o.consigne,
+        ...(typeof o.case === "string" ? { caseId: o.case } : {}),
+        ...(rect ? { rect } : {}),
+        quality: typeof o.quality === "string" ? o.quality : "medium",
+      },
+    });
+    if (!o.wait) return lancement;
+    const fin = await attendre(lancement.generationId);
+    return { ...lancement, ...fin };
+  },
 
   validate: () =>
     appel(`/outputs/${arg(0)}/validate`, {
@@ -857,6 +913,15 @@ const commandes = {
    * texte (PNG transparent et SVG vectoriel), le PDF de lecture, et le master
    * de tirage avec sa page de titre et ses mentions.
    */
+  /** Le contrôle avant tirage : ce que le master contiendra, et ce qui cloche. */
+  preflight: () => {
+    const q = new URLSearchParams();
+    if (typeof o.rognage === "string") q.set("rognage", o.rognage);
+    if (typeof o.locale === "string") q.set("locale", o.locale);
+    const qs = q.toString();
+    return appel(`/projects/${arg(0)}/preflight-master${qs ? `?${qs}` : ""}`);
+  },
+
   async export() {
     const genres = {
       "avec-texte": "export-avec-texte",
@@ -879,6 +944,22 @@ const commandes = {
           ...(typeof o.locale === "string" ? { locale: o.locale } : {}),
           ...(typeof o.planches === "string"
             ? { plancheIds: o.planches.split(",") }
+            : {}),
+          // Les réglages d'imprimeur du master ; les défauts sont ceux de
+          // l'atelier (A4, 3 mm, traits, CMYK, pages de garde).
+          ...(kind === "export-master" && typeof o.rognage === "string"
+            ? (() => {
+                const [l, h] = o.rognage.split("x").map(Number);
+                return { rognage: { largeurMm: l, hauteurMm: h } };
+              })()
+            : {}),
+          ...(kind === "export-master" && o["fond-perdu"] !== undefined
+            ? { fondPerduMm: Number(o["fond-perdu"]) }
+            : {}),
+          ...(kind === "export-master" && o["sans-traits"] ? { traitsDeCoupe: false } : {}),
+          ...(kind === "export-master" && o.rgb ? { cmyk: false } : {}),
+          ...(kind === "export-master" && o["sans-pages-de-garde"]
+            ? { pagesDeGarde: false }
             : {}),
           ...(o["exige-upscale"] ? { exigeUpscale: true } : {}),
         },
