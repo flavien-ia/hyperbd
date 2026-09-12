@@ -40,6 +40,7 @@
 //                          [--valider|--devalider]
 //   locales <projet>                       les langues, et où elles en sont
 //   add-locale <projet> --locale xx        ouvre une langue : copie la source de chaque planche
+//   drop-locale <projet> --locale xx       retire une langue de tout l'album (la source reste)
 //   repliques <projet> [--scene <id>]      les répliques du script, case par case
 //   shares <projet>                        les liens de lecture
 //   share-locale <lienId> [--locale xx]    la langue qu'un lien sert
@@ -351,6 +352,14 @@ const commandes = {
     return appel(`/projects/${arg(0)}/locales/amorcer`, {
       method: "POST",
       body: { locale: o.locale },
+    });
+  },
+
+  /** Retire une langue de tout l'album : ses lignes, planche par planche. La source reste. */
+  "drop-locale": () => {
+    if (typeof o.locale !== "string") throw new Error("Il faut --locale <code>.");
+    return appel(`/projects/${arg(0)}/locales/${encodeURIComponent(o.locale)}`, {
+      method: "DELETE",
     });
   },
 
