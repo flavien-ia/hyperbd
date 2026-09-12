@@ -4,6 +4,16 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.9.0 (12 septembre 2026)
+
+### Nouveautés
+- **Le mode tuto, en miroir de l'atelier.** À la fin de `/start-hyperbd`, Claude propose d'accompagner le premier album, de l'inscription à la première planche ; le bouton Guide de l'atelier suit les mêmes onze étapes. L'avancement n'est jamais compté par l'un ou l'autre : il est dérivé de ce qui existe vraiment (les clés, un jeton qui a servi, un brief, une bible, des personnages, une scène validée, des pistes graphiques, une planche). Les deux côtés ne peuvent donc pas se contredire. Chaque skill du premier album ouvre par le contexte (« Étape 6 sur 11 ») et termine par l'instruction miroir : où aller dans l'atelier, quoi regarder, puis quoi taper.
+- **`/tuto-hyperbd`** : où l'on en est (la liste cochée, l'étape courante, le geste des deux côtés), pour reprendre ou arrêter l'accompagnement.
+
+### Améliorations
+- `me` dit si le tuto est actif et à quelle étape ; `parcours` donne les onze étapes avec leurs deux textes, celui de l'atelier et celui de Claude.
+- Le tuto est un mode guidé : une skill lancée en automatique le dit et n'applique pas le protocole.
+
 ## v0.8.0 (12 septembre 2026)
 
 ### Nouveautés
