@@ -4,6 +4,25 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.8.0 (12 septembre 2026)
+
+### Nouveautés
+- **`/bd-album`, le pilote** : toutes les scènes dans l'ordre du récit (dialogues, planches, lettrage), puis la relecture de l'album entier, la couverture et le point final, sous un budget global. Trois signatures humaines par défaut (le plan de production, la première scène produite, l'album relu), et la reprise à tout moment depuis l'état de l'atelier.
+- **`/bd-couverture`** : la couverture et la quatrième. Trois concepts d'affiche jugés à taille de vignette, la page produite en portrait, le titre et les mentions posés dans le lettrage, jamais dans l'image.
+- **`/bd-traduire`** : l'album dans une autre langue, sans rien redessiner. Mêmes bulles, textes traduits avec la bible de voix sous les yeux, jugés, rendus pour voir ce qui déborde, validés langue par langue.
+- **La doctrine des refus** : quand le fournisseur d'images refuse (filtre de sécurité, crédit épuisé, plafond de dépense, clé), chaque skill sait quoi faire, et `/bd-status` le dit en clair. `/bd-dialogues` relit chaque case avant qu'une image soit payée.
+- **Retoucher une case** : la commande `retouch` repeint une seule case d'une variante, le reste est gardé tel quel. `/bd-planches` la préfère à une régénération dès que le juge nomme une case.
+- **Le master d'impression** : `preflight` contrôle l'album avant tirage (format, résolution au format, ce qui manque), et `export --kind master` sort un PDF en CMYK avec fonds perdus, traits de coupe et boîtes de rognage.
+
+### Améliorations
+- La couverture et la quatrième existent dans l'atelier (`create-planche --kind couverture` ou `quatrieme`), uniques et à place fixe ; les exports, le lecteur et les versions les prennent d'eux-mêmes.
+- `add-locale` ouvre une langue sur tout l'album en une commande.
+- Chaque planche de l'album dit sa dernière génération, avec la raison typée d'un échec.
+- Le brief ne vend plus de découpes pour les réseaux sociaux.
+
+### Coulisses
+- Deux grilles de juges de plus (couverture, traduction), et le juge du regard sait relire un album entier pour y chercher la dérive.
+
 ## v0.7.0 (9 septembre 2026)
 
 ### Améliorations
