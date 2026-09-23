@@ -4,6 +4,25 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.10.0 (23 septembre 2026)
+
+### Nouveautés
+- **Le lettrage vivant.** Le texte d'une planche naît du script une fois, puis c'est lui qui fait foi : on le corrige dans le lettrage, ou dans le dialogue de la scène sur la Toile, et Claude ne le ramène plus jamais au script. L'atelier y veille lui-même : un lettrage retouché ne se re-dérive plus sans qu'on le demande, et une réplique lettrée ne se réécrit qu'à votre demande.
+- **Le cadenas respecté.** Une page verrouillée dans la vue Lettrage ne bouge plus, pour Claude non plus : lettrage, dialogue de scène, QR codes, traduction.
+- **La couverture à plat** pour un album cartonné : la quatrième, le dos et la première d'un seul tenant, le titre du dos posé dans le lettrage, la largeur du dos réglable, le rembord au master.
+- **Les QR codes vers les sources**, posés comme dans l'atelier, avec leur icône « i ».
+- **La fin d'album** : numéros de page, version figée, contrôle avant tirage, agrandissement chiffré, master en entier ou par pages (« couv, 1-8 »).
+
+### Améliorations
+- Les fiches des personnages vivent sur la Toile, dans leurs blocs, reliées par leurs tensions.
+- Un refus du filtre de sécurité dit ce qui a déplu (« violence »...), et Claude reformule en visant ce motif.
+- Le brief demande la taille de page, la reliure et les langues prévues.
+- Une langue se retire de tout l'album d'une commande.
+- Des commandes citées par les skills n'existaient pas ou prenaient de mauvais paramètres : toutes corrigées, et vérifiées une à une.
+
+### Coulisses
+- Le contrôle mécanique compte une double page sur deux pages et mesure les QR codes au tirage.
+
 ## v0.9.0 (12 septembre 2026)
 
 ### Nouveautés
