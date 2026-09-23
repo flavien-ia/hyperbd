@@ -161,7 +161,8 @@ récurrence : chaque emploi devra être un choix.
 
 Compose le document depuis
 `${CLAUDE_SKILL_DIR}/../../templates/bible-voix-squelette.md` et écris-le dans
-le projet en nature `voix`. Ajoute au journal ce qui a été tranché : les axes de
+le projet en nature `voix` (`new-doc <projet> --kind voix --title "Bible de voix"
+--body-file voix.md`). Ajoute au journal ce qui a été tranché : les axes de
 divergence retenus, le taux d'attribution obtenu, les voix restées proches.
 
 Le taux mesuré va AU JOURNAL. C'est la preuve que la bible a été vérifiée, et

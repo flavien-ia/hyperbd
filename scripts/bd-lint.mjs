@@ -9,8 +9,10 @@
 //   node bd-lint.mjs --projet <slug>          contrôle la Toile d'un projet
 //   node bd-lint.mjs --fichier <chemin>       contrôle un texte
 //
-//   --largeur-mm <n>   largeur de la page imprimée (défaut : 240, format
-//                      d'album courant). Sert à dire si le lettrage se lira.
+//   --largeur-mm <n>   largeur d'une page imprimée (défaut : 210, le A4 de
+//                      l'atelier ; 240 pour un album au format franco-belge).
+//                      Une double page s'imprime sur deux. Sert à dire si le
+//                      lettrage et les QR codes se liront.
 //
 // Sortie : JSON { drapeaux: [...], compte: {...} }. Exit 0 même s'il y a des
 // drapeaux : c'est un rapport, pas un échec de commande.
@@ -47,14 +49,22 @@ const BULLE_MOTS_MAX = 25;
  * choisit toujours le plan moyen de face.
  */
 /**
- * Largeur de la page imprimée, en millimètres.
+ * Largeur d'une page imprimée, en millimètres.
  *
- * Format d'album le plus courant. Sert à traduire une taille de police (donnée
- * en fraction de la largeur de l'image) en millimètres réels : c'est le seul
- * chiffre qui dise si le texte se lira. Surchargeable par `--largeur-mm`, et
+ * Le A4 de l'atelier, celui de son master par défaut. Sert à traduire une
+ * taille de police (donnée en fraction de la largeur de l'image) en
+ * millimètres réels : c'est le seul chiffre qui dise si le texte se lira. Une
+ * double page s'imprime sur DEUX pages : son image est deux fois plus large
+ * au tirage, et sa police aussi. Surchargeable par `--largeur-mm`, et
  * toujours rappelé dans le message pour qu'on sache sur quoi le calcul porte.
  */
-const LARGEUR_PAGE_MM = 240;
+const LARGEUR_PAGE_MM = 210;
+
+/**
+ * En dessous, un téléphone accroche mal un QR imprimé (et moins encore un QR
+ * aux modules en étoiles). L'atelier les pose à environ 37 mm sur une page A4.
+ */
+const QR_COTE_MIN_MM = 25;
 
 /** En dessous, un lecteur adulte peine sur une bulle. */
 const CAPITALE_MIN_MM = 2;
@@ -462,9 +472,12 @@ async function controlerVisuel(projet, nodes) {
   const largeurMm = Number(lire("largeur-mm")) || LARGEUR_PAGE_MM;
 
   const { planches } = await appel(`/projects/${projet}/planches`);
+  let qrVersSources = 0;
   for (const p of (planches ?? []).filter((x) => x.kind === "planche")) {
     const { lettrage } = await appel(`/planches/${p.id}/lettrage`);
-    const ou = `planche « ${p.title || p.code || p.id} »`;
+    const ou = `planche ${p.numero ?? ""} « ${p.title || p.id} »`.replace("  ", " ");
+    // L'image d'une double page s'imprime sur deux pages.
+    const largeurImageMm = largeurMm * (p.double ? 2 : 1);
 
     // La plus PETITE police de la planche décide si le lecteur peine, pas la
     // moyenne. Le nombre de pixels ne dit rien : seule la taille au tirage le
@@ -474,11 +487,11 @@ async function controlerVisuel(projet, nodes) {
       .map((b) => b.fontSize)
       .filter((f) => typeof f === "number" && f > 0);
     if (polices.length) {
-      const mm = Math.min(...polices) * largeurMm;
+      const mm = Math.min(...polices) * largeurImageMm;
       if (mm < CAPITALE_MIN_MM) {
         signaler(
           "avertissement",
-          `texte à ${mm.toFixed(2)} mm de capitale sur une page de ${largeurMm / 10} cm`,
+          `texte à ${mm.toFixed(2)} mm de capitale sur une ${p.double ? "double page" : "page"} de ${largeurImageMm / 10} cm`,
           ou,
           `en dessous de ${CAPITALE_MIN_MM} mm un lecteur adulte peine : agrandir la police, ou dire que l'album s'imprime plus grand (--largeur-mm)`,
         );
@@ -486,7 +499,20 @@ async function controlerVisuel(projet, nodes) {
     }
 
     for (const b of lettrage?.bulles ?? []) {
-      if (b.kind !== "qrcode" || !b.sourceId) continue;
+      if (b.kind !== "qrcode") continue;
+      // Le côté imprimé : c'est lui, pas les pixels, qui dit si un téléphone
+      // accrochera le code.
+      const coteMm = (b.w ?? 0) * largeurImageMm;
+      if (coteMm > 0 && coteMm < QR_COTE_MIN_MM) {
+        signaler(
+          "avertissement",
+          `QR code de ${coteMm.toFixed(0)} mm de côté au tirage`,
+          ou,
+          `sous ${QR_COTE_MIN_MM} mm un téléphone l'accroche mal : l'agrandir (tous les QR de l'album à la même taille)`,
+        );
+      }
+      if (!b.sourceId) continue;
+      qrVersSources++;
       if (!vivantes.has(b.sourceId)) {
         signaler(
           "erreur",
@@ -495,6 +521,20 @@ async function controlerVisuel(projet, nodes) {
           "remettre la source, ou refaire pointer le QR ailleurs AVANT le tirage",
         );
       }
+    }
+  }
+
+  // Des QR mènent à la page publique des sources : fermée, chacun d'eux
+  // répond 404, et un album tiré ne se rattrape pas.
+  if (qrVersSources > 0) {
+    const etat = await appel(`/projects/${projet}/sources-public`);
+    if (!etat?.ouvert) {
+      signaler(
+        "erreur",
+        `${qrVersSources} QR code${qrVersSources > 1 ? "s mènent" : " mène"} à la page des sources, qui est fermée`,
+        "le projet",
+        "l'ouvrir avant tout tirage (une décision d'édition : la demander)",
+      );
     }
   }
 }

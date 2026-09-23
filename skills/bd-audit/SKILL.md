@@ -25,12 +25,19 @@ qu'un seul contexte ait à tout tenir.
 
 ```bash
 S="${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs"
-node "$S" scenario <projet>          # la structure et les scènes
-node "$S" docs <projet>              # brief, bible, bible graphique
+node "$S" nodes <projet>             # la structure : scènes, chapitres, liens
+node "$S" planches <projet>          # l'album : numéros, cadenas, états
+node "$S" docs <projet>              # brief, bible, bible graphique, voix
 node "$S" universe <projet>          # personnages, variantes, décors
 node "$S" journal <projet>           # les décisions déjà prises
 node "$S" sources <projet>           # s'il y a des sources
 ```
+
+`nodes` rend la Toile sans les corps. Le texte d'une scène se lit par
+`node <scène>` : une fois la scène découpée, son `dialogue` est **le texte
+lettré sur ses planches**, celui qu'on imprime, assemblé avec une ligne
+« ## Planche : <titre> » par planche. C'est lui qu'on audite, pas le script
+des cases (qui n'a été que le brouillon du découpage).
 
 Le **journal** est la pièce la plus importante : il porte des arbitrages. Une
 « incohérence » qu'une décision de journal explique n'en est pas une, et un
@@ -101,13 +108,30 @@ propose. Pas de généralités.
 
 En guidé : propose les corrections une par une, groupées par nature. En
 `--auto` : applique ce qui est factuel et sans ambiguïté (orthographes, dates
-qui découlent d'un calcul), et **laisse tout le reste** en liste.
+qui découlent d'un calcul) dans les bibles, les fiches, la Toile et les
+scripts pas encore lettrés, et **laisse tout le reste** en liste, dont toute
+réplique déjà lettrée (voir plus bas).
 
 ```bash
 node "$S" write-node <id> --file patch.json
 node "$S" set-entry <projet> <entryId> --file patch.json
-node "$S" write-doc <id> --file patch.json
+node "$S" write-doc <id> --body-file bible.md
 ```
+
+**Une réplique lettrée ne se réécrit qu'à la demande de la personne**, même
+en `--auto` : c'est une règle de l'atelier. Propose la correction exacte ;
+en `--auto`, elle reste dans la liste. Une fois acceptée, elle se fait dans
+le lettrage, jamais en re-dérivant depuis le script : réécris le `dialogue`
+de la scène (`write-node <scène>`, en gardant chaque ligne « ## Planche : »
+intacte, voir `_toile`), ou le texte d'une seule planche
+(`set-lettrage <planche> --text-file`). Les bulles suivent : une réplique
+corrigée garde sa bulle et sa place.
+
+**Une planche verrouillée ne se corrige pas d'ici.** Son cadenas protège une
+page finie ; l'atelier refuse l'écriture. Mets-la dans la liste, avec la
+correction exacte à faire, et dis à la personne qu'il faut d'abord ouvrir le
+cadenas (vue Lettrage). Une correction du texte source met aussi ses
+traductions en retard : signale-le, `/bd-traduire` les rattrape.
 
 **Ne corrige jamais un fait sans source.** La bible tranche. Si la bible est
 muette, c'est une décision d'auteur : signale-la, ne la prends pas.

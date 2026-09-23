@@ -37,7 +37,9 @@ même), posés sur la Toile comme propositions (des notes, une par découpage).
 Chacun tient en quelques lignes : ce que chaque chapitre fait, et sur quoi il
 bascule.
 
-Fais juger par `dramaturgie`. Fais trancher, ou tranche en `--auto`.
+Fais juger par `dramaturgie`. Fais trancher, ou tranche en `--auto`. Le
+découpage retenu passe en `valide`, les autres en `ecarte` avec leur raison
+(ils attendent dans la Corbeille du rail, voir `_toile`).
 
 ## Étape 2 : les scènes
 
@@ -51,7 +53,8 @@ bande à la souris, et ce sont ces bornes qui font foi.
 Pour chaque scène, dès sa création :
 
 - un **titre** qui dit ce qui s'y passe, pas ce qu'elle signifie ;
-- un **synopsis de deux lignes** : c'est ce qu'on lira dans la Structure ;
+- un **synopsis de deux lignes** : c'est ce qu'on lira sur la carte de la
+  scène, sur la Toile ;
 - le **lieu** et la **date** dans la fiction ;
 - le **budget de planches**.
 

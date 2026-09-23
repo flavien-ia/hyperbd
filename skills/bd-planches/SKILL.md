@@ -54,9 +54,11 @@ Pour chaque planche du scope, dans l'ordre où on la lira :
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" generate <plancheId> --quality medium --mode planche --wait
 ```
 
-Le mode `planche` produit la double page d'un coup. `page-left`, `page-right`
-et `case` servent aux reprises ciblées : quand une seule case cloche, on ne
-repaie pas toute la planche.
+Le mode `planche` produit la planche entière d'un coup, au format de l'album
+(double page ou page simple : l'atelier connaît la taille, ne la donne pas).
+`page-left`, `page-right` et `case` servent aux reprises ciblées : quand une
+seule case cloche, on ne repaie pas toute la planche. Une case sort au ratio
+de son emplacement sur le gabarit, là encore sans rien préciser.
 
 **Le texte ne se dessine jamais dans l'image.** La commande demande d'office
 des planches sans lettrage : le modèle réserve les espaces, et rien d'autre.
@@ -104,26 +106,39 @@ Deux pièges appris à la production, qui coûtent cher si on les ignore :
   ```
   Une image en retour, une variante de plus dans la mosaïque, l'originale
   intacte. C'est le tour le moins cher et le plus sûr : à préférer à ITÉRER
-  dès que le juge nomme une case. Une image de case se retouche avec
-  `--rect x,y,w,h` (fractions de l'image) ; une couverture aussi.
+  dès que le juge nomme une case. Sur l'image entière d'une planche (ou d'une
+  couverture, qui a son gabarit et ses cases), `--case` suffit ; sur une
+  image de case, ou pour une zone plus fine qu'une case, désigne-la par
+  `--rect x,y,w,h` en fractions de l'image.
 - **REGÉNÉRER** : le rendu est à côté. Reprends depuis le prompt, jamais depuis
   un « presque » : partir d'une image ratée pour la rattraper coûte plus cher
   que recommencer, et donne moins bien.
 
-### 4. Dériver le lettrage
+### 4. Faire naître le lettrage, une fois
 
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" derive-lettrage <plancheId>
 ```
 
-Le lettrage suit la production : les bulles naissent avec la planche. Les
-PLACER et les valider, c'est le travail de `/bd-lettrage` : ne le fais pas ici.
+Le lettrage naît avec la planche : ses bulles viennent des répliques du
+script. Les PLACER et les valider, c'est le travail de `/bd-lettrage` : ne le
+fais pas ici.
+
+Cette naissance n'a lieu qu'une fois. Une planche **déjà lettrée** qu'on vient
+de regénérer garde son lettrage : ne dérive pas de nouveau, les bulles gardent
+leur place, et c'est `/bd-lettrage` qui vérifiera qu'elles tombent encore
+bien sur la nouvelle image. Si l'atelier répond que le lettrage a été
+retouché depuis sa dérivation, ou que la page est verrouillée, c'est une
+protection : on ne force pas.
 
 ## Quand le fournisseur refuse
 
 Une génération peut revenir en erreur avec une **raison** (`errorReason`) :
 `refus_securite`, `credit_epuise`, `plafond_facturation`, `limite_debit`,
-`cle_refusee`, `autre`. La conduite pour chacune est fixée dans
+`cle_refusee`, `autre`. La réponse porte aussi la `conduite` à tenir et, pour
+un refus de sécurité, ses `motifs` en clair (« violence », « contenu
+sexuel »...) : c'est sur le motif nommé que la reformulation doit porter. La
+conduite pour chaque raison est fixée dans
 `${CLAUDE_SKILL_DIR}/../../templates/refus.md` : lis-la au premier refus, et
 applique-la sans la réinterpréter. En deux lignes :
 
@@ -178,7 +193,9 @@ rien reconstituer.
 - **On ne repart jamais d'un « presque ».** C'est la fausse économie la plus
   chère de tout le harnais.
 - **Une planche validée ne se regénère pas** sans le dire et sans l'écrire au
-  journal : quelqu'un a peut-être déjà lettré dessus.
+  journal : quelqu'un a peut-être déjà lettré dessus. Une planche dont le
+  lettrage est verrouillé (`lettrageVerrouille`) est finie : pas du tout sans
+  l'accord de la personne.
 - **La continuité se juge contre la planche précédente VALIDÉE**, jamais contre
   la dernière version produite : sinon la dérive s'installe planche après
   planche sans que rien ne la signale.

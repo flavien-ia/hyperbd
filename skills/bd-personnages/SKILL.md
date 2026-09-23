@@ -1,6 +1,6 @@
 ---
 name: bd-personnages
-description: Crée le casting comme un graphe de forces plutôt qu'une galerie de fiches : qui incarne quoi, ce qui les lie et les charge, leurs variantes visuelles, leur couleur de bulle. Écrit les fiches dans la bibliothèque de l'univers et pose le graphe des tensions sur la Toile. Passe aussi une vérification anti-ressemblance avec les figures connues. Utiliser après l'univers, quand la personne dit « crée les personnages », « /bd-personnages », « qui raconte cette histoire ».
+description: Crée le casting comme un graphe de forces plutôt qu'une galerie de fiches : qui incarne quoi, ce qui les lie et les charge, leurs variantes visuelles, leur couleur de bulle. Inscrit chaque personnage et ses variantes dans la bibliothèque de l'univers, et pose sur la Toile leurs fiches et le graphe des tensions. Passe aussi une vérification anti-ressemblance avec les figures connues. Utiliser après l'univers, quand la personne dit « crée les personnages », « /bd-personnages », « qui raconte cette histoire ».
 argument-hint: "[projet] [--auto]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
@@ -18,12 +18,20 @@ récit : ce qui fait un récit, ce sont les tensions entre les gens.
 
 ## Étape 0 : reprendre le fil
 
-Lis le brief, la bible, et l'état de la Toile.
+Lis le brief, la bible, la Toile et la bibliothèque.
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" docs <projet> --kind bible
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" universe <projet>
+S="${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs"
+node "$S" docs <projet> --kind brief
+node "$S" docs <projet> --kind bible
+node "$S" nodes <projet>
+node "$S" universe <projet>
 ```
+
+Si la bibliothèque a déjà des personnages (une suite, un univers partagé),
+ils existent : ne les recrée pas. Leurs fiches sont sur la Toile du projet
+qui les a vus naître (des blocs `personnage`, fiche dans leur corps) :
+repars d'elles.
 
 ## Étape 1 : les forces d'abord, les gens ensuite
 
@@ -39,9 +47,8 @@ reconnaît, pas à quinze qu'on confond.
 
 ## Étape 2 : les fiches
 
-Une fiche par personnage principal, écrite comme entrée `text` de la
-bibliothèque de l'univers (elle voyagera avec lui vers une suite ou un autre
-medium), nommée `Fiche : <Nom>`.
+Une fiche par personnage principal. Écris-la d'abord dans un fichier : elle
+ira sur la Toile à l'étape 4.
 
 Ce qu'elle contient :
 
@@ -62,22 +69,67 @@ Ce qu'elle contient :
 10. **Sa couleur de bulle** (elle sera constante sur tout l'album).
 11. **Ce qu'il devient** ensuite, s'il y a une suite.
 
-## Étape 3 : les variantes
+## Étape 3 : la bibliothèque, et les variantes
 
-Une variante est un état visuel distinct : un costume, un âge, une blessure, une
-tenue de cérémonie. **C'est ce qu'on caste sur une planche, pas le personnage
-en général.** Déclare-les maintenant : chacune deviendra un jeu d'images de
-référence au temps de la direction artistique.
+La bibliothèque de l'univers porte ce qui part dans les générations et dans
+le lettrage : le nom, la couleur de bulle, et une **description courte**. Pas
+la fiche : la description est redonnée au modèle d'images à CHAQUE planche où
+le personnage est casté, et une biographie y noierait les traits qui comptent.
 
-Crée le personnage et ses variantes dans la bibliothèque de l'univers : le
-conteneur porte l'identité et la couleur de bulle, les variantes portent le
-concret (leur description propre, et plus tard leurs images).
+Pour chaque personnage principal, le **conteneur** porte l'identité :
 
-## Étape 4 : le graphe des tensions
+```bash
+node "$S" new-entry <projet> --kind character --name "<Nom complet>" \
+  --color "<#hex>" --snippet-file apparence-<nom>.txt
+```
 
-Pose chaque personnage principal sur la Toile, et TRACE les tensions entre eux
-(liens de type `tension`, avec un label qui dit la charge : « la dette de
-2019 », « elle sait, il ignore qu'elle sait »).
+Le nom est celui des bulles : un locuteur de bulle se reconnaît à ce que
+chacun de ses mots commence un mot du nom en bibliothèque (« Mira » trouve
+« Mira Vasseur »), et c'est ainsi que la bulle prend sa couleur. Un nom de
+bulle qui ne trouve personne reste noir. La description (`apparence-<nom>.txt`)
+tient en trois ou quatre traits : ceux de la fiche, point 4.
+
+Une **variante** est un état visuel distinct : un costume, un âge, une
+blessure, une tenue de cérémonie. **C'est ce qu'on caste sur une planche, pas
+le personnage en général.** Déclare-les maintenant, sous leur conteneur ;
+chacune deviendra un jeu d'images de référence au temps de la direction
+artistique :
+
+```bash
+node "$S" new-entry <projet> --kind character --name "<Nom> (<la variante>)" \
+  --parent <id du conteneur> --snippet-file variante-<nom>-<variante>.txt
+```
+
+La description d'une variante dit ce qui la distingue (la tenue, l'âge,
+l'état), en matière et en coupe plutôt qu'en nom.
+
+## Étape 4 : les fiches et le graphe des tensions, sur la Toile
+
+Pose chaque personnage principal sur la Toile, **sa fiche dans le corps de
+son bloc**, et TRACE les tensions entre eux, le tout dans un seul lot (voir
+`_toile`) :
+
+```bash
+node "$S" scenario <projet> --file casting.json
+```
+
+```json
+{
+  "nodes": [
+    { "type": "note", "title": "Le casting : les forces et leurs tensions" },
+    { "type": "personnage", "title": "Mira Vasseur", "refId": "<id du conteneur>", "body": "<la fiche>" },
+    { "type": "personnage", "title": "Tobias Renn", "refId": "<id du conteneur>", "body": "<la fiche>" }
+  ],
+  "edges": [
+    { "from": 1, "to": 2, "type": "tension", "label": "elle sait, il ignore qu'elle sait" }
+  ]
+}
+```
+
+C'est là que la personne lira les fiches, et qu'elle les corrigera : un clic
+sur le bloc ouvre son panneau, la fiche est dans « Contenu ». Chaque lien de
+tension porte un label qui dit la charge (« la dette de 2019 », « elle sait,
+il ignore qu'elle sait »).
 
 Ce graphe sert deux fois : il montre les personnages isolés (personne ne les
 relie : ils ne servent à rien), et il donnera au temps du scénario le test
@@ -94,13 +146,16 @@ physique d'un personnage sur un album publié. Un personnage qui rappelle
 immédiatement un autre vole l'attention du lecteur.
 
 Si une ressemblance forte apparaît, propose ce qui la lève : ce n'est presque
-jamais le concept qu'il faut changer, c'est un ou deux traits.
+jamais le concept qu'il faut changer, c'est un ou deux traits. Un trait qui
+change se corrige à deux endroits : dans la fiche (le bloc sur la Toile,
+`write-node`) et dans la description de la bibliothèque (`set-entry`).
 
 ## Étape 6 : la relecture
 
 Fais juger par `incarnation` (des gens ou des porte-voix ?) et `coherence`
-(les fiches se contredisent-elles, contredisent-elles la bible ?). Boucle
-jusqu'à PASS, trois passes au maximum.
+(les fiches se contredisent-elles, contredisent-elles la bible ?). Les juges
+lisent les fiches sur la Toile (`node <bloc>`). Boucle jusqu'à PASS, trois
+passes au maximum.
 
 ## Étape 7 : livrer
 
@@ -119,6 +174,8 @@ Termine par `🎉 CASTING POSÉ`.
 - **Les couleurs de bulles doivent se distinguer entre elles**, y compris pour
   un lecteur qui distingue mal les couleurs : vérifie les contrastes, pas
   seulement les teintes.
+- **La description de la bibliothèque reste courte.** Trois ou quatre traits,
+  pas une fiche : elle part dans chaque génération.
 - N'invente pas de personne réelle. Si le projet parle de gens qui existent,
   c'est une décision éditoriale à poser avec la personne, pas un choix d'écriture.
 

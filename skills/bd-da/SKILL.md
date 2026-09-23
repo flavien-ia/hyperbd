@@ -26,7 +26,7 @@ planche 43, quand le modèle aura légèrement dérivé quarante-deux fois.
 S="${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs"
 node "$S" project <projet>
 node "$S" docs <projet>          # brief, bible, et déjà une bible graphique ?
-node "$S" scenario <projet>      # la structure, pour choisir la scène étalon
+node "$S" nodes <projet>         # la structure, pour choisir la scène étalon
 node "$S" me                     # les clés en place ?
 ```
 
@@ -77,15 +77,22 @@ album qui n'a pas cherché.
 Par piste, **deux images** de la scène étalon. Deux, parce qu'une seule ne dit
 rien de la stabilité du style, et c'est justement ce qu'on veut mesurer.
 
+Écris le prompt de chaque piste dans un fichier (`piste-<nom>.txt` : le bloc
+de style, puis la scène étalon) : un bloc de style fait des paragraphes, avec
+des accents et des guillemets que la ligne de commande abîme.
+
 ```bash
-node "$S" essai <projet> --kind da-piste \
-  --prompt "<bloc de style>, <la scène étalon>" \
-  --quality low --n 2 --wait
+node "$S" essai <projet> --kind da-piste --label "<nom de la piste>" \
+  --prompt-file piste-<nom>.txt --quality low --n 2 --wait
 ```
 
 Qualité basse par défaut : on juge un style, pas un rendu final. On monte en
 qualité seulement sur la piste retenue, s'il faut trancher entre deux
 finalistes.
+
+Si un essai revient en échec, la réponse dit sa `conduite` (reformuler,
+s'arrêter, attendre) et, pour un refus de sécurité, ses `motifs` : suis
+`${CLAUDE_SKILL_DIR}/../../templates/refus.md`.
 
 **Avant de lancer** : annonce le nombre d'images, le coût estimé, et le total.
 En guidé, attends le feu vert. Si un budget est passé, ne le dépasse pas, même
@@ -93,19 +100,41 @@ d'une image.
 
 ## Étape 4 : montrer et faire juger
 
-1. Pose les images sur la Toile, **en grappes par piste**, chaque grappe
-   annoncée par un bloc qui porte le nom de la piste et son bloc de style :
-
-```bash
-node "$S" new-node <projet> --type note --title "Piste : <nom>" --x .. --y ..
-node "$S" new-node <projet> --type image --title "<nom> 1" --ref <imageId> --x .. --y ..
-```
-
-2. Fais juger **chaque piste** par le juge des pistes DA : ses deux images plus
+1. Fais juger **chaque piste** par le juge des pistes DA : ses deux images plus
    son bloc de style. Passe par `_vision-qa` pour le téléchargement des images
    et le lancement du subagent, en lui indiquant la grille `da`.
 
-Les pistes se jugent **en parallèle** : elles sont indépendantes.
+   Les pistes se jugent **en parallèle** : elles sont indépendantes.
+
+2. Pose les pistes sur la Toile, **une grappe par piste**, toutes dans un
+   seul lot (voir `_toile`). Une grappe fait quatre blocs, dans cet ordre :
+   la note de la piste (son nom en titre, son bloc de style en corps), ses
+   deux images (type `image`, `refId` = l'identifiant de l'image d'essai),
+   et une note qui porte le verdict du juge. Quatre blocs, c'est une ligne
+   de la grille où l'atelier range un lot : chaque piste se lit sur sa ligne.
+
+```bash
+node "$S" scenario <projet> --file pistes.json
+```
+
+```json
+{
+  "nodes": [
+    { "type": "note", "title": "Piste : <nom>", "body": "<bloc de style>" },
+    { "type": "image", "title": "<nom> 1", "refId": "<id de l'image d'essai>" },
+    { "type": "image", "title": "<nom> 2", "refId": "<id de l'image d'essai>" },
+    { "type": "note", "title": "Verdict : <PORTEUSE ou non>", "body": "<ce que le juge a vu, où ça cassera>" }
+  ],
+  "edges": [
+    { "from": 0, "to": 1 }, { "from": 0, "to": 2 }, { "from": 0, "to": 3 }
+  ],
+  "ancre": { "x": 0, "y": 0 }
+}
+```
+
+   Si la Toile porte déjà des blocs libres, choisis une `ancre` (le coin
+   haut-gauche du lot) à côté d'eux plutôt que dessus : leurs positions sont
+   dans `nodes`. La personne regarde les pistes là, en vrai, pas dans le chat.
 
 3. Restitue en clair : pour chaque piste, ce que le juge a vu, à quoi ça
    ressemble, **où ça cassera**, et son verdict.
@@ -162,8 +191,12 @@ node "$S" set-template <projet> --file cadre.txt
    de mise en page, la police, et **ce qui a été écarté avec sa raison**.
 
 ```bash
-node "$S" new-doc <projet> --kind bible-graphique --file bible-graphique.md
+node "$S" new-doc <projet> --kind bible-graphique --title "Bible graphique" \
+  --body-file bible-graphique.md
 ```
+
+   Si une bible graphique existe déjà (on la revoit), réécris-la plutôt que
+   d'en créer une seconde : `write-doc <id> --body-file bible-graphique.md`.
 
 3. **Les images de la piste retenue** promues en entrées `style` de l'univers.
 
@@ -187,8 +220,14 @@ node "$S" promote-image <imageId> --style "<nom de la piste>"
    (l'atelier demandera d'attester des droits). Le choix se fait dans les
    paramètres de l'univers.
 
-5. **Les pistes perdantes** écartées avec leur raison, sur la Toile (statut
-   `ecarte` + raison, qui se lit dans la corbeille du rail) et au journal.
+5. **Les pistes perdantes** écartées avec leur raison, sur la Toile et au
+   journal : chaque bloc de leur grappe passe en `ecarte`, avec la raison
+   (elle se lit dans la Corbeille du rail), et la grappe gagnante en
+   `valide`.
+
+```bash
+node "$S" set-status <bloc> --status ecarte --raison "<pourquoi cette piste ne tiendra pas>"
+```
 
 ## Étape 7 : livrer
 

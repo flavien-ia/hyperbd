@@ -41,7 +41,16 @@ Trois arrêts nets :
 
 Puis identifie la scène à traiter (l'argument `--scene`, ou la première scène
 validée sans planches) et relis son synopsis, son budget de planches, et les
-tensions qu'elle doit déplacer.
+tensions qu'elle doit déplacer. Relis aussi son dialogue d'esquisse
+(`node <scène>`), s'il y en a un : c'est ta matière première. Il cesse d'être
+lu dès que la première planche est rattachée à la scène.
+
+**Une scène déjà lettrée ne se redécoupe pas ici.** Si ses planches ont un
+lettrage, ses dialogues vivent désormais dans ce lettrage : une retouche de
+réplique passe par le dialogue de la scène sur la Toile (voir `_toile`) ou par
+`/bd-lettrage`, jamais par un nouveau script suivi d'une nouvelle dérivation,
+qui effacerait ce que la personne a corrigé. Redécouper une scène lettrée est
+une décision lourde : dis-le, et ne le fais que si la personne le demande.
 
 ## Étape 1 : le découpage
 
@@ -79,11 +88,18 @@ Le fichier porte le script modulaire : un en-tête, une case par entrée, une
 ligne d'ambiance. Le script d'une case contient sa description ET ses répliques,
 au format `Nom : texte`, une par ligne.
 
-**Les répliques vont DANS les cases, jamais ailleurs.** Le lettrage se dérive
-du script : une réplique tapée directement dans le lettrage crée une seconde
-version du même dialogue, et les deux divergent au premier ajustement. L'atelier
-refuse d'ailleurs d'écraser un lettrage existant par un script muet : c'est une
-protection, pas un obstacle.
+**Les répliques vont DANS les cases, jamais ailleurs.** Le lettrage en naîtra,
+une fois, quand la planche sera produite (`/bd-planches`) : taper une réplique
+ailleurs créerait une seconde version du même dialogue. Après cette naissance,
+c'est le lettrage qui fait foi, et le script n'est plus relu : tant que la
+planche n'est pas produite, corrige donc ici autant qu'il le faut, c'est
+gratuit.
+
+Une réplique porte le texte exact qui sera lettré, rien d'autre : pas de
+marque, pas de note entre crochets, pas d'indication de ton collée au texte.
+Le lettrage prend la ligne telle quelle, et tout signe tapé là s'imprimerait
+dans la bulle. Une indication de ton va dans la parenthèse du locuteur
+(`Tobias (bas) : ...`), qui ne s'imprime pas.
 
 Rattache la planche à sa scène (`sceneId`) : c'est ce lien qui permettra de
 juger la scène entière, de la reprendre, et de la retrouver.
@@ -162,10 +178,20 @@ meilleure version avec le verdict honnête et ce qui bloque.
 ## Étape 4 : les répliques sourcées
 
 Si le projet a des sources, repère les répliques qui portent une affirmation
-vérifiable et marque-les `[i]`. Rapproche chacune d'une source existante :
-elles deviendront les QR de la planche au temps du lettrage.
+vérifiable, et rapproche chacune d'une source. Le lien se dit dans la
+**source**, jamais dans le texte de la case (un signe tapé là s'imprimerait) :
+son champ `replique` reprend la réplique concernée, son champ `plancheId`
+désigne la planche.
 
-Ne crée pas une source par réplique : une source sert plusieurs passages.
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" sources <projet>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" write-source <sourceId> --file lien.json
+```
+
+Ne crée pas une source par réplique : une source sert plusieurs passages. Ses
+champs n'en retiennent qu'un ; consigne donc la correspondance complète
+(réplique, planche, source) dans l'entrée de journal de la scène. C'est elle
+que `/bd-lettrage` relira pour poser les QR codes.
 
 ## Étape 5 : le journal
 

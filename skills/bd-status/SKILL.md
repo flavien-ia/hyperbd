@@ -1,6 +1,6 @@
 ---
 name: bd-status
-description: Fait le point sur une bande dessinée en cours dans l'atelier : où en est l'album planche par planche (rien, en cours, image validée, textes calés), ce qu'il a coûté jusqu'ici, et ce qu'il reste à faire. Utiliser quand la personne dit « où on en est », « /bd-status », « fais le point sur l'album », « combien ça a coûté », ou avant de reprendre le travail après une pause.
+description: Fait le point sur une bande dessinée en cours dans l'atelier : où en est l'album planche par planche (rien, en cours, image validée, textes validés, page verrouillée), ses langues et ses versions, ce qu'il a coûté jusqu'ici, et ce qu'il reste à faire. Utiliser quand la personne dit « où on en est », « /bd-status », « fais le point sur l'album », « combien ça a coûté », ou avant de reprendre le travail après une pause.
 argument-hint: "[projet] (nom d'adresse ou titre ; par défaut le seul projet, ou on demande)"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
@@ -36,25 +36,41 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" planches <projet>
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" costs <projet>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" locales <projet>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" versions <projet>
 ```
 
-Une planche passe par quatre états, et c'est **le plus bas qui compte** : une planche dont l'image est validée mais dont les textes ne sont pas calés reste « en cours de lettrage ».
+Une planche passe par quatre états, et c'est **le plus bas qui compte** : une planche dont l'image est validée mais dont les textes ne sont pas validés reste « en cours de lettrage ».
 
 | Ce que disent les données | Ce que ça veut dire |
 |---|---|
 | aucune image | rien n'a encore été dessiné |
 | des générations, rien de validé | on cherche encore la bonne image |
-| image validée, lettrage non validé | l'image est trouvée, les textes restent à caler |
+| image validée, lettrage non validé | l'image est trouvée, les textes restent à valider |
 | lettrage validé | la planche est finie |
 
-Les blocs `separator` sont les chapitres, pas des planches : compte-les à part.
-La `couverture` et la `quatrieme`, quand l'album en a, sont des pages à part
-elles aussi : dis si elles existent et où elles en sont (mêmes états qu'une
-planche), sans les compter dans les planches.
+Une planche finie peut en plus être **verrouillée** (`lettrageVerrouille`) :
+la personne a posé le cadenas, plus rien n'y bouge. Compte-les : c'est ce qui
+est acquis pour de bon.
+
+Désigne les planches par leur numéro d'atelier (`numero` : « 01 », « 12 »),
+celui que la personne voit à l'écran. Les blocs `separator` sont les
+chapitres, pas des planches : compte-les à part. La `couverture` et la
+`quatrieme`, quand l'album en a, sont des pages à part elles aussi : dis si
+elles existent et où elles en sont (mêmes états qu'une planche), sans les
+compter dans les planches. Une couverture à plat (`aPlat`) porte sa
+quatrième : dis-le, avec la largeur de son dos.
+
+**Les langues** : pour chacune, combien de planches sont traduites, combien
+en retard sur le texte source (une réplique source corrigée depuis), combien
+validées. **Les versions** : la dernière version figée, s'il y en a une, et
+ce qui a bougé depuis.
 
 **Les refus.** Chaque planche porte sa dernière génération
 (`derniereGeneration`) : quand son `status` est `error`, la raison
-(`errorReason`) dit ce qui s'est passé, et la conduite est celle de
+(`errorReason`) dit ce qui s'est passé, `erreur.conduite` ce qu'il faut en
+faire et, pour un refus de sécurité, `erreur.motifs` ce qui a déplu (dis-les :
+« refusée pour violence »). La doctrine est celle de
 `${CLAUDE_SKILL_DIR}/../../templates/refus.md`. Relève-les :
 
 | `errorReason` | Ce que tu dis |
@@ -78,7 +94,7 @@ Donne, dans cet ordre :
 4. **S'il y a des retours de relecteurs non traités**, signale-le : c'est du travail en attente que les chiffres ne montrent pas.
 5. **Les planches refusées ou arrêtées**, avec leur raison en clair et ce qu'il faut faire (voir « Les refus » plus haut). Une planche refusée par le filtre ne se compte pas « à dessiner » comme les autres : elle demande une reformulation, et le dire évite de la relancer telle quelle.
 
-Reste factuel et court. Si l'album est terminé, dis-le franchement et propose la suite (agrandir les images, exporter).
+Reste factuel et court. Si l'album est terminé, dis-le franchement et propose la suite : les numéros de page, figer une version, agrandir les images, sortir le master (`/bd-album` les enchaîne).
 
 ## Règles
 

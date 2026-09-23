@@ -40,9 +40,13 @@ node "$S" planches <projet>
 - **La langue** (`--vers`) est un code court : `en`, `de`, `es`, `pt-br`.
   Sans argument, demande-la.
 - **Les planches** : celles dont le lettrage source est **validé**
-  (`lettrageValidated`). Une planche dont les textes ne sont pas calés ne se
-  traduit pas encore : sa source va bouger, et la traduction serait en retard
-  avant d'exister. Dis combien de planches sont prêtes, combien ne le sont pas.
+  (`lettrageValidated`, « Textes validés » dans l'atelier). Une planche dont
+  les textes ne sont pas validés ne se traduit pas encore : sa source va
+  bouger, et la traduction serait en retard avant d'exister. Dis combien de
+  planches sont prêtes, combien ne le sont pas.
+- **Le cadenas vaut par langue.** Une traduction verrouillée (`verrouille`
+  dans `lettrage <planche> --locale <code>`) refuse toute écriture : on la
+  laisse telle quelle, même en retard, et on le dit.
 - **La langue existe déjà** (`locales` la liste) : dis où elle en est
   (planches traduites, validées, à jour) et ne retraduis que ce qui n'est pas
   à jour, sauf demande contraire. `aJour: false` sur une planche veut dire
@@ -174,7 +178,9 @@ se traduit. Jamais un fichier local.
 - **La géométrie vient de la source, toujours.** Si une bulle doit bouger
   pour que la traduction tienne, c'est la source qui se corrige
   (`/bd-lettrage`), et toutes les langues en profitent.
-- **Pas de traduction d'une source non calée.**
+- **Pas de traduction d'une source non validée.**
+- **Une langue se retire d'un bloc** (`drop-locale <projet> --locale <code>`),
+  la source reste. C'est irréversible : seulement sur demande expresse.
 - **Une traduction en retard n'est pas une erreur, c'est une information** :
   l'atelier la mesure, tu la reprends.
 - **Rien ne se génère.** Si une image doit changer d'une langue à l'autre

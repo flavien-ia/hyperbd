@@ -26,7 +26,7 @@ ses images de référence. C'est ce que cette étape fabrique.
 S="${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs"
 node "$S" docs <projet> --kind bible-graphique
 node "$S" universe <projet>
-node "$S" scenario <projet>
+node "$S" nodes <projet>         # les scènes et leur casting (meta.castingIds)
 node "$S" costs <projet>
 ```
 
@@ -63,8 +63,10 @@ Par variante, **deux images** :
 - **le portrait** (format portrait) : le visage, en gros, dans la lumière de la
   DA. C'est lui qui sert à juger la ressemblance.
 
-Le prompt : **le cadre de la DA** + la fiche d'apparence + ce qui distingue
-cette variante. Toujours dans cet ordre : le style d'abord, le sujet ensuite.
+Le prompt : **le cadre de la DA** + l'apparence (la description du personnage
+dans la bibliothèque, et sa fiche posée sur la Toile par `/bd-personnages`) +
+ce qui distingue cette variante. Toujours dans cet ordre : le style d'abord,
+le sujet ensuite.
 
 **Ne fais jamais porter à la planche de style l'identité d'un personnage.**
 Elle dit à quoi ressemble l'ALBUM, pas à quoi ressemble quelqu'un. Si tu la
@@ -81,10 +83,21 @@ travail usée descendant à mi-cuisse, col montant à patte boutonnée, tissu
 froissé et mat » ne laisse pas le choix. Les deux planches de références de la
 recette ont dérivé exactement là, et rien d'autre.
 
+Écris chaque prompt dans un fichier (le cadre, l'apparence, la variante),
+puis :
+
 ```bash
-node "$S" essai <projet> --kind personnage \
-  --prompt "<cadre>, <apparence>, <variante>" --size paysage --wait
+# la planche de références, en largeur
+node "$S" essai <projet> --kind personnage --label "<variante> : références" \
+  --prompt-file ref-<variante>.txt --size paysage --wait
+# le portrait, en hauteur
+node "$S" essai <projet> --kind personnage --label "<variante> : portrait" \
+  --prompt-file portrait-<variante>.txt --size portrait --wait
 ```
+
+Un essai refusé dit sa `conduite` et, pour un refus de sécurité, ses
+`motifs` : c'est sur le motif nommé que porte la reformulation (voir les
+règles plus bas).
 
 Puis :
 

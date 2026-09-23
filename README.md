@@ -22,20 +22,20 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 | `/start-hyperbd` | prépare tout, une fois : Node.js s'il manque, le jeton, le tour des trois clés en expliquant chacune |
 | `/new-bd` | commence une bande dessinée : crée le projet dans l'atelier et enchaîne sur le brief |
 | `/bd-connect` | relie Claude Code à l'atelier (jeton d'accès, état des clés) |
-| `/bd-status` | fait le point sur un album : avancement, coûts, prochaines planches |
+| `/bd-status` | fait le point sur un album : avancement (jusqu'aux pages verrouillées), langues, versions, coûts, prochaines planches |
 | `/bd-brief` | le point de départ : source, message, format, distance de transposition, devis |
 | `/bd-univers` | la prémisse (par pistes contrastées) et la bible du monde |
-| `/bd-personnages` | le casting comme graphe de forces, fiches et variantes |
+| `/bd-personnages` | le casting comme graphe de forces : les personnages et leurs variantes dans la bibliothèque, leurs fiches et leurs tensions sur la Toile |
 | `/bd-scenario` | chapitres, scènes, mise en scène, rappels, budget, audit et pitch |
 | `/bd-da` | la direction artistique : pistes contrastées générées, jugées, verrouillées |
 | `/bd-design` | personnages, décors et motifs dessinés, puis la planche test |
 | `/bd-voix` | la bible de voix, éprouvée en aveugle : on retire les noms, on attribue, on compte |
 | `/bd-dialogues` | une scène découpée en planches et en cases, dialogues écrits dans les cases |
 | `/bd-planches` | le gros œuvre : les planches produites une par une, regardées, validées |
-| `/bd-lettrage` | le texte posé sur les planches, jugé sur ce qui se voit, validé |
-| `/bd-couverture` | la couverture et la quatrième : concepts d'affiche jugés en vignette, page produite, titre posé dans le lettrage |
+| `/bd-lettrage` | le texte posé sur les planches (né du script une fois, puis corrigé dans le lettrage), les QR codes vers les sources, jugé sur ce qui se voit, validé ; les pages verrouillées ne bougent pas |
+| `/bd-couverture` | la couverture et la quatrième, en pages séparées ou à plat pour un album cartonné : concepts d'affiche jugés en vignette, page produite sur son gabarit, titre et dos posés dans le lettrage |
 | `/bd-traduire` | l'album dans une autre langue : mêmes bulles, textes traduits avec la bible de voix, jugés, rendus, validés ; rien n'est redessiné |
-| `/bd-album` | le pilote : toutes les scènes dans l'ordre (dialogues, planches, lettrage), puis la relecture, la couverture et le point final, sous un budget global, avec trois signatures et la reprise |
+| `/bd-album` | le pilote : toutes les scènes dans l'ordre (dialogues, planches, lettrage), puis la relecture, la couverture et le point final, sous un budget global, avec trois signatures et la reprise ; enfin, sur accord, les numéros de page, une version figée et le master d'impression |
 | `/bd-audit` | l'album passé au crible par lots parallèles, à tout moment |
 | `/tuto-hyperbd` | le mode tuto, en miroir du Guide de l'atelier : où l'on en est du premier album, l'étape courante, le geste des deux côtés |
 | `/update-hyperbd` | met le plugin à jour quand il a été téléversé dans Claude Desktop : vérifie, télécharge, contrôle l'empreinte, remplace |
@@ -49,7 +49,7 @@ produites sous des angles imposés, puis jugées par des relecteurs en aveugle
 (originalité, dramaturgie, cohérence, fidélité au message, incarnation, voix,
 grammaire visuelle) qui ne savent ni qui a écrit ni ce qu'on espérait. Le
 gagnant est greffé de ce que les autres avaient de meilleur ; les écartés vont
-au journal avec leur raison.
+dans la Corbeille de la Toile et au journal, avec leur raison.
 
 **Ce qui peut se mesurer n'est pas confié à un juge.** Un modèle qui s'auto-note
 se trouve toujours bon. La différenciation des voix, par exemple, ne se déclare
@@ -66,7 +66,9 @@ pas des lois : un écart motivé et consigné n'est pas une faute. Les juges
 **Le travail est partagé.** Le scénario vit sur une Toile : un canvas de blocs
 typés que la personne et Claude manipulent ensemble, l'une à la souris, l'autre
 par l'API. Ce que Claude propose arrive en trait interrompu, à adopter ou à
-écarter d'un geste.
+écarter d'un geste. Et ce que l'atelier protège, Claude le respecte : un
+lettrage retouché ne se ré-écrase pas depuis le script, une page verrouillée
+ne bouge plus.
 
 ## Installation
 

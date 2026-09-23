@@ -80,7 +80,13 @@ l'univers (il resservira pour une suite ou un autre medium) ; ce qui appartient
    section à part, marquée comme telle.
 
 Écris la bible au fil de l'eau dans l'atelier (`kind: bible`), pas d'un bloc à
-la fin : ce qui n'est pas écrit se perd.
+la fin : ce qui n'est pas écrit se perd. Elle s'écrit en Markdown, dans un
+fichier : créée une fois, puis réécrite à chaque avancée.
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-doc <projet> --kind bible --title "Bible" --body-file bible.md
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" write-doc <id> --body-file bible.md
+```
 
 ## Étape 3 : la relecture
 

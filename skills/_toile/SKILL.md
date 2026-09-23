@@ -27,10 +27,30 @@ tournis.
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" scenario <projet> --file <lot.json>
 ```
 
-Le lot contient les blocs et leurs liens (les liens désignent les blocs par
-leur rang dans le tableau). Les positions sont facultatives : l'atelier range
-les blocs libres en grille, et une scène n'en a pas besoin (voir plus bas).
-N'essaie pas de calculer une mise en page.
+Le lot contient les blocs et leurs liens :
+
+```json
+{
+  "nodes": [
+    { "type": "note", "title": "Trois pistes de prémisse, angles imposés" },
+    { "type": "note", "title": "Piste A : ...", "body": "..." },
+    { "type": "personnage", "title": "Mira", "refId": "<id de l'entrée>", "body": "<la fiche>" }
+  ],
+  "edges": [{ "from": 0, "to": 1, "type": "libre", "label": "" }]
+}
+```
+
+Les types de bloc : `note`, `scene`, `acte` (un chapitre), `personnage`,
+`decor`, `document`, `question`, `image`. Les liens désignent les blocs par
+leur RANG dans le tableau (leurs identifiants n'existent pas encore) et ne
+relient donc que des blocs du même lot ; leurs types : `libre`, `cause`,
+`rappel`, `tension`. Les positions sont facultatives : l'atelier range les
+blocs libres en grille, et une scène n'en a pas besoin (voir plus bas).
+N'essaie pas de calculer une mise en page. Un lot porte au plus soixante
+blocs.
+
+La même commande, sans `--file`, LIT la Toile (comme `nodes`) : les blocs et
+les liens, sans les corps. Le corps d'un bloc se lit par `node <id>`.
 
 ## Comment la Toile est faite
 
@@ -54,16 +74,44 @@ le bloc, une fois ses scènes créées.
 pas de planche, son champ `dialogue` porte les répliques d'esquisse et
 s'écrit comme les autres champs. Dès qu'elle est découpée, l'atelier n'a plus
 qu'un texte : celui qui est lettré sur ses planches, ce qu'on imprime.
-`GET /nodes/<id>` le rend assemblé, un intertitre `## <titre de planche>` par
-planche, avec `dialogueDesPlanches: true` ; l'écrire par `PATCH` réécrit le
-lettrage de chaque planche, par la même réconciliation que l'éditeur de
-lettrage : une réplique corrigée garde sa bulle et sa place, une réplique
-ajoutée sous un intertitre fait naître sa bulle au bord droit de cette
-planche, une réplique retirée emporte la sienne. Une planche qui gagne une
-bulle perd sa validation : la bulle est au bord, pas encore à sa place, et
-quelqu'un devra la poser dans la vue Lettrage. Garde donc les intertitres
-intacts, et n'ajoute une réplique que si tu sais dans quelle planche elle
-tombe ; le découpage case par case, lui, reste `/bd-dialogues`.
+`node <scène>` le rend assemblé, avec `dialogueDesPlanches: true` et une
+ligne d'intertitre par planche, exactement sous cette forme :
+
+```
+## Planche : <titre de la planche>
+Mira : Je ne suis pas venue pour qu'on en parle.
+Tobias : Alors pose-la.
+
+## Planche : <titre de la planche suivante>
+...
+```
+
+L'écrire (`write-node <scène> --file` avec `{ "dialogue": "..." }`)
+réécrit le lettrage de chaque planche, par la même réconciliation que
+l'éditeur de lettrage : une réplique corrigée garde sa bulle et sa place, une
+réplique ajoutée sous un intertitre fait naître sa bulle au bord droit de
+cette planche, une réplique retirée emporte la sienne. Une planche qui gagne
+une bulle perd sa validation : la bulle est au bord, pas encore à sa place,
+et quelqu'un devra la poser dans la vue Lettrage.
+
+Trois règles en découlent :
+
+- **Garde les intertitres intacts**, un par planche, dans l'ordre : l'atelier
+  refuse un dialogue qui n'a pas autant de lignes « ## Planche : » que la
+  scène a de planches. Tout autre `##` appartient au texte d'une planche
+  (une section d'encarts, par exemple) et lui revient intact.
+- **Une planche verrouillée ne se réécrit pas.** Le cadenas de la vue
+  Lettrage protège une page finie, contre toi aussi : si ton dialogue change
+  le texte d'une planche verrouillée, l'atelier refuse l'écriture entière et
+  n'écrit rien. Laisse ses lignes telles quelles, ou demande à la personne
+  d'ouvrir le cadenas. Ne cherche pas à contourner.
+- **C'est ICI qu'une réplique se corrige une fois la scène découpée**, et
+  plus dans le script des cases : le lettrage est né du script une fois, il
+  fait foi depuis. Re-dériver le lettrage depuis un script corrigé
+  effacerait ce que la personne a retouché ; l'atelier le refuse d'ailleurs
+  (voir `/bd-lettrage`). N'ajoute une réplique que si tu sais dans quelle
+  planche elle tombe ; le découpage case par case, lui, reste
+  `/bd-dialogues`.
 
 **Les images** sont un module : un bloc `image` peut désigner une image du
 laboratoire (`refId`) ou recevoir un fichier :
@@ -84,8 +132,10 @@ et doit deviner.
 
 **Ce que tu poses arrive en `idee`.** C'est le défaut, ne le change pas : une
 proposition est une proposition. L'atelier l'affiche en trait interrompu, avec
-ta marque. La personne l'adopte en la passant à `discute` ou `valide`, ou
-l'écarte.
+ta marque. La personne l'adopte en la passant à `discute` ou `valide` (un
+clic sur le bloc ouvre son panneau, le statut s'y choisit), ou l'écarte : un
+bloc écarté quitte la Toile et attend dans la Corbeille, l'icône du bas du
+rail, avec sa raison.
 
 ## Ce que tu lis avant d'écrire
 

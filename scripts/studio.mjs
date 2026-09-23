@@ -15,8 +15,10 @@
 //   projects                               mes projets
 //   project <id|slug>                      un projet et ce qu'il permet
 //   new-project --title T [--universe ID]  créer un projet de bande dessinée
+//   rename <projet> --title T              changer le titre de travail
 //   universe <projet>                      personnages, décors, styles
-//   planches <projet>                      l'album, dans l'ordre
+//   planches <projet>                      l'album, dans l'ordre (numéros de l'atelier,
+//                                          cadenas, couverture à plat, dernier échec)
 //   planche <id>                           une planche en détail
 //   create-planche <projet> [--title T] [--after ID] [--separator]
 //                  [--kind couverture|quatrieme]  (uniques, place fixe)
@@ -24,10 +26,15 @@
 //   rendu <plancheId> --out f.png          la planche lettrée, en image
 //         [--largeur 1536] [--locale en] [--sans-texte] [--calque]
 //   write <planche> --file <json>          écrit titre / script / casting
+//   a-plat <couverture>                    la couverture devient une couverture à plat
+//                                          (4e + dos + 1re, pour un album cartonné)
+//   dos <couverture> --mm 14               la largeur du dos d'une couverture à plat
 //   generate <planche> [--n 1] [--quality medium] [--mode planche] [--case ID]
 //            [--dialogue-mode overlay|empty-bubbles|model]
 //            (défaut overlay : le texte se compose ensuite, il ne se cuit
 //             jamais dans l'image)
+//            [--model gpt-image-2.5-flare|gpt-image-2.5-sunburst|gpt-image-2]
+//            [--size WxH] (omise : celle de l'atelier, case et couverture comprises)
 //                      [--extra "..."] [--wait]
 //   generation <id>                        où en est une génération
 //   retouch <variante> --consigne "..." [--case ID | --rect x,y,w,h]
@@ -35,22 +42,35 @@
 //   validate <variante> [--case ID]        retenir une variante
 //   upscale <variante> [--scale 2|4]       agrandir (Topaz)
 //   lettrage <planche>                     lire le lettrage
-//   derive-lettrage <planche> [--positional] [--remplacer]
+//   derive-lettrage <planche> [--positional] [--remplacer] [--rederiver]
+//                  (une fois : ensuite le lettrage fait foi, et un lettrage
+//                   retouché depuis ne se re-dérive qu'avec --rederiver)
 //   set-lettrage <planche> [--text-file F] [--file bulles.json] [--locale xx]
 //                          [--valider|--devalider]
+//                  (--text-file seul : les bulles suivent le texte, comme à la frappe)
+//   qr <planche> (--source ID | --url U) [--x 0.5 --y 0.5] [--px 180]
+//                [--style etoiles|ronds] [--info] [--locale xx]
+//                                          poser un QR (et son icône « i »)
+//   folios <projet> [--actif|--off] [--style S] [--position P] [--taille s|m|l]
+//                   [--couleur C] [--police P] [--depart N] [--masquer id,id]
+//                   [--lecture|--sans-lecture]   les numéros de page de l'album
 //   locales <projet>                       les langues, et où elles en sont
 //   add-locale <projet> --locale xx        ouvre une langue : copie la source de chaque planche
 //   drop-locale <projet> --locale xx       retire une langue de tout l'album (la source reste)
 //   repliques <projet> [--scene <id>]      les répliques du script, case par case
 //   shares <projet>                        les liens de lecture
 //   share-locale <lienId> [--locale xx]    la langue qu'un lien sert
+//   versions <projet>                      les versions figées de l'album
+//   new-version <projet> [--label V1] [--note "..." | --note-file F]   figer l'album
+//   share-version <lienId> (--version ID | --en-cours)   ce qu'un lien donne à lire
 //   costs <projet>                         ce que le projet a coûté
 //
 //   -- la Toile (le scénario) --
-//   nodes <projet> [--ecartes]             les blocs et les liens
+//   nodes <projet> [--ecartes]             les blocs et les liens (sans les corps)
 //   node <id>                              un bloc, corps compris
 //   new-node <projet> --file <json>        poser un bloc
 //   scenario <projet> --file <json>        poser un lot de blocs et de liens
+//                                          (sans --file : lit la Toile, comme `nodes`)
 //   write-node <id> --file <json>          écrire un bloc
 //   set-status <id> --status S [--raison R] valider ou écarter
 //   promote <id> [--acte]                  une note devient une scène (un chapitre avec --acte)
@@ -63,7 +83,9 @@
 //   docs <projet> [--kind K]               les textes du projet
 //   doc <id>                               un texte, corps compris
 //   new-doc <projet> --file <json>         en écrire un
+//   new-doc <projet> --kind K --title T --body-file F.md   (le même, depuis un .md)
 //   write-doc <id> --file <json>           le réécrire
+//   write-doc <id> --body-file F.md [--title T]
 //   journal <projet> [--limite N]          les décisions
 //   journal-add <projet> --file <json>     en consigner une
 //   version <projet>                       le numéro du dernier changement
@@ -71,7 +93,10 @@
 //
 //   -- le laboratoire (images sans planche) --
 //   essai <projet> --prompt-file F [--kind K] [--label L] [--n 1]
-//         [--quality low] [--size WxH] [--refs id,id] [--essais id,id] [--wait]
+//         [--quality low] [--size WxH|paysage|portrait|carre]
+//         [--refs id,id] [--essais id,id] [--wait]
+//         (--prompt "..." pour un prompt court ; --prompt-file dès qu'il a
+//          des paragraphes, des guillemets ou des accents)
 //   essais <projet> [--kind K]             ce que le laboratoire a produit
 //   essai-detail <id>                      un essai et ses images
 //   keep <imageId> [--off]                 retenir une image (survit à la purge)
@@ -80,7 +105,8 @@
 //   drop-essai <id>
 //
 //   -- écrire dans la bibliothèque de l'univers --
-//   new-entry <projet> --kind K --name N [--parent id] [--color hex] [--snippet "..."]
+//   new-entry <projet> --kind K --name N [--parent id] [--color hex]
+//             [--snippet "..." | --snippet-file F]
 //   set-entry <projet> <entryId> --file patch.json
 //   drop-entry <projet> <entryId>
 //   entry-image <projet> <entryId> --file image.png    dépose et inscrit
@@ -101,7 +127,7 @@
 //   set-template <projet> --file cadre.txt [--label "DA v2"] [--double-page "..."]
 //
 //   -- les travaux longs (agrandissement, exports) --
-//   upscale-batch <projet> [--model M] [--scale 2|4] [--planches id,id]
+//   upscale-batch <projet> [--model M] [--scale 2|4] [--planches id,id | --pages "1-5, 8"]
 //                 [--force] [--yes] [--wait]   sans --yes : chiffre, ne lance rien
 //   jobs <projet>                          les travaux du projet
 //   job <id>                               où en est un travail
@@ -110,10 +136,12 @@
 //   preflight <projet> [--rognage 210x297] [--locale xx]   le contrôle avant tirage
 //   export <projet> --kind avec-texte|sans-texte|calques|pdf|master
 //          master : [--rognage 210x297] [--fond-perdu 3] [--sans-traits] [--rgb]
-//                   [--sans-pages-de-garde] [--exige-upscale]
-//          [--locale xx] [--planches id,id] [--exige-upscale] [--wait]
+//                   [--sans-pages-de-garde] [--exige-upscale] [--rembord 15]
+//          [--locale xx] [--planches id,id | --pages "1-5, 8, couv, 4e"] [--wait]
 //
-// Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1).
+// Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1). Un échec
+// de génération ou d'essai y ajoute `raison`, `conduite` et, pour un refus de
+// sécurité, ses `motifs` : c'est sur eux qu'une reformulation doit porter.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { homedir } from "node:os";
@@ -135,6 +163,40 @@ function ecrireAcces(acces) {
   mkdirSync(dirname(FICHIER_ACCES), { recursive: true });
   writeFileSync(FICHIER_ACCES, JSON.stringify(acces, null, 2) + "\n", {
     mode: 0o600,
+  });
+}
+
+/**
+ * Une erreur qui en dit plus que son message.
+ *
+ * Un refus de génération n'est pas un échec comme un autre : l'atelier dit sa
+ * raison, la conduite à tenir (reformuler, s'arrêter, attendre) et, pour un
+ * refus de sécurité, les motifs nommés. Les perdre en route laissait l'agent
+ * reformuler à l'aveugle.
+ */
+class ErreurDetaillee extends Error {
+  constructor(message, details) {
+    super(message);
+    this.details = details;
+  }
+}
+
+/** L'échec d'une génération ou d'un essai, tel que l'atelier le décrit. */
+function echec(quoi, cle, id, erreur, messageBrut) {
+  const message = erreur
+    ? `${erreur.titre} : ${erreur.explication}`
+    : (messageBrut ?? `${quoi} a échoué.`);
+  return new ErreurDetaillee(message, {
+    [cle]: id,
+    ...(erreur
+      ? {
+          raison: erreur.raison,
+          conduite: erreur.conduite,
+          ...(erreur.motifs?.length ? { motifs: erreur.motifs } : {}),
+          ...(erreur.reference ? { reference: erreur.reference } : {}),
+        }
+      : {}),
+    ...(messageBrut && erreur ? { brut: messageBrut } : {}),
   });
 }
 
@@ -201,7 +263,7 @@ async function attendre(generationId, { intervalleMs = 8000, maxMs = 900000 } = 
     const { generation, outputs } = await appel(`/generations/${generationId}`);
     if (generation.status === "done") return { generation, outputs };
     if (generation.status === "error") {
-      throw new Error(generation.errorMessage ?? "La génération a échoué.");
+      throw echec("La génération", "generationId", generationId, generation.erreur, generation.errorMessage);
     }
     if (Date.now() - debut > maxMs) {
       throw new Error(
@@ -220,7 +282,7 @@ async function attendreEssai(essaiId, { intervalleMs = 8000, maxMs = 900000 } = 
     const { essai, images } = await appel(`/essais/${essaiId}`);
     if (essai.status === "done") return { essai, images };
     if (essai.status === "error") {
-      throw new Error(essai.errorMessage ?? "L'essai a échoué.");
+      throw echec("L'essai", "essaiId", essaiId, essai.erreur, essai.errorMessage);
     }
     if (Date.now() - debut > maxMs) {
       throw new Error(
@@ -232,6 +294,23 @@ async function attendreEssai(essaiId, { intervalleMs = 8000, maxMs = 900000 } = 
 }
 
 const [, , commande, ...reste] = process.argv;
+
+/**
+ * Un fichier texte, en fins de ligne Unix. Écrit sous Windows, il arrive en
+ * CRLF : un lettrage, un prompt ou une bible n'ont que faire de ces retours
+ * chariot, qui fausseraient toute comparaison de texte côté atelier.
+ */
+function lireTexte(chemin) {
+  return readFileSync(chemin, "utf8").replace(/\r\n?/g, "\n");
+}
+
+/** Un texte depuis un fichier, ou depuis l'option elle-même. */
+function texteDe(option, optionFichier) {
+  if (typeof o[optionFichier] === "string") return lireTexte(o[optionFichier]);
+  if (typeof o[option] === "string") return o[option];
+  return undefined;
+}
+
 const o = opts(reste);
 const positionnels = reste.filter((a) => !a.startsWith("--"));
 const arg = (i) => {
@@ -314,6 +393,12 @@ const commandes = {
   },
   projects: () => appel("/projects"),
   project: () => appel(`/projects/${arg(0)}`),
+
+  /** Le titre de travail change ; l'adresse (le slug) reste. */
+  rename() {
+    if (typeof o.title !== "string" || !o.title.trim()) throw new Error("Il faut --title <nouveau titre>.");
+    return appel(`/projects/${arg(0)}`, { method: "PATCH", body: { title: o.title.trim() } });
+  },
 
   /** Un projet neuf. Sans --universe, l'atelier lui ouvre un univers à lui. */
   "new-project"() {
@@ -469,6 +554,32 @@ const commandes = {
     });
   },
 
+  /**
+   * La couverture devient une couverture à plat : la quatrième, le dos et la
+   * première d'un seul tenant, pour un album cartonné. L'atelier recale tout
+   * d'un bloc (cases, images, lettrage). Refusé si l'album a une quatrième à
+   * part : la couverture à plat la porte.
+   */
+  "a-plat": () => appel(`/planches/${arg(0)}/a-plat`, { method: "POST", body: {} }),
+
+  /**
+   * La largeur du dos d'une couverture à plat, en millimètres (3 à 80, au
+   * demi-millimètre). Le gabarit, le lettrage et les retours suivent.
+   */
+  async dos() {
+    const mm = Number(o.mm);
+    if (!Number.isFinite(mm)) throw new Error("Il faut --mm <largeur du dos en millimètres>.");
+    const { planche } = await appel(`/planches/${arg(0)}`);
+    const modules = planche?.scriptModules;
+    if (!modules?.aPlat) {
+      throw new Error("Cette planche n'est pas une couverture à plat : `a-plat` d'abord.");
+    }
+    return appel(`/planches/${arg(0)}`, {
+      method: "PATCH",
+      body: { scriptModules: { ...modules, aPlat: { dosMm: mm } } },
+    });
+  },
+
   async generate() {
     const lancement = await appel(`/planches/${arg(0)}/generations`, {
       method: "POST",
@@ -494,6 +605,8 @@ const commandes = {
           typeof o["dialogue-mode"] === "string" ? o["dialogue-mode"] : "overlay",
         ...(typeof o.case === "string" ? { caseId: o.case } : {}),
         ...(typeof o.extra === "string" ? { extraPrompt: o.extra } : {}),
+        ...(typeof o.model === "string" ? { model: o.model } : {}),
+        ...(typeof o.size === "string" ? { size: o.size } : {}),
         ...(typeof o.base === "string"
           ? { baseOutputIds: o.base.split(",") }
           : {}),
@@ -548,14 +661,71 @@ const commandes = {
       body: { scale: o.scale ? Number(o.scale) : 2 },
     }),
 
+  /**
+   * Le lettrage naît du script, UNE fois. Ensuite, c'est lui qui fait foi :
+   * une réplique se corrige dans le lettrage (le dialogue de la scène sur la
+   * Toile, ou `set-lettrage --text-file`). L'atelier refuse de re-dériver un
+   * lettrage retouché depuis, sauf `--rederiver` (les corrections sont alors
+   * perdues, les bulles gardent leur place).
+   */
   "derive-lettrage": () =>
     appel(`/planches/${arg(0)}/lettrage/derive`, {
       method: "POST",
       body: {
         match: o.positional ? "positional" : "similarity",
         remplacer: Boolean(o.remplacer),
+        rederiver: Boolean(o.rederiver),
       },
     }),
+
+  /**
+   * Pose un QR code sur une planche, comme le bouton de l'atelier : vers la
+   * fiche d'une source (adresse absolue de la page publique) ou vers une
+   * adresse donnée, au côté retenu par le projet, et, avec --info, l'icône
+   * « i » à côté. Une page verrouillée refuse.
+   */
+  qr() {
+    if (typeof o.source !== "string" && typeof o.url !== "string") {
+      throw new Error("Il faut --source <id d'une source> ou --url <adresse>.");
+    }
+    return appel(`/planches/${arg(0)}/lettrage/qr`, {
+      method: "POST",
+      body: {
+        ...(typeof o.source === "string" ? { sourceId: o.source } : {}),
+        ...(typeof o.url === "string" ? { url: o.url } : {}),
+        ...(o.x !== undefined ? { x: Number(o.x) } : {}),
+        ...(o.y !== undefined ? { y: Number(o.y) } : {}),
+        ...(o.px !== undefined ? { px: Number(o.px) } : {}),
+        ...(typeof o.style === "string" ? { style: o.style } : {}),
+        ...(o.info ? { info: true } : {}),
+        ...(typeof o.locale === "string" ? { locale: o.locale } : {}),
+      },
+    });
+  },
+
+  /**
+   * Les numéros de page de l'album : un réglage d'album, calculé à chaque
+   * rendu d'après la place des planches. Sans option : les lire.
+   */
+  folios() {
+    const changements = {
+      ...(o.actif ? { actif: true } : {}),
+      ...(o.off ? { actif: false } : {}),
+      ...(typeof o.style === "string" ? { style: o.style } : {}),
+      ...(typeof o.position === "string" ? { position: o.position } : {}),
+      ...(typeof o.taille === "string" ? { taille: o.taille } : {}),
+      ...(typeof o.couleur === "string" ? { couleur: o.couleur } : {}),
+      ...(typeof o.police === "string" ? { police: o.police } : {}),
+      ...(o.depart !== undefined ? { depart: Number(o.depart) } : {}),
+      ...(typeof o.masquer === "string"
+        ? { masquees: o.masquer.split(",").filter(Boolean) }
+        : {}),
+      ...(o.lecture ? { enLecture: true } : {}),
+      ...(o["sans-lecture"] ? { enLecture: false } : {}),
+    };
+    if (Object.keys(changements).length === 0) return appel(`/projects/${arg(0)}/folios`);
+    return appel(`/projects/${arg(0)}/folios`, { method: "PUT", body: changements });
+  },
 
   // ── La Toile ────────────────────────────────────────────────────────────
 
@@ -580,7 +750,11 @@ const commandes = {
    * prend son rang dans le récit, sa hauteur vient de la lentille).
    */
   scenario() {
-    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    // Sans lot, c'est une lecture : la Toile telle qu'elle est, comme
+    // `nodes`. Poser exige un fichier.
+    if (!o.file) {
+      return appel(`/projects/${arg(0)}/nodes${o.ecartes ? "?ecartes=1" : ""}`);
+    }
     return appel(`/projects/${arg(0)}/scenario`, {
       method: "POST",
       body: JSON.parse(readFileSync(o.file, "utf8")),
@@ -673,19 +847,49 @@ const commandes = {
     ),
   doc: () => appel(`/docs/${arg(0)}`),
 
+  /**
+   * Un texte du projet. Soit un JSON complet (`--file`), soit un Markdown
+   * (`--body-file`) avec son genre et son titre en options : une bible
+   * s'écrit en Markdown, pas en JSON échappé.
+   */
   "new-doc"() {
-    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    if (o.file) {
+      return appel(`/projects/${arg(0)}/docs`, {
+        method: "POST",
+        body: JSON.parse(readFileSync(o.file, "utf8")),
+      });
+    }
+    if (typeof o["body-file"] !== "string" || typeof o.kind !== "string") {
+      throw new Error("Il faut --file <JSON>, ou --kind <genre> --body-file <texte.md> [--title T].");
+    }
     return appel(`/projects/${arg(0)}/docs`, {
       method: "POST",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: {
+        kind: o.kind,
+        title: typeof o.title === "string" ? o.title : "",
+        body: lireTexte(o["body-file"]),
+      },
     });
   },
 
   "write-doc"() {
-    if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
+    if (o.file) {
+      return appel(`/docs/${arg(0)}`, {
+        method: "PATCH",
+        body: JSON.parse(readFileSync(o.file, "utf8")),
+      });
+    }
+    if (typeof o["body-file"] !== "string" && typeof o.title !== "string") {
+      throw new Error("Il faut --file <JSON>, ou --body-file <texte.md> et/ou --title T.");
+    }
     return appel(`/docs/${arg(0)}`, {
       method: "PATCH",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: {
+        ...(typeof o["body-file"] === "string"
+          ? { body: lireTexte(o["body-file"]) }
+          : {}),
+        ...(typeof o.title === "string" ? { title: o.title } : {}),
+      },
     });
   },
 
@@ -716,15 +920,16 @@ const commandes = {
    * commande abîme.
    */
   async essai() {
-    if (!o["prompt-file"]) {
-      throw new Error("Il faut --prompt-file <chemin d'un texte>.");
+    const prompt = texteDe("prompt", "prompt-file");
+    if (!prompt?.trim()) {
+      throw new Error(`Il faut --prompt-file <chemin d'un texte> (ou --prompt "..." pour un prompt court).`);
     }
     const lancement = await appel(`/projects/${arg(0)}/essais`, {
       method: "POST",
       body: {
         kind: typeof o.kind === "string" ? o.kind : "libre",
         label: typeof o.label === "string" ? o.label : "",
-        prompt: readFileSync(o["prompt-file"], "utf8"),
+        prompt,
         n: o.n ? Number(o.n) : 1,
         quality: typeof o.quality === "string" ? o.quality : "low",
         ...(typeof o.size === "string" ? { size: o.size } : {}),
@@ -771,7 +976,9 @@ const commandes = {
       body: {
         kind: typeof o.kind === "string" ? o.kind : "character",
         name: o.name,
-        ...(typeof o.snippet === "string" ? { promptSnippet: o.snippet } : {}),
+        ...(texteDe("snippet", "snippet-file") !== undefined
+          ? { promptSnippet: texteDe("snippet", "snippet-file") }
+          : {}),
         ...(typeof o.parent === "string" ? { parentId: o.parent } : {}),
         ...(typeof o.color === "string" ? { bubbleColor: o.color } : {}),
       },
@@ -838,7 +1045,7 @@ const commandes = {
       method: "PUT",
       body: {
         ...(o["text-file"]
-          ? { text: readFileSync(o["text-file"], "utf8") }
+          ? { text: lireTexte(o["text-file"]) }
           : {}),
         ...(o.file ? JSON.parse(readFileSync(o.file, "utf8")) : {}),
         ...(typeof o.locale === "string" ? { locale: o.locale } : {}),
@@ -856,6 +1063,35 @@ const commandes = {
       method: "PUT",
       body: { locale: typeof o.locale === "string" ? o.locale : null },
     }),
+
+  /** Les versions figées de l'album : V1, V2... chacune immuable. */
+  versions: () => appel(`/projects/${arg(0)}/versions`),
+
+  /**
+   * Fige l'album tel qu'il est : ses images validées et son lettrage, pour
+   * toujours. Une coquille à corriger, c'est une version de plus.
+   */
+  "new-version"() {
+    const note = texteDe("note", "note-file");
+    return appel(`/projects/${arg(0)}/versions`, {
+      method: "POST",
+      body: {
+        ...(typeof o.label === "string" ? { label: o.label } : {}),
+        ...(note !== undefined ? { note } : {}),
+      },
+    });
+  },
+
+  /** Ce qu'un lien donne à lire : une version figée, ou l'état en cours. */
+  "share-version"() {
+    if (typeof o.version !== "string" && !o["en-cours"]) {
+      throw new Error("Il faut --version <id d'une version> ou --en-cours.");
+    }
+    return appel(`/shares/${arg(0)}/version`, {
+      method: "PUT",
+      body: { versionId: typeof o.version === "string" ? o.version : null },
+    });
+  },
 
   // ── Les sources : ce à quoi les affirmations de l'album renvoient ───────
 
@@ -931,6 +1167,7 @@ const commandes = {
         ...(typeof o.planches === "string"
           ? { plancheIds: o.planches.split(",") }
           : {}),
+        ...(typeof o.pages === "string" ? { pages: o.pages } : {}),
       },
       confirmer: Boolean(o.yes),
     };
@@ -980,6 +1217,8 @@ const commandes = {
           ...(typeof o.planches === "string"
             ? { plancheIds: o.planches.split(",") }
             : {}),
+          // Les pages écrites comme à l'impression : « 1-5, 8, couv, 4e ».
+          ...(typeof o.pages === "string" ? { pages: o.pages } : {}),
           // Les réglages d'imprimeur du master ; les défauts sont ceux de
           // l'atelier (A4, 3 mm, traits, CMYK, pages de garde).
           ...(kind === "export-master" && typeof o.rognage === "string"
@@ -995,6 +1234,11 @@ const commandes = {
           ...(kind === "export-master" && o.rgb ? { cmyk: false } : {}),
           ...(kind === "export-master" && o["sans-pages-de-garde"]
             ? { pagesDeGarde: false }
+            : {}),
+          // Le rembord d'une couverture à plat (15 mm par défaut) : ce qui
+          // se replie sur le carton.
+          ...(kind === "export-master" && o.rembord !== undefined
+            ? { rembordMm: Number(o.rembord) }
             : {}),
           ...(o["exige-upscale"] ? { exigeUpscale: true } : {}),
         },
@@ -1026,7 +1270,9 @@ Promise.resolve()
     console.log(JSON.stringify(r, null, 2));
   })
   .catch((e) => {
-    console.log(JSON.stringify({ erreur: e.message }, null, 2));
+    console.log(
+      JSON.stringify({ erreur: e.message, ...(e.details ?? {}) }, null, 2),
+    );
     // `exitCode` et non `exit()` : couper le processus pendant qu'une requête
     // se referme fait planter libuv sous Windows, et le code de sortie devient
     // 127 au lieu de 1, et un appelant qui teste l'échec s'y trompe.

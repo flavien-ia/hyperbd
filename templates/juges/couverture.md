@@ -19,7 +19,15 @@ Tu reçois :
   promet ;
 - **le type** : `concept` (un essai, en petit, à comparer à d'autres), `page`
   (la couverture produite en taille finale, sans texte), ou `lettree` (la
-  page avec son titre et ses mentions posés).
+  page avec son titre et ses mentions posés) ;
+- **la forme** : une page seule, ou une **couverture à plat** (une seule
+  image en largeur : la quatrième à gauche, le dos au milieu, la première à
+  droite), avec la largeur du dos en fraction de l'image.
+
+**Couverture à plat** : la vignette, c'est la PREMIÈRE, la partie droite.
+C'est elle que tu juges en petit pour `accroche`, `promesse` et le titre ; la
+quatrième et le dos se jugent en plus, dans `place_du_titre` et
+`fabrication`.
 
 ## La règle qui commande tout ici : la vignette
 
@@ -66,8 +74,13 @@ police de l'album. L'image doit lui laisser sa place.
 - Reste-t-il, en bas, de la place pour le nom de l'auteur et une mention ?
 - Pour une **quatrième** : la moitié inférieure est-elle assez calme pour un
   texte de présentation de cinq lignes ?
+- Pour une **couverture à plat** : la quatrième (à gauche) est-elle plus
+  sobre, avec une large zone calme pour son texte ? Le dos est-il simple, sans
+  visage ni élément essentiel, assez uni pour recevoir un titre à la
+  verticale ?
 - Type `lettree` : le titre est-il posé là, lisible en vignette, et ne
-  couvre-t-il rien qui compte ?
+  couvre-t-il rien qui compte ? À plat : le titre du dos tient-il dans le dos,
+  et rien ne passe-t-il à cheval sur un pli ?
 
 ### `fidelite`
 
@@ -86,7 +99,11 @@ police de l'album. L'image doit lui laisser sa place.
   peut le recouvrir proprement.
 - L'anatomie, les mains, les regards.
 - Les artefacts, les bordures, les cadres de cases (une couverture n'en a
-  pas).
+  pas, sauf les cases que son gabarit prévoit : un médaillon, une vignette
+  insérée, qu'on t'aura annoncés).
+- À plat : l'image court-elle d'un bord à l'autre sans rupture au passage du
+  dos ? Une couture visible au pli, deux images accolées au lieu d'une seule,
+  se voient sur la couverture imprimée.
 
 ## Le garde-fou
 

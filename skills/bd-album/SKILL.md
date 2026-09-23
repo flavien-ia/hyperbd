@@ -1,6 +1,6 @@
 ---
 name: bd-album
-description: Le pilote de l'album : enchaîne, scène après scène et dans l'ordre du récit, le découpage et les dialogues, la production des planches, le lettrage, puis la couverture et la quatrième, la relecture de l'album entier et le point final, sous un budget global. Trois signatures humaines par défaut (le plan de production, la première scène produite, l'album relu), reprise possible à tout moment depuis l'état de l'atelier. Utiliser après la planche test, quand la personne dit « produis l'album », « /bd-album », « enchaîne tout », « fais toute la BD ».
+description: Le pilote de l'album : enchaîne, scène après scène et dans l'ordre du récit, le découpage et les dialogues, la production des planches, le lettrage, puis la couverture et la quatrième, la relecture de l'album entier et le point final, sous un budget global ; puis, sur accord, les numéros de page, une version figée, le contrôle avant tirage, l'agrandissement et le master d'impression. Trois signatures humaines par défaut (le plan de production, la première scène produite, l'album relu), reprise possible à tout moment depuis l'état de l'atelier. Utiliser après la planche test, quand la personne dit « produis l'album », « /bd-album », « enchaîne tout », « fais toute la BD ».
 argument-hint: "[projet] --budget <dollars> [--auto] [--full-auto] [--depuis <scène>] [--sans-couverture]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et une clé d'images configurée dans l'atelier."
 ---
@@ -116,7 +116,8 @@ l'on choisit ce que l'image montrera et ce qu'elle laissera deviner.
 
 Charge la skill `bd-planches` pour cette scène (`--scene`), avec **le budget
 restant de l'album** comme plafond de la scène, en `--auto` quand on est en
-auto. Elle produit, fait regarder, itère, valide, dérive le lettrage.
+auto. Elle produit, fait regarder, itère, valide, et fait naître le lettrage
+(une fois : ensuite, c'est lui qui fait foi).
 
 Quand elle rend la main, relis `planches` : chaque planche de la scène a-t-
 elle une image validée ? Sinon, pourquoi (`derniereGeneration`) :
@@ -166,9 +167,10 @@ Toutes les scènes faites, avant la couverture :
    entre le chapitre 1 et le chapitre 4 ? La palette a-t-elle glissé ? Un
    album se produit planche par planche, et c'est le seul moment où quelqu'un
    le voit d'un bloc.
-3. **Le rapport** : les corrections de l'audit (propagées par l'atelier), les
-   planches que le regard d'ensemble désigne à reprendre, les planches restées
-   sans image (« à faire autrement »), le coût réel.
+3. **Le rapport** : les corrections de l'audit (faites dans le lettrage, ou
+   laissées en liste pour les pages verrouillées), les planches que le regard
+   d'ensemble désigne à reprendre, les planches restées sans image (« à faire
+   autrement »), le coût réel.
 
 Guidé et `--auto` : montre le rapport et **attends la signature** ; la
 personne peut demander la reprise de telle planche (`/bd-planches
@@ -179,9 +181,10 @@ et continue.
 ## Étape 4 : la couverture et la quatrième
 
 Sauf `--sans-couverture` : charge `bd-couverture`, en `--auto` avec le budget
-restant quand on est en auto. Elle fait le concept, la page, le titre et la
-quatrième. L'album a désormais une première et une dernière page ; les
-exports les prennent d'eux-mêmes.
+restant quand on est en auto. Elle fait le concept, la page (ou la couverture
+à plat, si l'album est cartonné), le titre, le dos et la quatrième. L'album a
+désormais une première et une dernière page ; les exports les prennent
+d'eux-mêmes.
 
 ## Étape 5 : le point final
 
@@ -199,8 +202,63 @@ Le bilan, sans arrondir en ta faveur :
 - ce que la relecture a fait bouger ;
 - ce qui reste fragile pour l'impression (un visage, une palette).
 
-Une dernière entrée de journal, puis annonce la suite : figer une version
-(dans l'atelier), l'envoyer en relecture, agrandir les images, exporter.
+Une dernière entrée de journal.
+
+## Étape 6 : vers le lecteur et l'imprimeur
+
+Ce qui reste à faire entre un album produit et un album imprimé. En guidé et
+en `--auto`, propose chaque geste et fais-le sur accord ; en `--full-auto`,
+fais les deux premiers et chiffre les autres, sans rien dépenser de plus.
+
+1. **Les numéros de page.** Un réglage d'album, pas un travail de lettrage :
+   l'atelier les calcule d'après la place de chaque planche. Beaucoup
+   d'albums n'en impriment pas ; c'est un choix d'édition, que la bible
+   graphique ou la personne tranche. Si oui : les activer dans le style de la
+   bible, et masquer les pages qui n'en portent pas (pleine page, ouverture
+   de chapitre), puis regarder deux rendus. En `--full-auto`, ne les active
+   que si la bible graphique le dit.
+
+```bash
+node "$S" folios <projet> --actif --style chiffre --position bas-exterieur
+node "$S" folios <projet> --masquer <plancheId>,<plancheId>
+```
+
+2. **Figer une version.** La V1 ne bougera plus : c'est elle qu'on envoie en
+   relecture, pendant que l'album continue à vivre. Si un lien de lecture
+   existe, fais-le viser cette version.
+
+```bash
+node "$S" new-version <projet> --label V1 --note "Album produit, relu, avant tirage"
+node "$S" shares <projet>
+node "$S" share-version <lienId> --version <id de la version>
+```
+
+3. **Le contrôle avant tirage** : ce que le master contiendra, page par page,
+   et ce qui manque (image, textes validés, agrandissement, résolution au
+   format). Gratuit.
+
+```bash
+node "$S" preflight <projet>
+```
+
+4. **L'agrandissement** (crédits Topaz, hors du budget d'images) : chiffre
+   d'abord, lance ensuite, sur accord explicite.
+
+```bash
+node "$S" upscale-batch <projet>          # chiffre, ne lance rien
+node "$S" upscale-batch <projet> --yes --wait
+```
+
+5. **Le master d'impression**, quand le contrôle est vert : A4 à 3 mm de fond
+   perdu, traits de coupe, CMYK et pages de garde par défaut. Une couverture
+   à plat sort dans son propre fichier, avec un rembord de 15 mm par défaut
+   (`--rembord`, à la demande de l'imprimeur) ; le tout arrive dans un zip.
+   Une partie seulement se tire par ses pages, comme à l'impression.
+
+```bash
+node "$S" export <projet> --kind master --wait
+node "$S" export <projet> --kind master --pages "couv, 1-8" --wait
+```
 
 Termine par `🎉 ALBUM PRODUIT (n planches, x $)`. Si l'album n'est pas
 complet (budget atteint, arrêt pour crédit, planches à faire autrement), ne

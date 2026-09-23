@@ -42,8 +42,8 @@ refuse jamais : le tuto conseille, il ne verrouille pas.
 après elle :
 
 1. **où aller** dans l'atelier (le lien de l'étape, `parcours` le donne :
-   la Toile, les Coulisses, la bibliothèque Personnages, le Laboratoire,
-   Planches) ;
+   la Toile et, sur son rail à gauche, la Corbeille où attendent les
+   écartés ; la bibliothèque Personnages ; Planches) ;
 2. **quoi regarder** (le texte `claude` de l'étape, dit avec tes mots) ;
 3. **puis quoi taper** (la commande de l'étape suivante).
 

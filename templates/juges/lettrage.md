@@ -2,7 +2,7 @@
 
 > Lis d'abord `_commun.md` (même dossier), **sauf sa ligne de verdict** : la
 > tienne est différente, elle est définie plus bas.
-> Références à lire : le script de la planche (pour connaître l'ordre voulu des
+> Références à lire : le texte du lettrage (pour connaître l'ordre voulu des
 > répliques) et la bible graphique (pour la place réservée au lettrage).
 
 Ta question : **est-ce que ça se lit ?**
@@ -19,10 +19,12 @@ est posé, et rien d'autre.
 1. **Les images de la planche lettrée**, déjà découpées pour toi : la planche
    entière pour l'ensemble et l'ordre de lecture, puis une vue par bande à
    résolution native pour le détail. Regarde-les, dans cet ordre.
-2. **Le script**, qui donne l'ordre voulu des répliques.
-3. **La liste NUMÉROTÉE des bulles** avec leur géométrie : centre `x`/`y`,
-   largeur `w`, taille de police, pointe de queue. Tout est normalisé à
-   l'image (0 à 1), l'origine en haut à gauche.
+2. **Le texte du lettrage**, qui donne l'ordre voulu des répliques.
+3. **La liste NUMÉROTÉE des éléments** (bulles, encarts, QR, icône « i ») avec
+   leur géométrie : centre `x`/`y`, largeur `w`, taille de police, pointe de
+   queue. Tout est normalisé à l'image (0 à 1), l'origine en haut à gauche.
+4. **La largeur d'impression** de la planche : c'est elle qui dit si le texte
+   se lira sur le papier.
 
 Ces numéros sont ton vocabulaire : tes remarques doivent les citer, sinon
 personne ne saura quelle bulle bouger.
@@ -64,7 +66,7 @@ Fais-le dans cet ordre, et montre ton travail :
    bande de gauche à droite, puis on descend. Deux bulles de la même bande se
    lisent gauche puis droite ; deux bulles de la même case se lisent haut puis
    bas.
-2. Compare-le à l'ordre du **script**.
+2. Compare-le à l'ordre du **texte du lettrage**.
 3. **Toute inversion est un défaut**, même minime : le lecteur ne se trompe pas
    une fois, il perd le fil de l'échange.
 
@@ -123,9 +125,17 @@ côté.
   Un imprimeur rogne, et il ne prévient pas.
 - **La reliure** : en double page, le pli central mange plusieurs millimètres.
   Aucune bulle ne se pose à cheval sur le pli.
-- **Les codes QR**, s'il y en a : ils doivent être entiers, à plat, dans une
-  zone calme, et assez grands pour se lire (un QR sous 1,5 cm au tirage ne se
-  scanne pas).
+- **Les codes QR**, s'il y en a : entiers, à plat, dans une zone calme
+  (jamais sur un visage ni à cheval sur un bord de case), et assez grands pour
+  se lire. L'atelier les pose à environ 3,7 cm de côté sur une page A4 ; sous
+  2,5 cm au tirage, un téléphone les accroche mal. Calcule le côté imprimé
+  (largeur `w` fois la largeur d'impression) et dis le chiffre.
+- **L'icône « i »**, s'il y en a une : elle dit à quelle réplique le QR se
+  rapporte. Elle doit être contre cette bulle, sans ambiguïté possible avec
+  une autre, et ne rien couvrir d'important.
+- **Les numéros de page** (folios), si l'album en a : ils sont dans le rendu,
+  en bas côté extérieur par défaut. Aucune bulle ne les couvre ni ne les
+  touche.
 
 ## Ton format de sortie
 
@@ -165,7 +175,8 @@ applique voit la planche, il saura où c'est.)
   cas le plus fréquent, et il exige des deltas.
 - **REFAIRE** : le texte lui-même est en cause (une réplique trop longue pour
   toute case disponible, un locuteur absent de la case où il parle). Ce n'est
-  plus un problème de placement, cela remonte au script.
+  plus un problème de placement : la réplique se raccourcit dans le lettrage,
+  ou l'image se reprend. Dis lequel des deux.
 
 ## Ce que tu ne fais pas
 

@@ -55,8 +55,12 @@ toi-même et justifie chaque réponse au journal.
 
 1. **À qui on parle.** Âge, familiarité avec le sujet, ce qu'ils en pensent
    déjà. Un lecteur convaincu et un lecteur hostile ne se racontent pas pareil.
-2. **Où ça se lit.** Album imprimé, PDF diffusé, planches sur les réseaux,
-   support d'exposition. Le canal décide du format autant que le budget.
+2. **Où ça se lit, et dans quelles langues.** Album imprimé, PDF diffusé,
+   planches sur les réseaux, support d'exposition : le canal décide du format
+   autant que le budget. Une traduction prévue se dit maintenant : l'album
+   se lettre une fois par langue, et une langue plus longue que la source
+   (l'allemand après le français) demande des bulles moins pleines dès le
+   découpage.
 3. **Le format**, avec son coût :
 
    | Format | Planches | Pour quoi | Ordre de grandeur |
@@ -71,6 +75,13 @@ toi-même et justifie chaque réponse au journal.
    aboutie en demande une trentaine (on cherche, on écarte, on recommence).
    Annonce une fourchette, jamais un chiffre unique, et rappelle que le
    stockage et l'agrandissement final sont aussi à sa charge.
+
+   **S'il s'imprime**, deux précisions, qui décident de la couverture et du
+   fichier d'imprimeur : la **taille de page** (A4 par défaut dans l'atelier ;
+   un autre format se règle au moment du master), et la **reliure**, broché
+   (couverture souple) ou cartonné (couverture rigide, qui se fabrique à plat :
+   quatrième, dos et première d'un seul tenant). Rien d'arrêté ? Note-le :
+   on tranchera à la couverture, pas avant.
 4. **Le ton** : gravité, humour, lyrisme, sécheresse documentaire. Et ce qu'on
    ne veut surtout pas.
 
@@ -90,6 +101,16 @@ Toile comme propositions, et laisse arbitrer.
 Recommande, argumente en une phrase, mais ne tranche pas à la place de la
 personne en mode guidé. En `--auto`, tranche et consigne pourquoi.
 
+Une fois le choix fait, **la Toile le dit** : la distance retenue passe en
+`valide`, les trois autres en `ecarte`, chacune avec sa raison. Elles quittent
+la Toile pour la Corbeille du rail, où la personne les retrouve avec ce qui
+les a écartées.
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <bloc retenu> --status valide
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <bloc> --status ecarte --raison "<pourquoi pas celle-ci, pour ce sujet>"
+```
+
 ## Étape 4 : créer le projet
 
 ```bash
@@ -97,18 +118,25 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects
 ```
 
 Si tu viens de `/new-bd`, le projet existe déjà : c'est lui. Sinon, crée-le
-maintenant (un titre de travail suffit, il se change ensuite dans l'atelier) :
+(un titre de travail suffit, il se change ensuite, dans l'atelier ou par
+`rename`), et fais-le **avant** de poser les distances de l'étape 3 : sans
+projet, pas de Toile.
 
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-project --title "<titre de travail>"
 ```
 
-Puis écris deux documents dans l'atelier :
+Puis écris deux documents dans l'atelier, chacun depuis un fichier Markdown :
 
 - le **brief** (`kind: brief`) : ce qui a été décidé aux étapes 1 à 3, en clair,
-  y compris la distance retenue et le devis annoncé ;
+  y compris la distance retenue, le devis annoncé, et, s'il s'imprime, la
+  taille de page, la reliure et les langues prévues ;
 - l'**architecture du message** (`kind: architecture-message`), si le projet a
   une source.
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-doc <projet> --kind brief --title "Brief" --body-file brief.md
+```
 
 Pose ensuite sur la Toile les premières **questions ouvertes** : ce qui reste à
 trancher et qu'on ne veut pas oublier. Consigne la décision de distance au

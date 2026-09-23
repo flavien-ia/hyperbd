@@ -1,6 +1,6 @@
 ---
 name: bd-couverture
-description: Fait la couverture et la quatrième de couverture de l'album. Compose trois concepts d'affiche contrastés, les fait générer en petit dans le laboratoire, les fait juger à taille de vignette (accroche, promesse, place du titre), produit le concept retenu en page simple portrait, la fait regarder contre les fiches, pose le titre et les mentions dans le lettrage (jamais dans l'image), puis fait de même pour la quatrième. Utiliser quand l'album a sa direction artistique et ses personnages dessinés, quand la personne dit « la couverture », « /bd-couverture », « la quatrième », « l'affiche de l'album ».
+description: Fait la couverture et la quatrième de couverture de l'album, en pages séparées ou en couverture à plat (quatrième, dos et première d'un seul tenant) pour un album cartonné. Compose trois concepts d'affiche contrastés, les fait générer en petit dans le laboratoire, les fait juger à taille de vignette (accroche, promesse, place du titre), produit le concept retenu sur le gabarit de la couverture, la fait regarder contre les fiches, pose le titre, le dos et les mentions dans le lettrage (jamais dans l'image), puis fait de même pour la quatrième. Utiliser quand l'album a sa direction artistique et ses personnages dessinés, quand la personne dit « la couverture », « /bd-couverture », « la quatrième », « l'affiche de l'album ».
 argument-hint: "[projet] [--quatrieme-seule] [--budget 3] [--auto]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et une clé d'images configurée dans l'atelier."
 ---
@@ -20,10 +20,24 @@ donner envie d'ouvrir. Elle se juge donc en petit, et son titre ne se dessine
 jamais dans l'image : il se pose ensuite, dans la police de l'album, là où
 l'image lui a laissé la place.
 
-Dans l'atelier, la couverture et la quatrième sont deux pages à part : une
-seule de chaque, la première toujours en tête, la seconde toujours en fin,
-en portrait, sans cases ni gabarit. Tout le reste (références, génération,
-juge, lettrage, export) est celui d'une planche.
+## Ce que l'atelier en fait
+
+Deux formes, selon la reliure de l'album :
+
+- **Deux pages séparées** (le défaut) : la couverture, toujours en tête, et la
+  quatrième, toujours en fin. Chacune est une page seule en A4 portrait, avec
+  son gabarit : une **description** de la page entière (ce que montre
+  l'image), et des cases si la composition en veut (un médaillon, une
+  vignette insérée). Pas de reliure, pas de gouttière.
+- **La couverture à plat**, pour un album cartonné : la quatrième (à gauche),
+  le dos (une bande étroite au milieu, à sa vraie largeur) et la première (à
+  droite), d'un seul tenant, comme l'imprimeur l'attend. Elle porte sa
+  quatrième : une quatrième à part n'existe plus, l'atelier la refuse. À la
+  lecture, elle se dédouble en première et quatrième ; au master, elle sort
+  dans son propre fichier, avec son rembord (ce qui se replie sur le carton).
+
+Tout le reste (références, génération, juge, lettrage, export) est celui
+d'une planche.
 
 ## Étape 0 : le pré-vol
 
@@ -31,6 +45,7 @@ juge, lettrage, export) est celui d'une planche.
 S="${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs"
 node "$S" me
 node "$S" project <projet>
+node "$S" docs <projet> --kind brief
 node "$S" docs <projet> --kind bible-graphique
 node "$S" universe <projet>
 node "$S" planches <projet>
@@ -50,22 +65,35 @@ Trois conditions, sinon **arrête-toi et dis laquelle manque** :
 3. **Le budget.** En guidé, annonce le coût estimé et attends l'accord. **En
    `--auto`, `--budget` est OBLIGATOIRE.**
 
+**La reliure** décide de la forme. Le brief la donne (`/bd-brief` la demande) :
+
+- **cartonné** : couverture à plat. La largeur du dos dépend du nombre de
+  pages et du papier : c'est l'imprimeur qui la donne. Sans elle, l'atelier
+  part de 12 mm (un album cartonné d'une soixantaine de pages), et on la
+  corrigera quand il l'aura dite.
+- **broché**, ou rien de décidé : deux pages séparées. Si l'imprimeur demande
+  malgré tout une couverture à plat pour un broché, c'est la même, sans
+  rembord.
+
+En guidé, si le brief est muet, demande. En `--auto`, prends deux pages
+séparées et dis-le.
+
 Regarde ensuite si l'album a déjà une couverture ou une quatrième (`kind`
-`couverture` ou `quatrieme` dans la liste des planches). Si oui, ne la refais
-pas en silence : dis ce qu'elle est, et demande s'il s'agit de la reprendre
-(on regénère sur la même page) ou de repartir de zéro (on la met à la
-corbeille, puis on en crée une neuve : l'atelier n'en accepte qu'une).
+`couverture` ou `quatrieme` dans la liste des planches ; `aPlat` dit si la
+couverture est à plat, avec la largeur de son dos). Si oui, ne la refais pas
+en silence : dis ce qu'elle est, et demande s'il s'agit de la reprendre (on
+regénère sur la même page) ou de repartir de zéro (on la met à la corbeille,
+puis on en crée une neuve : l'atelier n'en accepte qu'une).
 
 Avec `--quatrieme-seule`, passe directement à l'étape 7.
 
 ## Étape 1 : ce que la couverture promet
 
-Lis le brief, la bible et le pitch de l'album :
+Lis la bible et le pitch de l'album :
 
 ```bash
-node "$S" docs <projet> --kind brief
 node "$S" docs <projet> --kind bible
-node "$S" docs <projet>            # un pitch, un résumé, s'ils existent
+node "$S" docs <projet> --kind pitch
 ```
 
 Écris, en cinq lignes, **la promesse** : à qui s'adresse l'album, ce qu'il
@@ -91,9 +119,11 @@ des nuances. Varie **le principe** :
 - une **situation** (le héros dans son monde, une tension lisible) ;
 - un **signe** (un objet, un motif, une forme qui condense l'album).
 
-Pour chaque concept, écris un fichier de prompt : le cadre de la bible
-graphique tel quel, puis la description de l'image (sujet, cadrage,
-lumière, ambiance), puis ces trois consignes, toujours :
+Un concept se juge sur **la première de couverture**, même pour une
+couverture à plat : c'est elle qu'on voit en vignette. Pour chaque concept,
+écris un fichier de prompt : le cadre de la bible graphique tel quel, puis la
+description de l'image (sujet, cadrage, lumière, ambiance), puis ces trois
+consignes, toujours :
 
 > Composition d'affiche en portrait, une seule image sans cases ni bordures.
 > Zone calme et unie dans le tiers supérieur, réservée au titre : rien
@@ -104,13 +134,14 @@ la figure et la planche de style :
 
 ```bash
 node "$S" essai <projet> --kind couverture --label "<nom du concept>" \
-  --prompt-file concept-1.txt --size 1024x1536 --quality low --n 1 \
+  --prompt-file concept-1.txt --size portrait --quality low --n 1 \
   --refs <imageIds étoilées de la variante>,<imageId de la planche de style> --wait
 ```
 
 Qualité basse : on juge une intention, pas un rendu. **Avant de lancer** :
 annonce le nombre d'images, le coût estimé, le total. Un budget passé ne se
-dépasse pas, même d'une image.
+dépasse pas, même d'une image. Un essai refusé dit sa `conduite` et, pour un
+refus de sécurité, ses `motifs` : voir les règles.
 
 ## Étape 3 : faire juger, à taille de vignette
 
@@ -148,10 +179,23 @@ la leur.
 node "$S" create-planche <projet> --kind couverture --title "Couverture"
 ```
 
-2. **L'écrire** : la description du concept retenu (telle qu'elle a servi au
-   laboratoire, corrigée du delta s'il y en a eu) dans `script`, et le
-   casting dans `draft` (la variante de la figure, la planche de style, un
-   décor si le concept en montre un) :
+2. **Album cartonné : la passer à plat**, puis régler son dos. L'atelier
+   refuse la bascule si l'album a une quatrième à part : en guidé, demande
+   avant de la mettre à la corbeille (`drop-planche`) ; en `--auto`, ne la
+   jette pas, arrête-toi et dis-le.
+
+```bash
+node "$S" a-plat <plancheId>
+node "$S" dos <plancheId> --mm <largeur du dos donnée par l'imprimeur>
+```
+
+   Le dos se corrige à tout moment, jusqu'au tirage : le gabarit, le
+   lettrage et les retours suivent.
+
+3. **L'écrire** : la description du concept retenu (telle qu'elle a servi au
+   laboratoire, corrigée du delta s'il y en a eu) dans le gabarit de la page,
+   et le casting dans `draft` (la variante de la figure, la planche de style,
+   un décor si le concept en montre un) :
 
 ```bash
 node "$S" write <plancheId> --file couverture.json
@@ -159,7 +203,13 @@ node "$S" write <plancheId> --file couverture.json
 
 ```json
 {
-  "script": "<la description de l'image>",
+  "scriptModules": {
+    "header": "",
+    "cases": [],
+    "footer": "<l'ambiance : la lumière, les couleurs dominantes>",
+    "pageSeule": true,
+    "description": "<ce que montre la page entière : sujet, cadrage, lumière>"
+  },
   "draft": {
     "characterIds": ["<id de la variante>"],
     "decorIds": [],
@@ -168,19 +218,37 @@ node "$S" write <plancheId> --file couverture.json
 }
 ```
 
-L'en-tête d'affiche (portrait, zone calme, aucun texte) est ajouté par
-l'atelier lui-même pour ce genre de page : ne le recopie pas.
+   Laisse `header` vide : l'atelier y met lui-même l'en-tête d'affiche
+   (portrait, zone calme pour le titre, aucun texte), et, à plat, celui de la
+   couverture complète (la première à droite avec sa zone de titre, la
+   quatrième à gauche, plus sobre, avec une large zone calme pour son texte,
+   le dos simple). **Pour une couverture à plat**, pars du gabarit que la
+   bascule a laissé (`planche <id>`, champ `scriptModules`) : change
+   `description` et `footer`, garde le reste, et n'y mets pas `pageSeule`.
+   La description dit l'image continue, d'un bord à l'autre, en nommant ce
+   qui tombe sur la première et ce qui tombe sur la quatrième. L'atelier
+   garde de lui-même la largeur du dos quand on réécrit le gabarit.
 
-3. **Générer**, en qualité finale, en mode planche (le seul que l'atelier
-   accepte pour une couverture ; il la met en portrait de lui-même) :
+   **Des cases, si la composition en veut** (un médaillon, une vignette
+   insérée) : chacune dans `cases`, avec son script et son emplacement en
+   fractions de la page (`page: "both"` sur une page seule ; `left` pour la
+   quatrième, `right` pour la première, `both` à cheval sur le dos, à plat).
+   Une case se génère seule (`generate --mode case --case <id>`), à la
+   taille de son emplacement. Une couverture sans case est la règle.
+
+4. **Générer**, en qualité finale, la page entière (la taille est celle de
+   l'atelier : portrait, ou les proportions de la couverture à plat, dos
+   compris) :
 
 ```bash
 node "$S" generate <plancheId> --quality high --mode planche --wait
 ```
 
-4. **Regarder** : le juge des couvertures, `TYPE : page`, contre les fiches
+5. **Regarder** : le juge des couvertures, `TYPE : page`, contre les fiches
    de la figure et la planche de style. `RETENIR` : valide la variante.
-   `ITERER` : repasse le delta en `--extra`, trois tours au maximum, le coût
+   `ITERER` : si le delta ne vise qu'une zone (un visage, une main), retouche
+   cette zone (`retouch <variante> --rect x,y,w,h --consigne "<delta>"`) ;
+   sinon repasse le delta en `--extra`. Trois tours au maximum, le coût
    affiché à chaque tour. `ECARTER` : reprends depuis le prompt, jamais
    depuis un « presque ».
 
@@ -188,7 +256,7 @@ node "$S" generate <plancheId> --quality high --mode planche --wait
 node "$S" validate <varianteId>
 ```
 
-## Étape 6 : le titre et les mentions, dans le lettrage
+## Étape 6 : le titre, le dos et les mentions, dans le lettrage
 
 Le titre est un **texte libre** du lettrage : il se pose sur l'image, dans la
 police de l'album, et se change sans rien regénérer. Lis d'abord ce que la
@@ -199,6 +267,8 @@ bible graphique dit de la police et de la place réservée au texte.
 ```bash
 node "$S" set-lettrage <plancheId> --file lettrage-couverture.json --valider
 ```
+
+Couverture en page séparée :
 
 ```json
 {
@@ -247,29 +317,53 @@ titre ; sans `font`, c'est la police du lettrage de l'album. `shadow` décolle
 le titre d'un fond chargé ; `rot` et `curve` existent pour un titre qui
 penche ou qui s'arque.
 
+**Couverture à plat** : les fractions valent pour l'image entière, quatrième,
+dos et première. Avec `L = 420 + dos` (en millimètres, pour deux pages A4) :
+
+- la **première** va de `(210 + dos) / L` à 1 ; son centre est à
+  `x = (315 + dos) / L` (environ 0,757 pour un dos de 12 mm). Le titre et
+  l'auteur s'y posent, avec des `w` et des `fontSize` rapportés à cette
+  moitié : un titre de 0,8 page fait `w ≈ 0,39` ;
+- le **dos** est centré sur `x = 0,5`. Son titre est un texte libre tourné
+  (`rot: -90`, il se lit de bas en haut, à la française ; `90` pour la
+  convention anglaise), centré en `y = 0,5`, avec un `fontSize` qui tient
+  dans la largeur du dos (au plus les deux tiers de `dos / L`) ;
+- la **quatrième** va de 0 à `210 / L` ; son centre est à `x = 105 / L`
+  (environ 0,243). Son texte s'y pose à l'étape 7.
+
+Rien ne se pose à cheval sur un pli (entre le dos et une face), sauf ce qui
+est fait pour : le titre du dos reste dans le dos.
+
 Puis rends la page lettrée et **regarde-la toi-même** :
 
 ```bash
 node "$S" rendu <plancheId> --out couverture.png
 ```
 
-Le titre est-il lisible réduit au quart ? Couvre-t-il un visage ? Si oui,
-corrige les coordonnées et re-rends. En cas de doute, un dernier passage du
-juge des couvertures, `TYPE : lettree`, tranche.
+Le titre est-il lisible réduit au quart ? Couvre-t-il un visage ? Le titre du
+dos tient-il dans le dos ? Si non, corrige les coordonnées et re-rends. En
+cas de doute, un dernier passage du juge des couvertures, `TYPE : lettree`,
+tranche.
 
 ## Étape 7 : la quatrième de couverture
 
-Même chemin, plus court : un seul concept, sans laboratoire, en guidé comme
-en auto. La quatrième est **une image calme** : le monde de l'album, un
-motif, une figure de dos, un détail ; jamais une seconde couverture. Sa
-moitié inférieure reste unie : c'est là que le texte se posera.
+La quatrième est **une image calme** : le monde de l'album, un motif, une
+figure de dos, un détail ; jamais une seconde couverture. Sa moitié
+inférieure reste unie : c'est là que le texte se posera.
 
 1. Écris **le texte de quatrième** : le pitch de l'album s'il existe (le
    scénario en produit un), sinon trois à cinq lignes qui donnent envie sans
    raconter la fin. Fais-le relire par le juge `dramaturgie` (protocole de
    `_juge`, type « document ») si la personne le demande ou en `--auto`.
 
-2. Crée la page, écris-la, génère, fais regarder (`TYPE : page`), valide :
+2. **Couverture à plat** : la quatrième est déjà dans l'image (la moitié
+   gauche, sobre, que l'en-tête de l'atelier a demandée). Pose son texte en
+   **encart** dans le lettrage de la couverture, centré sur la quatrième
+   (`x` autour de 105 / L), puis rends et regarde. Rien à générer de plus.
+
+3. **Pages séparées** : un seul concept, sans laboratoire, en guidé comme en
+   auto. Crée la page, écris-la (même gabarit qu'à l'étape 5, sa description
+   disant l'image calme), génère, fais regarder (`TYPE : page`), valide :
 
 ```bash
 node "$S" create-planche <projet> --kind quatrieme --title "Quatrième de couverture"
@@ -278,7 +372,7 @@ node "$S" generate <plancheId> --quality high --mode planche --wait
 node "$S" validate <varianteId>
 ```
 
-3. Pose le texte en **encart** (une boîte, lisible sur n'importe quel fond)
+4. Pose le texte en **encart** (une boîte, lisible sur n'importe quel fond)
    et les mentions en texte libre (éditeur, collection, prix ou code-barres
    si la personne les donne ; sinon rien : on n'invente pas une mention
    légale), puis valide le lettrage :
@@ -305,6 +399,9 @@ node "$S" validate <varianteId>
 }
 ```
 
+   (À plat, ajoute cet encart à la liste COMPLÈTE du lettrage de la
+   couverture, avec `x` autour de 0,243 et `w` autour de 0,38.)
+
 Rends, regarde, corrige s'il le faut.
 
 ## Étape 8 : livrer
@@ -313,13 +410,17 @@ Rends, regarde, corrige s'il le faut.
 node "$S" costs <projet>
 ```
 
-Récapitule : le concept retenu et pourquoi, ce que la couverture promet, le
-titre et sa place, la quatrième et son texte, ce qui reste fragile (un
-visage à surveiller à l'agrandissement, un fond chargé sous le titre), et le
-coût réel dépensé.
+Récapitule : la forme (pages séparées ou à plat, et la largeur du dos), le
+concept retenu et pourquoi, ce que la couverture promet, le titre et sa
+place, la quatrième et son texte, ce qui reste fragile (un visage à
+surveiller à l'agrandissement, un fond chargé sous le titre, un dos à
+confirmer avec l'imprimeur), et le coût réel dépensé.
 
 Une entrée de journal, puis annonce la suite : l'agrandissement et l'export
-de l'album, où la couverture ouvre et la quatrième ferme, d'elles-mêmes.
+de l'album, où la couverture ouvre et la quatrième ferme, d'elles-mêmes. Une
+couverture à plat sort au master dans son propre fichier, avec un rembord de
+15 mm par défaut (`export --kind master --rembord <mm>` si l'imprimeur en
+veut un autre).
 
 Termine par `🎉 COUVERTURE POSÉE` (ou `🎉 QUATRIÈME POSÉE` avec
 `--quatrieme-seule`). Si le budget a arrêté la boucle, ne termine pas ainsi :
@@ -328,14 +429,17 @@ rends le bilan honnête, avec ce qui bloque.
 ## Règles
 
 - **Le titre ne se dessine jamais dans l'image.** Ni le titre, ni l'auteur,
-  ni un logo, ni un faux code-barres : le modèle écrit dans une police de son
-  invention, cuite dans les pixels, et rien ne la recouvre proprement. Tout
-  texte est du lettrage.
+  ni le titre du dos, ni un logo, ni un faux code-barres : le modèle écrit
+  dans une police de son invention, cuite dans les pixels, et rien ne la
+  recouvre proprement. Tout texte est du lettrage.
 - **Une couverture se juge en vignette.** Si tu ne montres que des images en
   grand, tu fais choisir sur un critère qui ne sera jamais celui du lecteur.
 - **Une seule couverture, une seule quatrième.** L'atelier refuse la
   seconde : pour repartir de zéro, on met l'ancienne à la corbeille
-  (`drop-planche`), on le dit, et on l'écrit au journal.
+  (`drop-planche`), on le dit, et on l'écrit au journal. Une couverture à
+  plat porte sa quatrième : pas de quatrième à part.
+- **La largeur du dos vient de l'imprimeur.** Un dos faux décale la première
+  et la quatrième au pli : on la confirme avant le tirage.
 - **Le budget est un plafond, pas une estimation.** L'atteindre arrête la
   boucle et rend le bilan de ce qui a été fait.
 - **On ne repart jamais d'un « presque ».** Trois tours au maximum par page ;
@@ -346,6 +450,6 @@ rends le bilan honnête, avec ce qui bloque.
 - **Le cadre de la bible graphique s'applique à la couverture comme à toute
   planche.** Une couverture qui en sort trompe sur l'album.
 - **Un refus du fournisseur se traite selon la doctrine commune**
-  (`${CLAUDE_SKILL_DIR}/../../templates/refus.md`) : on reformule, on ne
-  relance jamais à l'identique, on s'arrête proprement pour un crédit ou une
-  clé.
+  (`${CLAUDE_SKILL_DIR}/../../templates/refus.md`) : on reformule en visant
+  le motif nommé, on ne relance jamais à l'identique, on s'arrête proprement
+  pour un crédit ou une clé.

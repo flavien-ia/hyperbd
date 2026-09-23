@@ -5,11 +5,21 @@
 > `/bd-status` (qui rend compte). Une seule règle par cas, pour que deux
 > skills ne répondent jamais différemment au même refus.
 
-Un modèle d'image ne refuse pas comme un éditeur : il ne dit pas ce qui
-gêne, il rend une phrase générique et il facture parfois quand même le tour.
-L'atelier classe donc chaque échec en une **raison**, à côté du message brut,
-et la renvoie avec la génération (`errorReason`). C'est cette raison qui dit
-quoi faire, pas le message.
+Un modèle d'image ne refuse pas comme un éditeur : il rend une phrase
+générique et il facture parfois quand même le tour. L'atelier classe donc
+chaque échec en une **raison**, à côté du message brut, et la renvoie avec la
+génération ou l'essai (`errorReason`), avec une lecture prête à servir
+(`erreur`) :
+
+- `erreur.conduite` : la règle ci-dessous, déjà choisie (`reformuler`,
+  `arreter`, `attendre`, `corriger_cle`, `reessayer`) ;
+- `erreur.motifs` : pour un refus de sécurité, **ce que le filtre a vu**, en
+  français (« violence », « automutilation », « contenu sexuel »...) ;
+- `erreur.reference` : l'identifiant de la requête chez le fournisseur, que
+  son support demandera.
+
+Quand on attend une génération, un échec sort avec ces champs (`raison`,
+`conduite`, `motifs`). C'est la raison qui dit quoi faire, pas le message.
 
 ## Les six raisons, et la conduite pour chacune
 
@@ -35,8 +45,11 @@ Deux règles qui priment :
 
 Le filtre refuse **ce qu'il croit voir**, pas ce que la scène veut dire. Il
 n'est pas nécessaire de changer la scène ; il faut changer la façon dont
-l'image la montre. Dans l'ordre, jusqu'à ce que ça passe (trois tours au
-maximum, puis on fait cette image autrement) :
+l'image la montre. **Commence par les motifs nommés** : un refus pour
+« violence » se reprend au point 1, un refus pour « contenu sexuel » ou
+« mineurs » au point 4, et une reformulation qui ne touche pas au motif nommé
+échouera pareil. Sans motif nommé, dans l'ordre, jusqu'à ce que ça passe
+(trois tours au maximum, puis on fait cette image autrement) :
 
 1. **Suggérer plutôt que montrer.** Le coup est hors champ, l'arme est posée,
    la blessure est un pansement, le sang est une ombre. La violence se lit

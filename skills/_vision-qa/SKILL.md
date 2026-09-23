@@ -82,8 +82,16 @@ Pour itérer :
 
 ```bash
 node "$S" generate <planche> --extra "<le delta, tel quel>" --wait
-node "$S" essai <projet> --kind <k> --prompt "<prompt + delta>" --refs <ids> --wait
+node "$S" essai <projet> --kind <k> --prompt-file <prompt-et-delta.txt> --refs <ids> --wait
 ```
+
+Pour un essai, le prompt d'origine plus le delta vont dans un fichier : un
+prompt de DA fait des paragraphes, et la ligne de commande les abîme.
+
+Quand le juge nomme une case, ou une zone, préfère la retouche locale à une
+nouvelle génération : elle repeint cette zone seule et garde le reste de
+l'image (`retouch <variante> --case <id> --consigne "<le delta>"`, voir
+`/bd-planches`).
 
 ## Étape 4 : la boucle, et sa limite
 
