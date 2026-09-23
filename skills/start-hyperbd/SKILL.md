@@ -1,6 +1,6 @@
 ---
 name: start-hyperbd
-description: Prépare tout, une seule fois, pour travailler avec HyperBD : installe Node.js s'il manque (winget sur Windows, Homebrew sur macOS), relie Claude Code à l'atelier avec un jeton d'accès, puis fait le tour des trois clés d'API (OpenAI, Cloudflare R2, Topaz) en expliquant pour chacune à quoi elle sert, ce qu'elle coûte et comment l'obtenir. Utiliser quand la personne dit « /start-hyperbd », « installe HyperBD », « prépare tout », « on commence », ou juste après avoir installé le plugin.
+description: Prépare tout, une seule fois, pour travailler avec HyperBD : installe Node.js s'il manque (winget sur Windows, Homebrew sur macOS), relie Claude Code à l'atelier avec un jeton d'accès, puis fait le tour des clés d'API (OpenAI et Cloudflare R2, indispensables ; Topaz et Bria, pour l'impression) en expliquant pour chacune à quoi elle sert, ce qu'elle coûte et comment l'obtenir. Utiliser quand la personne dit « /start-hyperbd », « installe HyperBD », « prépare tout », « on commence », ou juste après avoir installé le plugin.
 compatibility: "Agent Skills standard (Claude Code ou Codex). Installe Node.js si nécessaire, rien d'autre."
 ---
 
@@ -110,7 +110,13 @@ La réponse de l'atelier dit quelles clés sont en place. L'atelier ne dépense 
 - **Ce que ça coûte** : à l'usage, sans abonnement, environ un crédit par image agrandie. La clé ne fonctionne pas à zéro crédit.
 - **Comment l'obtenir** : un compte sur topazlabs.com, l'espace développeur (Topaz Labs API), un premier lot de crédits, puis une clé dans « API Keys ».
 
-Dis clairement ce qui est bloquant (OpenAI et R2 : sans eux, rien ne se dessine) et ce qui peut attendre (Topaz : le jour où l'on imprime). Puis demande à la personne de te dire quand elle a renseigné ses clés, et revérifie :
+### Bria (facultatif : le fond perdu de l'impression)
+
+- **À quoi ça sert** : prolonger chaque planche au-delà de son bord, pour le fond perdu du master d'impression, en générant la matière qui manque. Sans elle, le fond perdu se fait en miroir, gratuitement.
+- **Ce que ça coûte** : à l'usage, environ 0,02 $ par page prolongée, une seule fois par page (le résultat est gardé).
+- **Comment l'obtenir** : un compte sur platform.bria.ai, un moyen de paiement (offre à l'usage), puis une clé sur la page des clés d'API.
+
+Dis clairement ce qui est bloquant (OpenAI et R2 : sans eux, rien ne se dessine) et ce qui peut attendre (Topaz et Bria : le jour où l'on imprime). Puis demande à la personne de te dire quand elle a renseigné ses clés, et revérifie :
 
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" me

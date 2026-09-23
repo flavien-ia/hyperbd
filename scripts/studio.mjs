@@ -126,16 +126,22 @@
 //   get-template <projet>                  le cadre en vigueur
 //   set-template <projet> --file cadre.txt [--label "DA v2"] [--double-page "..."]
 //
-//   -- les travaux longs (agrandissement, exports) --
-//   upscale-batch <projet> [--model M] [--scale 2|4] [--planches id,id | --pages "1-5, 8"]
-//                 [--force] [--yes] [--wait]   sans --yes : chiffre, ne lance rien
+//   -- les travaux longs (agrandissement, fond perdu, exports) --
+//   upscale-batch <projet> [--dpi 300 [--rognage 210x297] | --scale 2|4] [--model M]
+//                 [--planches id,id | --pages "1-5, 8"] [--force] [--yes] [--wait]
+//                                          sans --yes : chiffre, ne lance rien
+//   fond-perdu <projet> [--rognage 210x297] [--fond-perdu 3] [--rembord 15]
+//              [--planches id,id | --pages "..."] [--yes] [--wait]
+//                                          le fond perdu génératif (Bria), chiffré d'abord
 //   jobs <projet>                          les travaux du projet
 //   job <id>                               où en est un travail
 //   job-continue <id>                      relancer une tranche arrêtée
 //   job-cancel <id>
-//   preflight <projet> [--rognage 210x297] [--locale xx]   le contrôle avant tirage
+//   preflight <projet> [--rognage 210x297] [--fond-perdu 3] [--rembord 15] [--locale xx]
+//                                          le contrôle avant tirage, et le devis
 //   export <projet> --kind avec-texte|sans-texte|calques|pdf|master
-//          master : [--rognage 210x297] [--fond-perdu 3] [--sans-traits] [--rgb]
+//          master : [--etape assemblage|final] [--methode miroir|bria]
+//                   [--rognage 210x297] [--fond-perdu 3] [--sans-traits] [--rgb]
 //                   [--sans-pages-de-garde] [--exige-upscale] [--rembord 15]
 //          [--locale xx] [--planches id,id | --pages "1-5, 8, couv, 4e"] [--wait]
 //
@@ -309,6 +315,16 @@ function texteDe(option, optionFichier) {
   if (typeof o[optionFichier] === "string") return lireTexte(o[optionFichier]);
   if (typeof o[option] === "string") return o[option];
   return undefined;
+}
+
+/** Le format rogné d'une page simple (`--rognage 210x297`, en mm), s'il est donné. */
+function rognageDe() {
+  if (typeof o.rognage !== "string") return {};
+  const [largeurMm, hauteurMm] = o.rognage.split("x").map(Number);
+  if (!Number.isFinite(largeurMm) || !Number.isFinite(hauteurMm)) {
+    throw new Error("--rognage s'écrit largeurxhauteur, en millimètres : 210x297.");
+  }
+  return { rognage: { largeurMm, hauteurMm } };
 }
 
 const o = opts(reste);
@@ -1156,6 +1172,10 @@ const commandes = {
    * En DEUX temps par défaut : sans --yes, la commande chiffre ce que cela
    * coûterait et ne lance rien. Des crédits Topaz ne se dépensent pas par
    * surprise.
+   *
+   * `--dpi 300` est le geste du master : chaque page amenée JUSTE à 300 dpi
+   * à son format (`--rognage`, A4 par défaut), jamais au-delà, toujours
+   * depuis l'original. Sans lui, un facteur fixe (×2 ou ×4).
    */
   async "upscale-batch"() {
     const body = {
@@ -1163,6 +1183,8 @@ const commandes = {
       params: {
         model: typeof o.model === "string" ? o.model : "High Fidelity V2",
         scale: o.scale ? Number(o.scale) : 2,
+        ...(o.dpi !== undefined ? { dpiCible: Number(o.dpi) } : {}),
+        ...rognageDe(),
         ...(o.force ? { force: true } : {}),
         ...(typeof o.planches === "string"
           ? { plancheIds: o.planches.split(",") }
@@ -1185,11 +1207,45 @@ const commandes = {
    * texte (PNG transparent et SVG vectoriel), le PDF de lecture, et le master
    * de tirage avec sa page de titre et ses mentions.
    */
-  /** Le contrôle avant tirage : ce que le master contiendra, et ce qui cloche. */
+  /**
+   * Le fond perdu génératif (Bria) : de la matière AJOUTÉE autour de chaque
+   * page, au-delà de la coupe, fabriquée une fois par page et gardée (jamais
+   * repayée). Payant, à la page : sans --yes, chiffre et ne lance rien. Il
+   * faut la clé Bria dans Mon compte ; sans elle, le master prolonge en
+   * miroir, gratuitement.
+   */
+  async "fond-perdu"() {
+    const lancement = await appel(`/projects/${arg(0)}/jobs`, {
+      method: "POST",
+      body: {
+        kind: "fond-perdu-batch",
+        params: {
+          ...rognageDe(),
+          ...(o["fond-perdu"] !== undefined ? { fondPerduMm: Number(o["fond-perdu"]) } : {}),
+          ...(o.rembord !== undefined ? { rembordMm: Number(o.rembord) } : {}),
+          ...(typeof o.planches === "string"
+            ? { plancheIds: o.planches.split(",") }
+            : {}),
+          ...(typeof o.pages === "string" ? { pages: o.pages } : {}),
+        },
+        confirmer: Boolean(o.yes),
+      },
+    });
+    if (!o.wait || !lancement.jobId) return lancement;
+    return { ...lancement, ...(await attendreJob(lancement.jobId)) };
+  },
+
+  /**
+   * Le contrôle avant tirage : ce que le master contiendra, ce qui cloche,
+   * et le devis des deux étapes payantes (l'agrandissement à 300 dpi, le fond
+   * perdu génératif).
+   */
   preflight: () => {
     const q = new URLSearchParams();
     if (typeof o.rognage === "string") q.set("rognage", o.rognage);
     if (typeof o.locale === "string") q.set("locale", o.locale);
+    if (o["fond-perdu"] !== undefined) q.set("fondPerdu", String(o["fond-perdu"]));
+    if (o.rembord !== undefined) q.set("rembord", String(o.rembord));
     const qs = q.toString();
     return appel(`/projects/${arg(0)}/preflight-master${qs ? `?${qs}` : ""}`);
   },
@@ -1221,11 +1277,16 @@ const commandes = {
           ...(typeof o.pages === "string" ? { pages: o.pages } : {}),
           // Les réglages d'imprimeur du master ; les défauts sont ceux de
           // l'atelier (A4, 3 mm, traits, CMYK, pages de garde).
-          ...(kind === "export-master" && typeof o.rognage === "string"
-            ? (() => {
-                const [l, h] = o.rognage.split("x").map(Number);
-                return { rognage: { largeurMm: l, hauteurMm: h } };
-              })()
+          ...(kind === "export-master" ? rognageDe() : {}),
+          // L'étape : « assemblage » (le PDF de contrôle, RGB, au format
+          // rogné, sans fond perdu) ou « final » (le fichier de l'imprimeur).
+          ...(kind === "export-master" && typeof o.etape === "string"
+            ? { etape: o.etape }
+            : {}),
+          // Le fond perdu : « miroir » (gratuit, par défaut) ou « bria » (la
+          // matière générée par `fond-perdu`, fabriquée avant).
+          ...(kind === "export-master" && typeof o.methode === "string"
+            ? { methode: o.methode }
             : {}),
           ...(kind === "export-master" && o["fond-perdu"] !== undefined
             ? { fondPerduMm: Number(o["fond-perdu"]) }

@@ -19,7 +19,7 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |
 |---|---|
-| `/start-hyperbd` | prépare tout, une fois : Node.js s'il manque, le jeton, le tour des trois clés en expliquant chacune |
+| `/start-hyperbd` | prépare tout, une fois : Node.js s'il manque, le jeton, le tour des clés en expliquant chacune |
 | `/new-bd` | commence une bande dessinée : crée le projet dans l'atelier et enchaîne sur le brief |
 | `/bd-connect` | relie Claude Code à l'atelier (jeton d'accès, état des clés) |
 | `/bd-status` | fait le point sur un album : avancement (jusqu'aux pages verrouillées), langues, versions, coûts, prochaines planches |
@@ -101,9 +101,10 @@ jeton d'accès, le tour des clés), et `/new-bd` commence un album.
   [app.studio-entremondes.fr/inscription](https://app.studio-entremondes.fr/inscription).
 - Claude Desktop (ou Claude Code) avec un abonnement Claude Pro au minimum.
   Node.js est installé par `/start-hyperbd` s'il manque.
-- **Trois clés**, renseignées dans « Mon compte », qui restent celles de la
-  personne : OpenAI pour dessiner, Cloudflare R2 pour ranger les images, Topaz
-  pour les agrandir avant impression. L'atelier ne dépense jamais rien à la
+- **Des clés**, renseignées dans « Mon compte », qui restent celles de la
+  personne : OpenAI pour dessiner et Cloudflare R2 pour ranger les images
+  (indispensables) ; Topaz pour les agrandir et Bria pour leur fond perdu,
+  le jour de l'impression. L'atelier ne dépense jamais rien à la
   place de quiconque, et les images produites vivent dans l'espace de stockage
   de leur auteur.
 

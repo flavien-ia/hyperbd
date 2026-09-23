@@ -420,7 +420,8 @@ Une entrée de journal, puis annonce la suite : l'agrandissement et l'export
 de l'album, où la couverture ouvre et la quatrième ferme, d'elles-mêmes. Une
 couverture à plat sort au master dans son propre fichier, avec un rembord de
 15 mm par défaut (`export --kind master --rembord <mm>` si l'imprimeur en
-veut un autre).
+veut un autre), prolongé en miroir ou, avec une clé Bria, généré (voir la fin
+de `/bd-album`).
 
 Termine par `🎉 COUVERTURE POSÉE` (ou `🎉 QUATRIÈME POSÉE` avec
 `--quatrieme-seule`). Si le budget a arrêté la boucle, ne termine pas ainsi :

@@ -234,31 +234,59 @@ node "$S" share-version <lienId> --version <id de la version>
 ```
 
 3. **Le contrôle avant tirage** : ce que le master contiendra, page par page,
-   et ce qui manque (image, textes validés, agrandissement, résolution au
-   format). Gratuit.
+   ce qui manque (image, textes validés, résolution au format), et le devis
+   des deux étapes payantes. Gratuit.
 
 ```bash
 node "$S" preflight <projet>
 ```
 
-4. **L'agrandissement** (crédits Topaz, hors du budget d'images) : chiffre
+Puis **le master, en quatre étapes**, les mêmes que dans la fenêtre du
+master de l'atelier, chacune avec son fichier. Une partie seulement de
+l'album se tire par ses pages, comme à l'impression (`--pages "couv, 1-8"`).
+
+4. **La chromie** (facultative) : les couleurs de l'album telles qu'elles
+   partent à l'imprimeur (au curseur, ou une LUT importée) et le profil CMYK
+   de l'imprimeur. Elle se règle dans la fenêtre du master de l'atelier, pas
+   d'ici : si l'imprimeur a fourni un profil, dis à la personne de l'y
+   déposer. Sans chromie, l'image sort telle quelle, convertie avec le profil
+   de l'atelier.
+
+5. **L'assemblage** : un PDF de contrôle, en RGB, au format rogné, sans fond
+   perdu. C'est lui qu'on relit avant de payer quoi que ce soit.
+
+```bash
+node "$S" export <projet> --kind master --etape assemblage --wait
+```
+
+6. **L'agrandissement** (crédits Topaz, hors du budget d'images) : les pages
+   sous 300 dpi à leur format amenées juste à 300, depuis l'original. Chiffre
    d'abord, lance ensuite, sur accord explicite.
 
 ```bash
-node "$S" upscale-batch <projet>          # chiffre, ne lance rien
-node "$S" upscale-batch <projet> --yes --wait
+node "$S" upscale-batch <projet> --dpi 300          # chiffre, ne lance rien
+node "$S" upscale-batch <projet> --dpi 300 --yes --wait
 ```
 
-5. **Le master d'impression**, quand le contrôle est vert : A4 à 3 mm de fond
-   perdu, traits de coupe, CMYK et pages de garde par défaut. Une couverture
-   à plat sort dans son propre fichier, avec un rembord de 15 mm par défaut
-   (`--rembord`, à la demande de l'imprimeur) ; le tout arrive dans un zip.
-   Une partie seulement se tire par ses pages, comme à l'impression.
+7. **Le fond perdu, puis le master.** Le fond perdu AJOUTE de la matière
+   autour de chaque page (rien ne part plus à la coupe) : en miroir, gratuit
+   et par défaut ; ou généré par Bria, environ 0,02 $ la page, fabriqué une
+   fois et gardé, s'il y a une clé Bria dans Mon compte. Le génératif se
+   chiffre et se confirme comme l'agrandissement ; le master le reprend
+   ensuite. A4 à 3 mm de fond perdu, traits de coupe, CMYK et pages de garde
+   par défaut ; une couverture à plat sort dans son propre fichier, avec un
+   rembord de 15 mm (`--rembord`, à la demande de l'imprimeur), le tout dans
+   un zip.
 
 ```bash
-node "$S" export <projet> --kind master --wait
-node "$S" export <projet> --kind master --pages "couv, 1-8" --wait
+node "$S" fond-perdu <projet>                       # chiffre, ne lance rien
+node "$S" fond-perdu <projet> --yes --wait          # sur accord
+node "$S" export <projet> --kind master --methode bria --wait
+node "$S" export <projet> --kind master --wait      # ou en miroir, gratuit
 ```
+
+En `--full-auto`, fais l'assemblage et chiffre le reste : ni Topaz ni Bria
+ne se dépensent sans un accord explicite.
 
 Termine par `🎉 ALBUM PRODUIT (n planches, x $)`. Si l'album n'est pas
 complet (budget atteint, arrêt pour crédit, planches à faire autrement), ne

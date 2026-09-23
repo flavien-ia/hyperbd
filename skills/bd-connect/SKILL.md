@@ -1,6 +1,6 @@
 ---
 name: bd-connect
-description: Relie Claude Code à l'atelier du Studio Entremondes (app.studio-entremondes.fr) pour qu'il puisse y travailler : enregistre un jeton d'API, vérifie l'accès, et fait le point sur les trois clés (OpenAI pour générer, Cloudflare R2 pour stocker, Topaz pour agrandir). Utiliser quand la personne dit « connecte-toi à l'atelier », « /bd-connect », « relie mon compte », ou quand une autre skill HyperBD constate qu'aucun accès n'est enregistré.
+description: Relie Claude Code à l'atelier du Studio Entremondes (app.studio-entremondes.fr) pour qu'il puisse y travailler : enregistre un jeton d'API, vérifie l'accès, et fait le point sur les clés (OpenAI pour générer, Cloudflare R2 pour stocker, Topaz pour agrandir, Bria pour le fond perdu de l'impression). Utiliser quand la personne dit « connecte-toi à l'atelier », « /bd-connect », « relie mon compte », ou quand une autre skill HyperBD constate qu'aucun accès n'est enregistré.
 argument-hint: "[--url <adresse de l'atelier>]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
@@ -21,7 +21,7 @@ Tu relies Claude Code à l'atelier où vivent les projets de bande dessinée. Sa
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" me
 ```
 
-- **Ça répond avec un compte** : l'accès existe déjà. Affiche à qui il appartient et l'état des trois clés, puis propose : garder tel quel, ou relier un autre compte. Si la personne garde, tu as fini.
+- **Ça répond avec un compte** : l'accès existe déjà. Affiche à qui il appartient et l'état des clés, puis propose : garder tel quel, ou relier un autre compte. Si la personne garde, tu as fini.
 - **Ça répond une erreur** : continue à l'étape 1.
 
 ## Étape 1 : obtenir un jeton
@@ -57,8 +57,9 @@ La réponse indique quelles clés sont en place. Chacune sert à autre chose, et
 | OpenAI | dessiner les planches | rien ne peut être généré |
 | Cloudflare R2 | ranger les images produites | rien ne peut être généré non plus |
 | Topaz | agrandir les images avant impression | tout marche, sauf l'agrandissement final |
+| Bria | prolonger les pages au-delà de la coupe (le fond perdu du master) | le fond perdu se fait en miroir, gratuitement |
 
-Présente l'état en clair (« Tout est en place » ou « Il manque la clé Topaz, ce n'est pas bloquant pour l'instant »). Les clés se renseignent dans **Mon compte**, chacune avec sa marche à suivre : n'essaie jamais de les saisir toi-même, et ne demande jamais leur valeur dans la conversation.
+Présente l'état en clair (« Tout est en place » ou « Il manque les clés Topaz et Bria, ce n'est pas bloquant avant l'impression »). Les clés se renseignent dans **Mon compte**, chacune avec sa marche à suivre : n'essaie jamais de les saisir toi-même, et ne demande jamais leur valeur dans la conversation.
 
 Vérifie aussi **les droits du jeton** (`token.scopes` dans la réponse) : il en faut trois pour tout le métier, `read` (lire l'atelier), `write` (écrire les textes, la Toile, le lettrage, lancer les exports) et `generate` (dessiner, retoucher, agrandir une image). Un jeton créé sans `generate` suffit pour écrire un scénario, pas pour produire : dis-le tout de suite, et propose d'en créer un avec les trois droits plutôt que de le découvrir au premier dessin.
 
