@@ -4,6 +4,12 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.11.1 (23 septembre 2026)
+
+### Améliorations
+- **Les clés se collent dans Mon compte, jamais dans la conversation.** `/start-hyperbd` et `/bd-connect` le disent clairement : le jeton d'accès est le seul secret qui se donne à Claude. Chaque clé d'API (OpenAI, Cloudflare, Topaz, Bria) se colle dans Mon compte, qui la vérifie auprès de son service et la chiffre. Une clé collée ici par erreur n'est ni répétée ni utilisée, et Claude propose de la régénérer.
+- **Cloudflare R2 en trois lignes.** Un jeton « Admin Read & Write » suffit : l'Access Key ID, la Secret Access Key et l'adresse européenne du point d'accès. Plus d'identifiant de compte ni de nom de bucket à chercher : l'atelier crée son bucket en Europe et le règle pour que les images partent du navigateur. Un jeton limité à un seul bucket reste possible, avec son nom en plus.
+
 ## v0.11.0 (23 septembre 2026)
 
 ### Nouveautés
