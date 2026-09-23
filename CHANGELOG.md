@@ -4,6 +4,16 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.11.0 (23 septembre 2026)
+
+### Nouveautés
+- **Le master en quatre étapes, comme dans l'atelier.** La chromie (les couleurs et le profil de l'imprimeur, réglés dans la fenêtre du master), l'assemblage (un PDF de contrôle à relire avant de payer quoi que ce soit), l'agrandissement juste à 300 dpi au format, puis le fond perdu et le fichier final. `/bd-album` déroule ce fil à la fin de l'album, et ne dépense jamais de crédits Topaz ou Bria sans votre accord.
+- **Le fond perdu génératif** : de la matière ajoutée autour de chaque page, au-delà de la coupe, par Bria (environ 0,02 $ la page, fabriquée une fois et gardée). Chiffré d'abord, lancé sur accord. Sans clé Bria, le fond perdu se fait en miroir, gratuitement.
+
+### Améliorations
+- Le contrôle avant tirage chiffre les deux étapes payantes.
+- `/start-hyperbd` et `/bd-connect` présentent Bria, la quatrième clé, facultative comme Topaz.
+
 ## v0.10.0 (23 septembre 2026)
 
 ### Nouveautés
