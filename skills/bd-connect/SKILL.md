@@ -59,7 +59,7 @@ La réponse indique quelles clés sont en place. Chacune sert à autre chose, et
 | Topaz | agrandir les images avant impression | tout marche, sauf l'agrandissement final |
 | Bria | prolonger les pages au-delà de la coupe (le fond perdu du master) | le fond perdu se fait en miroir, gratuitement |
 
-Présente l'état en clair (« Tout est en place » ou « Il manque les clés Topaz et Bria, ce n'est pas bloquant avant l'impression »). Les clés se renseignent dans **Mon compte**, chacune avec sa marche à suivre : n'essaie jamais de les saisir toi-même, et ne demande jamais leur valeur dans la conversation.
+Présente l'état en clair (« Tout est en place » ou « Il manque les clés Topaz et Bria, ce n'est pas bloquant avant l'impression »). Les clés se collent dans **Mon compte**, chacune avec sa marche à suivre : n'essaie jamais de les saisir toi-même, ne demande jamais leur valeur dans la conversation, et si la personne en colle une ici, ne l'utilise pas et renvoie-la vers Mon compte. Le jeton d'accès est le seul secret qui se colle dans la conversation.
 
 Vérifie aussi **les droits du jeton** (`token.scopes` dans la réponse) : il en faut trois pour tout le métier, `read` (lire l'atelier), `write` (écrire les textes, la Toile, le lettrage, lancer les exports) et `generate` (dessiner, retoucher, agrandir une image). Un jeton créé sans `generate` suffit pour écrire un scénario, pas pour produire : dis-le tout de suite, et propose d'en créer un avec les trois droits plutôt que de le découvrir au premier dessin.
 
