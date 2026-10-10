@@ -216,9 +216,12 @@ node "$S" promote-image <imageId> --style "<nom de la piste>"
 ```
 
 4. **La police du lettrage** : le catalogue de l'atelier en propose seize,
-   libres de droits, avec un aperçu. Montre-les, ou laisse importer la sienne
-   (l'atelier demandera d'attester des droits). Le choix se fait dans les
-   paramètres de l'univers.
+   libres de droits, avec un aperçu. Montre-les ; une police à soi s'importe
+   dans Mon compte (« Mes polices », avec l'attestation des droits). C'est un
+   réglage de l'ALBUM : vue Lettrage, bouton « Réglages de l'album », ou
+   `node "$S" police <projet> --set <id>` (`--essai` d'abord si des planches
+   sont déjà lettrées : le bilan dit les bulles qui changeraient de forme).
+   Un tome neuf hérite de la police du tome précédent de l'univers.
 
 5. **Les pistes perdantes** écartées avec leur raison, sur la Toile et au
    journal : chaque bloc de leur grappe passe en `ecarte`, avec la raison

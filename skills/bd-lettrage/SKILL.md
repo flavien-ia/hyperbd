@@ -40,6 +40,15 @@ Chaque planche tombe dans un état, et un seul :
 La couverture et la quatrième se lettrent avec `/bd-couverture` : titre,
 mentions et dos ne sont pas des répliques.
 
+**Les bulles « à revoir » passent en premier.** Quand la police de l'album
+change, l'atelier re-mesure chaque bulle et marque `aRevoir: true` celles qui
+ont changé de forme (lignes, hauteur, marge de la page, contact avec une autre
+bulle). `node "$S" police <projet>` en donne la liste, page par page. Pour
+chacune : rendre la page, regarder (étape 6), corriger la place ou la largeur
+de la bulle ; toute retouche retire le signalement, et une bulle qui va bien
+telle quelle s'en libère par `set-lettrage` en enlevant `aRevoir`. Une page
+verrouillée se signale à la personne sans y toucher.
+
 **Rien ne se lit d'un fichier local.** Relancer cette skill, c'est relire l'état
 du serveur : c'est ce qui rend la reprise possible après n'importe quelle
 interruption.
@@ -232,7 +241,8 @@ Termine par `🎉 LETTRAGE POSÉ (n planches)`.
   personnages de la bibliothèque et valent pour tout l'album : les changer ici
   les désaccorderait d'une planche à l'autre. Si deux couleurs se confondent,
   dis-le et renvoie vers `/bd-personnages`.
-- **Tu ne changes pas la police.** Elle est arrêtée par la bible graphique.
+- **Tu ne changes pas la police.** Elle est arrêtée par la bible graphique,
+  et se règle dans l'album (`/bd-da`, ou les Réglages de l'album).
 - **Un ordre de lecture cassé ne se rattrape par rien.** Ni par la beauté du
   placement, ni par la lisibilité : c'est le seul défaut qui empêche VALIDER à
   lui tout seul.

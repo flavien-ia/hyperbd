@@ -32,7 +32,7 @@ Si la réponse dit qu'OpenAI ou R2 manquent, continue quand même (le scénario 
 
 ## Étape 2 : l'univers
 
-Un univers, c'est la bibliothèque du projet : personnages, décors, images de référence, planches de style, police. Il se réutilise d'un projet à l'autre (un tome 2 partage l'univers du tome 1).
+Un univers, c'est la bibliothèque du projet : personnages, décors, images de référence, planches de style. Il se réutilise d'un projet à l'autre (un tome 2 partage l'univers du tome 1, et prend la police de son lettrage, qu'il pourra changer sans toucher au tome 1).
 
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects

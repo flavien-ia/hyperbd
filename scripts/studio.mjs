@@ -54,6 +54,10 @@
 //   folios <projet> [--actif|--off] [--style S] [--position P] [--taille s|m|l]
 //                   [--couleur C] [--police P] [--depart N] [--masquer id,id]
 //                   [--lecture|--sans-lecture]   les numéros de page de l'album
+//   police <projet> [--set ID] [--essai]   la police du lettrage de l'album (un réglage du projet) :
+//                                          sans option, la lire (catalogue, typothèque, bulles à revoir) ;
+//                                          --set la change et marque « à revoir » les bulles déformées,
+//                                          --essai n'en rend que le bilan
 //   locales <projet>                       les langues, et où elles en sont
 //   add-locale <projet> --locale xx        ouvre une langue : copie la source de chaque planche
 //   drop-locale <projet> --locale xx       retire une langue de tout l'album (la source reste)
@@ -716,6 +720,19 @@ const commandes = {
         ...(o.info ? { info: true } : {}),
         ...(typeof o.locale === "string" ? { locale: o.locale } : {}),
       },
+    });
+  },
+
+  /**
+   * La police du lettrage : un réglage de l'album (plus de l'univers depuis le
+   * 10/10/2026). Changer de police re-mesure toutes les bulles : l'atelier
+   * marque « à revoir » celles qui changent de forme.
+   */
+  police() {
+    if (typeof o.set !== "string") return appel(`/projects/${arg(0)}/police`);
+    return appel(`/projects/${arg(0)}/police`, {
+      method: "POST",
+      body: { police: o.set, essai: Boolean(o.essai) },
     });
   },
 
