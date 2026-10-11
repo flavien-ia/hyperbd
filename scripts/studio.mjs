@@ -68,6 +68,8 @@
 //   new-version <projet> [--label V1] [--note "..." | --note-file F]   figer l'album
 //   share-version <lienId> (--version ID | --en-cours)   ce qu'un lien donne à lire
 //   costs <projet>                         ce que le projet a coûté
+//   archive <projet> [--out F.zip]         tout le projet (lignes, fichiers, univers) dans un .zip,
+//                                          réimportable dans l'atelier (« Importer un projet »)
 //
 //   -- la Toile (le scénario) --
 //   nodes <projet> [--ecartes]             les blocs et les liens (sans les corps)
@@ -436,6 +438,25 @@ const commandes = {
   planches: () => appel(`/projects/${arg(0)}/planches`),
   planche: () => appel(`/planches/${arg(0)}`),
   costs: () => appel(`/projects/${arg(0)}/costs`),
+
+  /**
+   * L'archive complète du projet (lignes, fichiers, univers) dans un .zip, à
+   * garder sur cette machine : la même que « Exporter le projet » de
+   * l'atelier, réimportable par « Importer un projet ». Réservé au
+   * propriétaire. L'avancement s'écrit sur stderr.
+   */
+  async archive() {
+    const { exporterProjet } = await import("./archive-projet.mjs");
+    const { resolve } = await import("node:path");
+    const sortie = resolve(typeof o.out === "string" ? o.out : `${arg(0)}-archive.zip`);
+    return exporterProjet({
+      appel,
+      projet: arg(0),
+      sortie,
+      onProgres: (t) => process.stderr.write(`${t}
+`),
+    });
+  },
   lettrage: () =>
     appel(
       `/planches/${arg(0)}/lettrage${

@@ -4,6 +4,12 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.12.0 (11 octobre 2026)
+
+### Nouveautés
+- **L'archive complète d'un album** : `studio.mjs archive <projet> [--out album.zip]` range tout le projet (planches, variantes, lettrages et traductions, Toile, versions, journal) et tous ses fichiers, avec son univers, dans un .zip sur votre machine. C'est la même archive que le bouton « Exporter le projet » de l'atelier : elle s'y remet par « Importer un projet », toujours en projet neuf. Elle s'écrit au fil de l'eau, sans tenir en mémoire, même pour un album de plusieurs gigaoctets.
+- **La police du lettrage, réglage de l'album** : `studio.mjs police <projet> [--set ID] [--essai]` la lit ou la change, avec le bilan des bulles qui changent de forme (marquées « à revoir », traitées en premier par `/bd-lettrage`).
+
 ## v0.11.1 (23 septembre 2026)
 
 ### Améliorations
