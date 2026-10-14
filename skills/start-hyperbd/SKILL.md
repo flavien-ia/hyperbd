@@ -152,9 +152,10 @@ Termine par `🎉 PRÊT`.
 
 Si la personne n'a encore aucun projet, propose le mode tuto, en une question :
 
-> Veux-tu que je t'accompagne pour ton premier album ? Je te dirai quoi faire
-> ici, et quoi aller voir dans l'atelier, étape par étape, jusqu'à ta première
-> planche. Le Guide de l'atelier suivra les mêmes étapes.
+> Veux-tu que je t'accompagne jusqu'à ton premier projet ? Il reste deux
+> étapes : ton premier univers (le tien, ou un univers ouvert partagé par
+> d'autres auteurs), puis ton premier album. Le Guide de l'atelier suit les
+> mêmes étapes.
 
 Oui :
 
