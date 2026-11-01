@@ -4,7 +4,7 @@
 
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -137,6 +137,12 @@ ok(/SCORES:/.test(commun) && /VERDICT:/.test(commun), "la grille commune porte l
 const lettrage = readFileSync(join(RACINE, "templates/juges/lettrage.md"), "utf8");
 ok(/VALIDER \| AJUSTER \| REFAIRE/.test(lettrage), "le juge lettrage porte son verdict propre");
 ok(/Ce que recouvre chaque bulle/.test(lettrage), "le juge lettrage exige le relevé des visages");
+
+// ── La mise à jour : ce qu'elle promet selon l'endroit où vit le plugin ────
+// Une vraie installation, dans des dossiers jetables (scripts/update/recette-place.mjs).
+const recettePlace = spawnSync(process.execPath, [join(RACINE, "scripts/update/recette-place.mjs")], { encoding: "utf8" });
+if (recettePlace.status !== 0) console.log(recettePlace.stdout + recettePlace.stderr);
+ok(recettePlace.status === 0, "la mise à jour ne promet une sauvegarde que là où elle dure");
 
 console.log(`\n${echecs === 0 ? "STATIQUE : tout tient." : `STATIQUE : ${echecs} échec(s).`}`);
 process.exitCode = echecs ? 1 : 0;

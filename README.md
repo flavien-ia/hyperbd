@@ -92,7 +92,7 @@ jeton d'accès, le tour des clés), et `/new-bd` commence un album.
 
 - Plugin téléversé dans Claude Desktop : `/update-hyperbd` vérifie s'il existe
   une version plus récente, la télécharge, contrôle son empreinte et la met en
-  place en gardant l'ancienne de côté.
+  place.
 - Plugin installé par la ligne de commande : `/plugin marketplace update hyperbd`.
 
 ## Ce qu'il faut avoir

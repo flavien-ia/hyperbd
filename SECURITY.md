@@ -43,7 +43,8 @@ que vous avez installé est bien ce qui a été publié.
   Ce jeton n'est jamais écrit ailleurs, ni dans un dépôt, ni dans une
   conversation après coup.
 - `~/.hyperbd/updates/` : les archives téléchargées par `/update-hyperbd`, et
-  la sauvegarde de la version précédente à côté du plugin.
+  la sauvegarde de la version précédente à côté du plugin (sous Claude Desktop,
+  qui efface les dossiers qu'il ne connaît pas, elle ne dure que quelques minutes).
 - Le dossier courant, uniquement quand vous demandez un export, un rendu ou une
   épreuve d'aveugle, et sous le nom que vous avez donné.
 - Votre `~/.zprofile`, **sur macOS et seulement si `/start-hyperbd` a dû installer

@@ -24,6 +24,7 @@ import { inflateRawSync } from "node:zlib";
 import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { placeDuPlugin } from "../plugin-place.mjs";
 
 const ATELIER = "https://app.studio-entremondes.fr";
 /** Ce que l'atelier annonce de la version publiée : numéro, empreinte, date. */
@@ -400,12 +401,18 @@ function cmdInstall() {
     }
   }
 
+  // La sauvegarde n'est promise que dans un dossier de marketplace : le registre des plugins
+  // téléversés de Claude Desktop l'efface en quelques minutes (voir scripts/plugin-place.mjs).
+  const { place, backupKept, desktop } = placeDuPlugin(pluginDir, "hyperbd");
   rendre({
     ok: true,
     oldVersion: ancienne,
     version: nouvelle,
     pluginDir,
     backup: sauvegarde,
+    backupKept,
+    desktop,
+    place,
     catalogueMisAJour: catalogue,
   });
 }

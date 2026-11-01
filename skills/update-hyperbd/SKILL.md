@@ -1,6 +1,6 @@
 ---
 name: update-hyperbd
-description: Met le plugin HyperBD à jour vers la dernière version publiée. Lit d'abord comment il a été installé : suivi par Claude Code (marketplace), la mise à jour lui appartient et on indique la commande ; téléversé à la main dans Claude Desktop, on télécharge, on vérifie l'empreinte, on remplace en gardant l'ancienne version de côté. Utiliser quand la personne dit « /update-hyperbd », « mets à jour HyperBD », « y a-t-il une nouvelle version ? », ou demande si son plugin est à jour.
+description: Met le plugin HyperBD à jour vers la dernière version publiée. Lit d'abord comment il a été installé : suivi par Claude Code (marketplace), la mise à jour lui appartient et on indique la commande ; téléversé à la main dans Claude Desktop, on télécharge, on vérifie l'empreinte, on remplace. Utiliser quand la personne dit « /update-hyperbd », « mets à jour HyperBD », « y a-t-il une nouvelle version ? », ou demande si son plugin est à jour.
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js 18 ou plus. Ni compte ni clé : le plugin est open source, la version publiée se lit sur l'atelier et l'archive se télécharge sans jeton."
 ---
 
@@ -53,15 +53,19 @@ Le JSON donne `file` (l'archive, dans `~/.hyperbd/updates/`), `version`, `files`
 node "$PLUGIN_DIR/scripts/update/update-hyperbd.mjs" install --zip "<file de l'étape 2>"
 ```
 
-Le script déballe l'archive dans un dossier temporaire et vérifie qu'elle contient un plugin complet **avant** de toucher à l'installation en place. Alors seulement il écarte le dossier actuel en sauvegarde et met le nouveau à sa place. Si quoi que ce soit échoue, la version précédente est remise d'elle-même.
+Le script déballe l'archive dans un dossier temporaire et vérifie qu'elle contient un plugin complet **avant** de toucher à l'installation en place. Alors seulement il écarte le dossier actuel le temps de l'échange et met le nouveau à sa place. Si quoi que ce soit échoue, la version précédente est remise d'elle-même.
 
-- `ok: true` : le JSON donne `version`, `oldVersion` et `backup`. Passe à l'étape 4.
+- `ok: true` : le JSON donne `version`, `oldVersion`, `backup`, `backupKept` et `desktop`. Garde `backupKept` et `desktop` pour l'étape 4, et passe à l'étape 4.
 - `ok: false` : rien n'a été remplacé, ou la version précédente a été remise. Rapporte le `message` tel quel. **STOP.**
 
 ## Étape 4 : conclure
 
 > **Mise à jour installée (version `<version>`).**
 >
-> Ferme et rouvre Claude Code pour qu'il charge la nouvelle version. L'ancienne est gardée de côté (`hyperbd-backup-<ancienne version>`) : quand tu auras vérifié que tout marche, tu peux me demander de la supprimer.
+> Ferme et rouvre Claude Code pour qu'il charge la nouvelle version.
 
-Si un dossier `hyperbd-backup-*` d'une mise à jour **antérieure** traîne encore et que le plugin en place fonctionne, propose de le supprimer aussi.
+Ensuite, selon le JSON de l'étape 3 :
+
+- `backupKept: true` : ajoute « L'ancienne version est gardée de côté (`hyperbd-backup-<ancienne version>`) : quand tu auras vérifié que tout marche, tu peux me demander de la supprimer. » Si un dossier `hyperbd-backup-*` d'une mise à jour **antérieure** traîne encore et que le plugin en place fonctionne, propose de le supprimer aussi.
+- `backupKept: false` : **ne promets jamais de sauvegarde.** Le plugin ne vit pas dans un dossier de marketplace (sous Claude Desktop, le registre des plugins téléversés efface en quelques minutes tout dossier qu'il ne connaît pas, la sauvegarde comprise). Elle n'a servi qu'à revenir en arrière si l'échange avait échoué. N'en parle pas, sauf si on te le demande : alors dis exactement cela.
+- `desktop: true` : ajoute une phrase : « Claude Desktop continuera d'afficher l'ancien numéro dans son écran Plugins, c'est normal : la version qui tourne est la `<version>`. » (Desktop montre la version du téléversement, jamais celle du disque.)
