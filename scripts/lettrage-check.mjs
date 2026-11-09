@@ -51,10 +51,11 @@ const ratio = iw && ih ? iw / ih : pageSeule ? 0.708 : 1.412;
 function boite(b) {
   const fs = b.fontSize ?? 0.00495;
   const w = b.w ?? 0.18;
-  const utile = Math.max(w - fs * 2.2, fs * 4);
+  const pad = b.pad ?? 1;
+  const utile = Math.max(w - fs * 1.9 * pad - fs * 0.3, fs * 4);
   const largeurTexte = (b.text ?? "").length * fs * 0.56;
   const lignes = Math.max(1, Math.ceil(largeurTexte / utile));
-  const hauteur = (lignes * fs * 1.25 + fs * 1.9) * ratio;
+  const hauteur = (lignes * fs * 1.25 + fs * 1.7 * pad) * ratio;
   const h = b.h ? Math.max(b.h, hauteur) : hauteur;
   return { x0: b.x - w / 2, x1: b.x + w / 2, y0: b.y - h / 2, y1: b.y + h / 2, lignes };
 }
@@ -108,8 +109,20 @@ bulles.forEach((b, i) => {
       if (t.x >= bx.x0 && t.x <= bx.x1 && t.y >= bx.y0 && t.y <= bx.y1) {
         dire(n, "sa queue pointe dans sa propre bulle", "écarter la pointe vers la bouche du locuteur");
       }
-      const d = Math.hypot((t.x - b.x) * ratio, t.y - b.y);
-      if (d > 0.35) dire(n, "queue très longue", "rapprocher la bulle de son locuteur");
+      // Ce qui dépasse de la bulle, en fraction de la largeur de l'image :
+      // la distance de la pointe au bord de l'ellipse, dans sa direction.
+      const dx = t.x - b.x;
+      const dy = (t.y - b.y) / ratio;
+      const d = Math.hypot(dx, dy);
+      const a = (bx.x1 - bx.x0) / 2;
+      const bb = (bx.y1 - bx.y0) / 2 / ratio;
+      const r = d > 0 ? 1 / Math.sqrt((dx / d) ** 2 / a ** 2 + (dy / d) ** 2 / bb ** 2) : 0;
+      const depasse = d - r;
+      if (depasse > 0.035) {
+        dire(n, `queue trop longue (${depasse.toFixed(3)} de la largeur hors de la bulle)`, "rapprocher la BULLE de son locuteur : la queue dépasse de 0,012 à 0,03, elle désigne sans traverser la case");
+      } else if (depasse < 0.008 && d > r) {
+        dire(n, "queue à peine visible", "écarter un peu la pointe vers le locuteur");
+      }
     }
   }
   const mm = (b.fontSize ?? 0.00495) * largeurMm;

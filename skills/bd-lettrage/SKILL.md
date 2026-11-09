@@ -140,10 +140,17 @@ texte tient, pas là où elles se lisent.
   `nombre de caractères × fontSize × 0,56 ÷ 3`, sans dépasser 45 % de la
   largeur de la case. Ne touche pas au corps (`fontSize`) : c'est celui de
   l'album.
-- **La queue** (`tail`) part vers la bouche du locuteur et s'arrête juste
-  avant elle (à environ 0,015 de la bouche) : elle désigne, elle ne touche
-  pas. Elle ne traverse jamais un autre personnage ni une autre bulle. Hors
-  champ, elle pointe le bord de la case d'où vient la voix.
+- **La queue** (`tail`) est COURTE : elle dépasse de la bulle de 0,012 à
+  0,03 de la largeur de l'image, dans la direction de la bouche du
+  locuteur. Elle désigne, elle ne va pas chercher la bouche : si la bouche
+  est loin, c'est la bulle qu'on rapproche de la tête, pas la queue qu'on
+  allonge. Elle ne traverse jamais un visage, un autre personnage ni une
+  autre bulle. Hors champ, elle pointe le bord de la case d'où vient la
+  voix.
+- **La marge intérieure** (`pad`) : une bulle neuve naît avec celle de
+  l'atelier (plus d'air autour du texte). Garde-la ; sur une bulle ancienne
+  qui n'en a pas, ajoute `"pad": 1.45` et élargis `w` d'environ
+  `fontSize × 0,85` pour garder le même nombre de lignes.
 - **L'ordre de lecture** : dans une case, la première réplique est la plus
   haute, ou la plus à gauche à hauteur égale. Deux locuteurs qui se répondent
   se posent en escalier, la queue de chacun vers sa propre bouche.
