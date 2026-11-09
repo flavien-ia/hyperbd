@@ -75,6 +75,37 @@ Trois choses à tenir en composant :
 - **La place du lettrage.** La bible graphique dit où les bulles se posent :
   laisse-leur l'air correspondant dans les cadrages.
 
+### Le gabarit : la structure de la double page
+
+**Une planche de l'atelier est une double page** : page de gauche, page de
+droite, reliure au milieu. Le gabarit dit où est chaque case et quelle place
+elle prend. Ce n'est pas un détail de maquette : c'est lui que l'atelier
+remplit case par case, puis qu'il envoie à l'IA pour intégrer la planche
+(`/bd-planches`), et c'est en haut de leur case que les bulles naissent.
+Sans gabarit, le générateur décide seul de la mise en page.
+
+Pense la structure de chaque double page AVANT de la poser, et montre-la :
+
+- **La hiérarchie.** Une case dominante (l'accent), des cases moyennes, des
+  petites pour les respirations. Des tailles franchement inégales : cinq
+  bandes de même largeur ne font pas une planche.
+- **Les deux pages.** La page de gauche se lit avant celle de droite, chacune
+  de haut en bas. Le bas de la page de droite est la chute de la planche.
+  Une case à cheval sur la reliure (`both`) est un effet fort, à réserver
+  au grand moment, et jamais avec un visage sur la reliure.
+- **Les raccords.** Un cadrage repris d'une planche à l'autre se repose à la
+  même place et à la même taille.
+
+Chaque case porte sa place en fractions de la double page entière (0 à 1) :
+`page` (`left`, `right` ou `both`) et `layout` `{x, y, w, h}`. La page de
+gauche va de x = 0 à 0,5, la droite de 0,5 à 1. Laisse des marges (0,02) et
+des gouttières (0,015 environ), et ne fais pas toucher la reliure à une case
+qui n'est pas `both`.
+
+Chaque case porte aussi **ses** personnages et **son** décor
+(`characterIds`, `decorIds` : les variantes, pas les conteneurs) : une case
+générée seule ne reçoit que les références de sa case.
+
 ## Étape 2 : écrire dans les cases
 
 Crée les planches et rattache-les à leur scène :
@@ -87,6 +118,40 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" write <plancheId> --file <pl
 Le fichier porte le script modulaire : un en-tête, une case par entrée, une
 ligne d'ambiance. Le script d'une case contient sa description ET ses répliques,
 au format `Nom : texte`, une par ligne.
+
+```json
+{
+  "sceneId": "<id de la scène>",
+  "scriptModules": {
+    "header": "<la structure de la double page, en une phrase par page>",
+    "cases": [
+      {
+        "id": "c1",
+        "page": "left",
+        "layout": { "x": 0.02, "y": 0.03, "w": 0.46, "h": 0.55 },
+        "intro": "Case dominante de la page de gauche.",
+        "script": "<plan, angle, geste, décor>\nMira : <réplique>",
+        "characterIds": ["<variante>"],
+        "decorIds": ["<décor>"]
+      }
+    ],
+    "footer": "<l'ambiance : lumière, couleurs dominantes>"
+  },
+  "draft": {
+    "characterIds": ["<toutes les variantes de la planche>"],
+    "decorIds": ["<les décors>"],
+    "plateIds": ["<la planche de style>"]
+  }
+}
+```
+
+**Ne mets ni `size` dans `draft`, ni `pageSeule`** : l'atelier connaît le
+format de l'album (la double page). Une taille portrait posée là fait sortir
+une page simple dans un cadre de double page, avec la reliure au milieu.
+
+**Vérifie que l'écriture a pris** (la réponse ne dit pas d'erreur, et
+`planche <id>` rend bien les cases) avant d'aller plus loin : un script
+refusé laisse la planche vide.
 
 **Les répliques vont DANS les cases, jamais ailleurs.** Le lettrage en naîtra,
 une fois, quand la planche sera produite (`/bd-planches`) : taper une réplique

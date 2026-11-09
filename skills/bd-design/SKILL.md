@@ -141,17 +141,26 @@ elle servira de référence, pas d'illustration.
 C'est la preuve que **tout** le pipeline tient : la DA, les personnages, les
 décors, la génération de planche, le lettrage.
 
-1. Crée une planche réelle dans le projet.
-2. Écris un **court script de 3 ou 4 cases** sur la scène étalon. Un script
-   d'essai, pas le dialogue canonique : on teste la fabrication, pas l'écriture.
-3. Caste les variantes qui viennent d'être produites.
-4. Génère par le pipeline de planche, et attends :
+1. Crée une planche réelle dans le projet, rattachée à la scène étalon : la
+   planche test peut devenir la vraie planche de cette scène, rien n'est
+   perdu.
+2. Écris son **gabarit de double page** (voir `/bd-dialogues` : la place et
+   la taille de chaque case, ses personnages, son décor) et un **court
+   script de 4 à 6 cases**. On teste la fabrication, pas l'écriture.
+3. Caste les variantes qui viennent d'être produites, case par case.
+4. Génère comme en production, **des cases à la planche** : chaque case
+   seule, retiens-les, puis la planche entière, qui part de ses cases.
 
 ```bash
-node "$S" create-planche <projet> --title "Planche test"
-node "$S" write <plancheId> --file script.json
-node "$S" generate <plancheId> --wait
+node "$S" create-planche <projet> --title "<titre de la scène>"
+node "$S" write <plancheId> --file script.json      # puis vérifie qu'il a pris
+node "$S" generate <plancheId> --mode case --case <caseId> --wait   # chaque case
+node "$S" validate <varianteId> --case <caseId>
+node "$S" generate <plancheId> --mode planche --wait
 ```
+
+Ne donne aucune taille : l'atelier connaît la double page, et chaque case
+sort au ratio de son emplacement.
 
 5. Passe au regard (`_vision-qa`), en donnant cette fois **le script demandé**
    comme référence : c'est la dimension `script` qui se joue ici.

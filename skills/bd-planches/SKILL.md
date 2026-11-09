@@ -35,7 +35,8 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" costs <projet>
 2. **Les variantes sont castées et ont leurs images de référence étoilées.**
    Une planche se caste avec des VARIANTES (un costume, un âge, un état), pas
    avec des personnages en général. Sinon : `/bd-design`.
-3. **Les scripts modulaires sont posés**, cases et répliques. Sinon :
+3. **Les scripts modulaires et le gabarit sont posés** : cases, répliques,
+   et l'emplacement de chaque case sur la double page. Sinon :
    `/bd-dialogues`.
 4. **Le budget.** En guidé, annonce le coût estimé du scope et attends l'accord.
    **En `--auto`, `--budget` est OBLIGATOIRE** : une boucle qui dépense sans
@@ -48,17 +49,44 @@ coût déjà dépensé sur le projet.
 
 Pour chaque planche du scope, dans l'ordre où on la lira :
 
-### 1. Générer
+### 1. Générer : des cases à la planche
+
+**On ne fait pas une planche d'un coup.** Une planche de l'atelier est une
+double page, et elle se fabrique en deux temps :
+
+**a. Case par case.** Le gabarit est posé (`/bd-dialogues` : chaque case a sa
+place et sa taille sur la double page, ses personnages et son décor). Génère
+chaque case seule, regarde-la, retiens la meilleure :
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" generate <plancheId> --quality medium --mode planche --wait
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" generate <plancheId> --mode case --case <caseId> --quality medium --wait
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" validate <varianteId> --case <caseId>
 ```
 
-Le mode `planche` produit la planche entière d'un coup, au format de l'album
-(double page ou page simple : l'atelier connaît la taille, ne la donne pas).
-`page-left`, `page-right` et `case` servent aux reprises ciblées : quand une
-seule case cloche, on ne repaie pas toute la planche. Une case sort au ratio
-de son emplacement sur le gabarit, là encore sans rien préciser.
+Une case sort au ratio de son emplacement sur le gabarit : **ne donne jamais
+de taille**, ni pour une case ni pour une planche. Une case prend les
+personnages et le décor de la case (`characterIds`, `decorIds` dans la case
+du script), pas ceux de la planche. Les cases d'une planche sont
+indépendantes : lance-les ensemble, puis regarde-les ensemble.
+
+**b. La planche, à partir de ses cases.** Une fois les cases retenues,
+génère la planche entière :
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" generate <plancheId> --mode planche --quality medium --wait
+```
+
+L'atelier pose chaque case retenue à son emplacement exact sur la double
+page (les cases encore vides restent en réserve numérotée), envoie ce gabarit
+en tête des références, avec la consigne d'intégration : respecter la mise en
+page, reprendre les cases dessinées telles quelles, harmoniser l'encrage, les
+couleurs et la lumière, dessiner les cases en réserve d'après le script.
+C'est le comportement par défaut dès qu'une case est retenue, exactement
+comme le bouton « Générer la planche » de l'atelier. `--gabarit aucun` repart
+du prompt seul : ne le fais que si la personne le demande.
+
+Le mode page (page gauche, page droite) n'existe plus : on passe des cases à
+la planche.
 
 **Le texte ne se dessine jamais dans l'image.** La commande demande d'office
 des planches sans lettrage : le modèle réserve les espaces, et rien d'autre.
@@ -121,8 +149,10 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" derive-lettrage <plancheId>
 ```
 
 Le lettrage naît avec la planche : ses bulles viennent des répliques du
-script. Les PLACER et les valider, c'est le travail de `/bd-lettrage` : ne le
-fais pas ici.
+script, et chacune naît en haut de la case qui porte sa réplique (d'où
+l'importance d'un gabarit posé : sans emplacements, elles naissent au
+centre). Les PLACER finement et les valider, c'est le travail de
+`/bd-lettrage` : ne le fais pas ici.
 
 Cette naissance n'a lieu qu'une fois. Une planche **déjà lettrée** qu'on vient
 de regénérer garde son lettrage : ne dérive pas de nouveau, les bulles gardent

@@ -29,7 +29,10 @@
 //   a-plat <couverture>                    la couverture devient une couverture à plat
 //                                          (4e + dos + 1re, pour un album cartonné)
 //   dos <couverture> --mm 14               la largeur du dos d'une couverture à plat
-//   generate <planche> [--n 1] [--quality medium] [--mode planche] [--case ID]
+//   generate <planche> [--n 1] [--quality medium] [--mode planche|case] [--case ID]
+//            [--gabarit habille|schema|aucun] (planche entière : par défaut, elle
+//             part de ses cases dès qu'une case est retenue, posées à leur
+//             place dans le gabarit ; « aucun » = le prompt seul)
 //            [--dialogue-mode overlay|empty-bubbles|model]
 //            (défaut overlay : le texte se compose ensuite, il ne se cuit
 //             jamais dans l'image)
@@ -622,12 +625,39 @@ const commandes = {
   },
 
   async generate() {
+    const mode = typeof o.mode === "string" ? o.mode : "planche";
+    // Le mode page n'existe plus : on passe des cases à la planche.
+    if (mode !== "planche" && mode !== "case") {
+      throw new Error(
+        "Le mode page n'existe plus : génère case par case (--mode case --case ID), puis la planche entière, qui part de ses cases.",
+      );
+    }
+    if (mode === "case" && typeof o.case !== "string") {
+      throw new Error("Il faut --case <id de la case> en mode case.");
+    }
+    /**
+     * Pas de génération sur un gabarit vide.
+     *
+     * Un script refusé à l'écriture laisse la planche sans cases ; une
+     * génération lancée juste derrière partait quand même, sur le prompt de
+     * planche nu, et se payait pour une image hors sujet. Vécu le 2026-11-09.
+     */
+    const { planche } = await appel(`/planches/${arg(0)}`);
+    const cases = planche?.scriptModules?.cases ?? [];
+    if (cases.length === 0) {
+      throw new Error(
+        "Cette planche n'a pas encore de cases : écris son gabarit (write --file) avant de générer. Rien n'a été dépensé.",
+      );
+    }
+    if (mode === "case" && !cases.some((c) => c.id === o.case)) {
+      throw new Error(`Case introuvable sur cette planche : ${o.case}.`);
+    }
     const lancement = await appel(`/planches/${arg(0)}/generations`, {
       method: "POST",
       body: {
         n: o.n ? Number(o.n) : 1,
         quality: typeof o.quality === "string" ? o.quality : "medium",
-        mode: typeof o.mode === "string" ? o.mode : "planche",
+        mode,
         /**
          * Le texte ne se dessine PAS dans l'image.
          *
@@ -645,6 +675,9 @@ const commandes = {
         dialogueMode:
           typeof o["dialogue-mode"] === "string" ? o["dialogue-mode"] : "overlay",
         ...(typeof o.case === "string" ? { caseId: o.case } : {}),
+        ...(mode === "planche" && typeof o.gabarit === "string"
+          ? { gabarit: o.gabarit }
+          : {}),
         ...(typeof o.extra === "string" ? { extraPrompt: o.extra } : {}),
         ...(typeof o.model === "string" ? { model: o.model } : {}),
         ...(typeof o.size === "string" ? { size: o.size } : {}),
