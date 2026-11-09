@@ -16,6 +16,8 @@
 //   project <id|slug>                      un projet et ce qu'il permet
 //   new-project --title T [--universe ID]  créer un projet de bande dessinée
 //   rename <projet> --title T              changer le titre de travail
+//   style-cases <projet> [--set "..."]     le style de case de l'album (bords, gouttières,
+//                                          blanc) : il part avec la consigne du gabarit
 //   universe <projet>                      personnages, décors, styles
 //   planches <projet>                      l'album, dans l'ordre (numéros de l'atelier,
 //                                          cadenas, couverture à plat, dernier échec)
@@ -25,6 +27,7 @@
 //   drop-planche <plancheId>               retirer une planche de l'album
 //   rendu <plancheId> --out f.png          la planche lettrée, en image
 //         [--largeur 1536] [--locale en] [--sans-texte] [--calque]
+//         [--repere] (grille chiffrée, cases et bulles numérotées : pour placer)
 //   write <planche> --file <json>          écrit titre / script / casting
 //   a-plat <couverture>                    la couverture devient une couverture à plat
 //                                          (4e + dos + 1re, pour un album cartonné)
@@ -425,6 +428,19 @@ const commandes = {
     return appel(`/projects/${arg(0)}`, { method: "PATCH", body: { title: o.title.trim() } });
   },
 
+  /**
+   * Le style de case de l'album : bords des cases, gouttières, rapport au
+   * blanc. Le gabarit envoyé à l'IA ne dit que la position des cases ; ce
+   * style dit comment les dessiner. Il se pose à la direction artistique.
+   */
+  async "style-cases"() {
+    if (typeof o.set === "string") {
+      await appel(`/projects/${arg(0)}`, { method: "PATCH", body: { styleCases: o.set } });
+    }
+    const { project } = await appel(`/projects/${arg(0)}`);
+    return { styleCases: project?.styleCases ?? null };
+  },
+
   /** Un projet neuf. Sans --universe, l'atelier lui ouvre un univers à lui. */
   "new-project"() {
     if (typeof o.title !== "string" || !o.title.trim()) throw new Error("Il faut --title <titre de travail>.");
@@ -555,6 +571,7 @@ const commandes = {
     if (typeof o.locale === "string") q.set("locale", o.locale);
     if (o["sans-texte"]) q.set("texte", "0");
     if (o.calque) q.set("calque", "1");
+    if (o.repere) q.set("repere", "1");
     const qs = q.toString();
 
     const r = await fetch(

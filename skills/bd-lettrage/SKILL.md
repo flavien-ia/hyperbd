@@ -106,32 +106,77 @@ Une correction du texte source met ses traductions en retard : dis-le,
 
 ## Étape 4 : placer, puis regarder
 
-Les bulles fraîchement dérivées sont toutes au centre de l'image, empilées :
-c'est normal, elles attendent d'être posées.
+Les bulles fraîchement dérivées naissent en haut de la case qui porte leur
+réplique : elles sont dans la bonne case, pas encore à la bonne place, et
+leur queue pointe au hasard. Les poser est un travail de regard et de mesure,
+pas d'estimation. La méthode :
 
-Lis le lettrage (`lettrage <planche>` : le texte et la liste complète des
-éléments), place les bulles en écrivant leurs coordonnées, et réécris la
-liste COMPLÈTE (`set-lettrage <planche> --file bulles.json`, avec `bulles` :
-elle remplace l'existante, un élément oublié disparaît). Respecte **la place
-que la bible graphique réserve au lettrage**. Puis fais rendre la planche par
-l'atelier :
+**1. Lire la planche avec une règle graduée.**
 
 ```bash
+node "$S" rendu <plancheId> --sans-texte --repere --largeur 2048 --out reperes.png
+```
+
+L'image porte une grille chiffrée (tous les 5 %, en fractions de l'image : ce
+sont les coordonnées des bulles), l'emplacement et le nom de chaque case. Lis
+l'image toi-même et, pour CHAQUE réplique, relève par écrit, au centième :
+
+- **sa case** (celle dont le script porte la réplique) ;
+- **la bouche de son locuteur** (x, y), ou, s'il est hors champ, le point du
+  bord de la case d'où il parle ;
+- **les zones libres de sa case** : décor calme (mur, ciel, voûte, sol, fond
+  flou), de préférence en haut et du côté du locuteur. Ne sont jamais libres :
+  un visage, des mains qui agissent, l'objet que la case montre, la reliure.
+
+Ce relevé est la matière du placement : sans lui, on pose les bulles là où le
+texte tient, pas là où elles se lisent.
+
+**2. Poser chaque bulle d'après le relevé.**
+
+- **Le centre** (`x`, `y`) dans une zone libre de sa case, au-dessus ou à
+  côté de la tête du locuteur plutôt qu'en face d'un autre personnage, et
+  vers le haut de la case.
+- **La largeur** (`w`) pour deux à quatre lignes : environ
+  `nombre de caractères × fontSize × 0,56 ÷ 3`, sans dépasser 45 % de la
+  largeur de la case. Ne touche pas au corps (`fontSize`) : c'est celui de
+  l'album.
+- **La queue** (`tail`) part vers la bouche du locuteur et s'arrête juste
+  avant elle (à environ 0,015 de la bouche) : elle désigne, elle ne touche
+  pas. Elle ne traverse jamais un autre personnage ni une autre bulle. Hors
+  champ, elle pointe le bord de la case d'où vient la voix.
+- **L'ordre de lecture** : dans une case, la première réplique est la plus
+  haute, ou la plus à gauche à hauteur égale. Deux locuteurs qui se répondent
+  se posent en escalier, la queue de chacun vers sa propre bouche.
+
+Réécris la liste COMPLÈTE (`set-lettrage <planche> --file bulles.json`, avec
+`bulles` : elle remplace l'existante, un élément oublié disparaît ; garde
+l'`id` et tous les champs de chaque bulle, ne change que `x`, `y`, `w` et
+`tail`). Respecte **la place que la bible graphique réserve au lettrage**.
+
+**3. Faire contrôler par le calcul.**
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/lettrage-check.mjs" <plancheId>
+```
+
+Il dit, bulle par bulle (numéros du rendu avec repères), ce qui est
+mécaniquement faux : une bulle qui déborde de sa case ou mord sur la
+reliure, deux bulles qui se chevauchent, un ordre de lecture inversé, une
+queue qui sort de la case ou pointe dans sa propre bulle, un texte trop petit
+pour l'impression. Corrige jusqu'à `OK`.
+
+**4. Vérifier de l'œil, avec les repères puis sans.**
+
+```bash
+node "$S" rendu <plancheId> --repere --largeur 2048 --out verif.png
 node "$S" rendu <plancheId> --out <fichier.png>
 ```
 
-**Regarde l'image toi-même avant de la soumettre.** Une bulle manifestement sur
-un visage n'a pas besoin d'un juge, et lui envoyer un placement grossier gâche
-un tour.
-
-Trois repères pour placer :
-
-- **En haut, dans l'ordre de lecture.** Une bulle se pose vers le haut de sa
-  case, et les bulles d'une même bande se lisent de gauche à droite.
-- **Sur du décor.** Un ciel, un mur, un meuble sont de la place disponible. Un
-  visage, une main qui agit, l'objet que la scène regarde ne le sont pas.
-- **La queue désigne.** Elle pointe la bouche de son locuteur, ou l'endroit
-  d'où il parle s'il est hors champ, et ne traverse jamais quelqu'un d'autre.
+Avec les repères, chaque bulle porte son numéro et la pointe de sa queue un
+point : vérifie que chaque point est juste devant la bonne bouche et
+qu'aucune bulle ne couvre un visage. Puis regarde le rendu sans repères,
+comme un lecteur. Une bulle manifestement mal posée n'a pas besoin d'un juge,
+et lui envoyer un placement grossier gâche un tour.
 
 **Les numéros de page ne se posent pas ici.** Ce sont les folios, un réglage
 d'album que `/bd-album` règle à la fin (`folios`) : l'atelier les calcule à

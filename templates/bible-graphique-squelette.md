@@ -36,6 +36,20 @@ DA l'a nommé. Le savoir, c'est pouvoir le surveiller.]
 
 ---
 
+## Le style des cases
+
+> Ce que l'album fait de ses CASES : leurs bords, les gouttières, le rapport
+> au blanc. C'est la copie exacte du réglage `style-cases` du projet : il part
+> avec la consigne du gabarit, qui ne donne que la position des cases (sans
+> aucun contour), quand une planche se génère à partir de ses cases.
+
+```
+[une ou deux phrases, en matière : « aucun filet ; chaque case se perd dans
+le blanc du papier par un bord de lavis irrégulier ; gouttières larges »]
+```
+
+---
+
 ## Les codes visuels porteurs de sens
 
 > La couleur ne décore pas : elle dit où l'on est et ce qui se joue. Un lecteur

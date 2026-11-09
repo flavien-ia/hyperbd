@@ -179,15 +179,36 @@ est bon.
 C'est l'étape qui transforme un choix en règle. Ne la saute pas : une DA
 choisie mais pas écrite se dissout en trois séances.
 
-1. **Le cadre** dans le modèle de prompt du projet :
+1. **Le cadre, dans la planche de style.** L'atelier n'envoie plus le modèle
+   de prompt du projet : le texte de style qui part avec chaque case et
+   chaque planche est la **description de la planche de style** de
+   l'univers. Une fois l'image de la piste promue en style (point 4), écris
+   le bloc de style dans sa description :
 
 ```bash
-node "$S" set-template <projet> --file cadre.txt
+node "$S" set-entry <projet> <id de l'entrée style> --file style.json   # {"promptSnippet": "<le bloc de style>"}
 ```
 
-2. **La bible graphique**, depuis
+   Un bloc écrit ailleurs (`set-template`) n'arrive jamais au modèle.
+
+2. **Le style des cases.** Ce que la piste retenue fait des CASES : leurs
+   bords (filet noir, bord de lavis qui se perd dans le blanc, cadre
+   déchiré, pas de cadre), les gouttières (larges, étroites, absentes), le
+   rapport au blanc du papier. Décris-le en une ou deux phrases, en matière
+   et non en nom d'auteur, d'après ce que montrent les images retenues :
+
+```bash
+node "$S" style-cases <projet> --set "<le style des cases>"
+```
+
+   C'est lui qui part avec la consigne du gabarit quand une planche se
+   génère à partir de ses cases : le gabarit ne donne que la position des
+   cases, sans aucun contour, et les cases suivent ce style. Sans lui, le
+   modèle invente leurs bords, ou recopie ceux du gabarit.
+
+3. **La bible graphique**, depuis
    `${CLAUDE_SKILL_DIR}/../../templates/bible-graphique-squelette.md` :
-   le cadre, les codes couleur par fil, les motifs, les négatifs, la grammaire
+   le cadre, le style des cases, les codes couleur par fil, les motifs, les négatifs, la grammaire
    de mise en page, la police, et **ce qui a été écarté avec sa raison**.
 
 ```bash
@@ -198,7 +219,7 @@ node "$S" new-doc <projet> --kind bible-graphique --title "Bible graphique" \
    Si une bible graphique existe déjà (on la revoit), réécris-la plutôt que
    d'en créer une seconde : `write-doc <id> --body-file bible-graphique.md`.
 
-3. **Les images de la piste retenue** promues en entrées `style` de l'univers.
+4. **Les images de la piste retenue** promues en entrées `style` de l'univers.
 
    **Avant de promouvoir, relis chaque image contre les négatifs que tu viens
    d'écrire.** Une planche de style est ce que le modèle imitera soixante fois :
@@ -215,7 +236,7 @@ node "$S" new-doc <projet> --kind bible-graphique --title "Bible graphique" \
 node "$S" promote-image <imageId> --style "<nom de la piste>"
 ```
 
-4. **La police du lettrage** : le catalogue de l'atelier en propose seize,
+5. **La police du lettrage** : le catalogue de l'atelier en propose seize,
    libres de droits, avec un aperçu. Montre-les ; une police à soi s'importe
    dans Mon compte (« Mes polices », avec l'attestation des droits). C'est un
    réglage de l'ALBUM : vue Lettrage, bouton « Réglages de l'album », ou
@@ -223,7 +244,7 @@ node "$S" promote-image <imageId> --style "<nom de la piste>"
    sont déjà lettrées : le bilan dit les bulles qui changeraient de forme).
    Un tome neuf hérite de la police du tome précédent de l'univers.
 
-5. **Les pistes perdantes** écartées avec leur raison, sur la Toile et au
+6. **Les pistes perdantes** écartées avec leur raison, sur la Toile et au
    journal : chaque bloc de leur grappe passe en `ecarte`, avec la raison
    (elle se lit dans la Corbeille du rail), et la grappe gagnante en
    `valide`.
@@ -251,8 +272,9 @@ Termine par `🎉 DIRECTION ARTISTIQUE POSÉE`.
   qualité change le rendu, pas la robustesse.
 - **La lisibilité se juge en petit.** Si tu ne montres que des images en grand,
   tu fais choisir sur un critère qui ne sera jamais celui du lecteur.
-- **Le cadre écrit dans le projet et celui de la bible graphique doivent être
-  identiques.** Si l'un change, l'autre change dans la même séance.
+- **Le cadre de la planche de style, le style des cases et la bible graphique
+  disent la même chose.** Si l'un change, les autres changent dans la même
+  séance.
 - N'invente pas un style « inspiré de » un auteur vivant nommément. Décris des
   qualités graphiques, pas une signature à imiter.
 
