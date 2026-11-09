@@ -399,6 +399,34 @@ async function controlerDialogue(projet) {
       );
     }
 
+    /**
+     * La densité : une planche peut avoir des cases muettes, pas être muette.
+     *
+     * Une double page de cinq à sept cases avec une ou deux répliques se
+     * regarde, elle ne se lit pas : le lecteur ne sait ni qui sont ces gens, ni
+     * où l'on est, ni ce qui se joue. Vécu le 2026-11-09 (dix répliques pour
+     * vingt-trois cases, « incompréhensible en l'état »). Les encarts du
+     * narrateur vivent dans le lettrage, pas dans le script : ils peuvent
+     * compenser, d'où un avertissement et non une erreur.
+     */
+    const parlantes = cases.filter((c) =>
+      (c.script ?? "")
+        .split(/\r?\n/)
+        .some((l) => /^[^:(\n#>*|[]{1,45}?\s*(?:\([^)\n]*\))?\s*:\s+\S/.test(l.trim())),
+    ).length;
+    if (
+      cases.length >= 4 &&
+      !sansParole &&
+      ((p.nbRepliques ?? 0) < Math.ceil(cases.length * 0.8) || parlantes < cases.length / 2)
+    ) {
+      signaler(
+        "avertissement",
+        `planche trop muette pour être suivie (${p.nbRepliques} répliques, ${parlantes} cases parlantes sur ${cases.length})`,
+        `planche « ${p.title || p.slug || p.id} »`,
+        "donner au lecteur de quoi suivre : des répliques aux personnages qui entourent un taiseux, et, si le projet a un narrateur, un encart de lieu et de date à chaque changement",
+      );
+    }
+
     if (cases.length && !PLANS.some((re) => cases.some((c) => re.test(c.script ?? "")))) {
       signaler(
         "avertissement",
