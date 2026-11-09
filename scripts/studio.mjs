@@ -39,7 +39,7 @@
 //            [--dialogue-mode overlay|empty-bubbles|model]
 //            (défaut overlay : le texte se compose ensuite, il ne se cuit
 //             jamais dans l'image)
-//            [--model gpt-image-2.5-flare|gpt-image-2.5-sunburst|gpt-image-2]
+//            [--model gpt-image-2.5-flare|gpt-image-2.5-sunburst]
 //            [--size WxH] (omise : celle de l'atelier, case et couverture comprises)
 //                      [--extra "..."] [--wait]
 //   generation <id>                        où en est une génération
