@@ -4,6 +4,20 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.13.0 (9 novembre 2026)
+
+### Nouveautés
+- **Des cases à la planche, jamais d'un coup.** Chaque case se génère seule, au format de son emplacement, et se retient ; puis la planche entière part de ses cases, posées à leur place dans le gabarit de la double page, avec une consigne d'intégration. C'est le chemin du bouton « Générer la planche » de l'atelier.
+- **Le gabarit de la double page.** Le découpage pense et pose la structure de chaque planche : hiérarchie des cases, page de gauche puis de droite, raccords, personnages et décor de chaque case.
+- **Le style des cases**, défini à la direction artistique : bords, gouttières, rapport au blanc. Le gabarit ne donne que la position des cases ; elles sont dessinées dans ce style.
+- **Le lettrage posé à la règle.** Un rendu avec repères chiffrés permet de relever la bouche de chaque locuteur et les zones libres ; les bulles se posent d'après ce relevé, avec des queues courtes, puis un contrôle vérifie case, reliure, chevauchements, ordre de lecture et longueur des queues.
+
+### Améliorations
+- Le texte de style de la direction artistique s'écrit là où l'atelier le lit vraiment.
+- Le contrôle du découpage signale une planche trop muette pour être suivie.
+- Plus de génération possible sur une planche sans cases, et plus de mode page.
+- Le tutoriel couvre les quatre étapes d'accueil de l'atelier.
+
 ## v0.12.0 (11 octobre 2026)
 
 ### Nouveautés
