@@ -4,6 +4,16 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.13.2 (11 novembre 2026)
+
+### Améliorations
+- **La planche finale sort en haute définition.** Les cases restent en qualité moyenne, puisqu'elles servent de matière ; la planche entière, celle qu'on lit et qu'on imprime, passe en haute : 3408 x 2416 pour une double page, au lieu de 1536 x 1088.
+- **La qualité s'annonce et se choisit.** Avant la première génération d'un projet, Claude dit les réglages, ce qu'ils coûtent, et demande s'ils vous conviennent. Vous pouvez en changer à tout moment, en le lui demandant ou depuis l'atelier (vue Planche, champ « Qualité »). Votre choix est retenu au journal du projet et n'est plus redemandé.
+
+### Corrections
+- **La traduction est jugée sur la traduction.** Le rendu d'une langue pas encore validée servait le texte d'origine : le juge regardait des planches en langue source. `/bd-traduire` demande maintenant le rendu du brouillon.
+- **La planche test se valide** à la fin de `/bd-design`, image et lettrage, comme le pilote d'album l'attend avant de commencer.
+
 ## v0.13.1 (11 novembre 2026)
 
 ### Corrections
