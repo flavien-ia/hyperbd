@@ -16,9 +16,10 @@
 
 ## Le cadre
 
-> Le bloc de style exact, tel qu'il part dans chaque prompt de planche. C'est
-> la copie de ce qui est enregistré dans le `prompt_template` du projet : les
-> deux doivent rester identiques, et si l'un change, l'autre change.
+> Le bloc de style exact, tel qu'il part avec chaque case et chaque planche.
+> C'est la copie du « Prompt de style » de la planche de style de l'univers
+> (la description de l'entrée de style) : les deux doivent rester identiques,
+> et si l'un change, l'autre change.
 
 ```
 [le bloc de style, en prose, couvrant les neuf dimensions :

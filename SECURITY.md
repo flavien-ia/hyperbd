@@ -59,7 +59,7 @@ que vous avez installé est bien ce qui a été publié.
   scénarios, les planches et les images.
 - Pour la mise à jour : l'atelier et `github.com`, sans jeton, pour lire la
   version publiée et télécharger l'archive.
-- **Vos clés d'API (OpenAI, Cloudflare R2, Topaz) ne transitent jamais par le
+- **Vos clés d'API (OpenAI, Cloudflare R2, Topaz, Bria) ne transitent jamais par le
   plugin.** Elles sont saisies dans l'atelier, chiffrées, et c'est l'atelier
   qui s'en sert. Le plugin ne les voit pas, ne les demande pas, ne les lit pas.
 

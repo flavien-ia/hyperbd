@@ -78,7 +78,7 @@ faire et, pour un refus de sécurité, `erreur.motifs` ce qui a déplu (dis-les 
 | `refus_securite` | « refusée par le filtre de sécurité : à reformuler » (et vers `/bd-planches`) |
 | `credit_epuise` | « le compte OpenAI n'a plus de crédit : rien ne se génèrera avant un rechargement » |
 | `plafond_facturation` | « plafond de dépense OpenAI atteint : à relever, ou attendre le mois suivant » |
-| `cle_refusee` | « la clé OpenAI est refusée : à remplacer dans Mon compte » |
+| `cle_refusee` | « la clé OpenAI est refusée : à retirer puis recoller dans Mon compte, onglet Clés API » |
 | `limite_debit`, `autre` | « un échec passager : à relancer » |
 
 Un crédit épuisé, un plafond ou une clé refusée valent pour TOUT l'album, pas

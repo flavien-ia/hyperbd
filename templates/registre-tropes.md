@@ -1,7 +1,7 @@
 # Registre de tropes
 
-> Une bibliothèque de départ, à enrichir projet après projet (`/bd-retro` y
-> ajoute ce qu'on a rencontré).
+> Une bibliothèque de départ, à enrichir projet après projet, de ce qu'on a
+> rencontré.
 >
 > Un trope n'est pas une faute : c'est un raccourci partagé avec le lecteur, et
 > s'en priver par principe donne des récits illisibles. Ce qui coûte, c'est le

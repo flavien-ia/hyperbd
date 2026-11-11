@@ -44,10 +44,16 @@ Les types de bloc : `note`, `scene`, `acte` (un chapitre), `personnage`,
 `decor`, `document`, `question`, `image`. Les liens désignent les blocs par
 leur RANG dans le tableau (leurs identifiants n'existent pas encore) et ne
 relient donc que des blocs du même lot ; leurs types : `libre`, `cause`,
-`rappel`, `tension`. Les positions sont facultatives : l'atelier range les
-blocs libres en grille, et une scène n'en a pas besoin (voir plus bas).
-N'essaie pas de calculer une mise en page. Un lot porte au plus soixante
-blocs.
+`rappel`, `tension`. Pour relier deux blocs déjà posés (un rappel entre deux
+scènes, par exemple), c'est `new-edge --from <id> --to <id> --type rappel
+--label "<le fil>"`. Un lot porte au plus soixante blocs.
+
+**Tu ne donnes pas de positions.** La commande range elle-même les blocs
+libres d'un lot sur l'établi : à gauche du récit, en rangées de quatre, sous
+le lot précédent, sans jamais rien recouvrir. Deux lots posés l'un après
+l'autre se lisent donc comme deux grappes, la plus récente en bas. Une scène
+n'a pas de position du tout (voir plus bas). N'essaie pas de calculer une
+mise en page, et ne passe ni `x`, ni `y`, ni `ancre`.
 
 La même commande, sans `--file`, LIT la Toile (comme `nodes`) : les blocs et
 les liens, sans les corps. Le corps d'un bloc se lit par `node <id>`.
@@ -55,12 +61,14 @@ les liens, sans les corps. Le corps d'un bloc se lit par `node <id>`.
 ## Comment la Toile est faite
 
 La Toile est une partition. **Le récit court en largeur** : une colonne par
-scène, dans l'ordre du récit. **La hauteur est une lentille** que la personne
-choisit : le temps (une scène datée descend à sa date), les personnages ou les
-lieux en rangées, le statut, ou rien. Une scène n'a donc pas de position à
-elle : son rang dans le récit et sa date suffisent. Les positions ne comptent
-que pour les blocs libres (notes, images, décors, personnages, documents,
-questions).
+scène, dans l'ordre du récit. **La hauteur est une lecture** que la personne
+choisit (à l'écran, le bouton « Lire en hauteur » du rail) : le temps (une
+scène datée descend à sa date), les personnages ou les lieux en rangées, les
+fils du récit (les intrigues nommées dans `meta.intrigues`), le statut, ou
+libre. Une scène n'a donc pas de position à elle : son rang dans le récit et
+sa date suffisent. Les positions ne comptent que pour les blocs libres
+(notes, images, décors, personnages, documents, questions), qui vivent sur
+l'établi, à gauche du récit.
 
 **Les chapitres** (type `acte` dans l'atelier, « chapitre » à l'écran) sont
 des bandes qui couvrent des scènes consécutives. Un chapitre que tu poses
@@ -130,12 +138,44 @@ ensemble, ouvre-la par un bloc `note` qui dit ce que c'est (« Trois pistes de
 prémisse, angles imposés »). Sans cela, la personne trouve six blocs orphelins
 et doit deviner.
 
-**Ce que tu poses arrive en `idee`.** C'est le défaut, ne le change pas : une
-proposition est une proposition. L'atelier l'affiche en trait interrompu, avec
-ta marque. La personne l'adopte en la passant à `discute` ou `valide` (un
-clic sur le bloc ouvre son panneau, le statut s'y choisit), ou l'écarte : un
-bloc écarté quitte la Toile et attend dans la Corbeille, l'icône du bas du
-rail, avec sa raison.
+**Ce que tu poses arrive en `idee`.** C'est le défaut à la pose, ne le change
+pas : une proposition est une proposition. L'atelier l'affiche en trait
+interrompu, avec ta marque. La personne peut l'adopter elle-même en la
+passant à `discute` ou `valide` (un clic sur le bloc ouvre son panneau, le
+statut s'y choisit, tout en bas), ou l'écarter : un bloc écarté quitte la
+Toile et attend dans la Corbeille, l'icône du bas du rail, avec sa raison.
+
+## La Toile suit la conversation
+
+En pratique, la personne arbitre en te répondant, pas en cliquant sur la
+Toile. **C'est donc toi qui reportes chaque décision sur la Toile, au moment
+où elle est prise**, sans attendre la fin de la skill :
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <bloc> --status valide
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <bloc> --status ecarte --raison "<pourquoi, dans ses mots>"
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <bloc> --status discute
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" drop-node <note d'annonce>
+```
+
+- ce qu'elle retient passe en `valide` ;
+- ce qu'elle écarte passe en `ecarte`, avec la raison ;
+- ce qu'elle laisse ouvert passe en `discute` ;
+- la note d'annonce d'une grappe tranchée n'a plus d'objet : retire-la, la
+  décision est au journal ;
+- une question à laquelle elle a répondu passe en `valide`, sa réponse écrite
+  dans le corps du bloc (`write-node`).
+
+Une Toile où tout reste en `idee` ment : elle montre comme des propositions
+ce qui est décidé depuis longtemps, et les skills suivantes, qui ne
+construisent que sur du validé, ne savent plus sur quoi s'appuyer.
+
+Deux garde-fous. **Tu ne valides jamais à la place de la personne** : tu
+reportes ce qu'elle a dit, et tant qu'elle n'a rien dit, le bloc reste en
+`idee`. En `--auto` seulement, c'est toi qui tranches, et tu le consignes au
+journal. **Tu ranges avant de rendre la main** : à la fin de la skill, relis
+`nodes` ; il ne doit rester en `idee` que ce qui attend vraiment une réponse,
+et aucune note d'annonce orpheline.
 
 ## Ce que tu lis avant d'écrire
 
@@ -146,6 +186,10 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" nodes <projet>
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" changes <projet> --since <ton dernier curseur>
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" journal <projet> --limite 20
 ```
+
+Le curseur est le numéro que `version <projet>` a rendu la dernière fois que
+tu as lu la Toile dans cette conversation. Dans une conversation neuve, tu
+n'en as pas : saute `changes`, `nodes` et le journal suffisent.
 
 Ce que tu en tires :
 

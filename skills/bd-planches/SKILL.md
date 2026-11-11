@@ -88,14 +88,12 @@ du prompt seul : ne le fais que si la personne le demande.
 Le mode page (page gauche, page droite) n'existe plus : on passe des cases à
 la planche.
 
-**Le texte ne se dessine jamais dans l'image.** La commande demande d'office
-des planches sans lettrage : le modèle réserve les espaces, et rien d'autre.
-C'est ce qui rend possible tout ce qui suit : dériver les répliques du script,
-les composer dans la police de l'album, les traduire, sortir un export sans
-texte pour l'imprimeur. Un dialogue peint dans les pixels est définitif, et il
-arrive dans une police que personne n'a choisie. Ne passe `--dialogue-mode
-model` que si quelqu'un veut délibérément une planche où le modèle écrit, en
-sachant qu'elle sort alors de la chaîne de lettrage.
+**Le texte ne se dessine jamais dans l'image.** L'atelier l'impose : le
+modèle réserve les espaces, et rien d'autre. C'est ce qui rend possible tout
+ce qui suit : dériver les répliques du script, les composer dans la police de
+l'album, les traduire, sortir un export sans texte pour l'imprimeur. Un
+dialogue peint dans les pixels serait définitif, dans une police que personne
+n'a choisie : il n'existe plus d'option pour le demander.
 
 ### 2. Regarder
 

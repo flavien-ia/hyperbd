@@ -241,9 +241,12 @@ node "$S" share-version <lienId> --version <id de la version>
 node "$S" preflight <projet>
 ```
 
-Puis **le master, en quatre étapes**, les mêmes que dans la fenêtre du
-master de l'atelier, chacune avec son fichier. Une partie seulement de
-l'album se tire par ses pages, comme à l'impression (`--pages "couv, 1-8"`).
+Puis **le master, étape par étape**. Dans l'atelier, sa fenêtre s'ouvre
+depuis la vue Aperçu (menu de téléchargement, « Le master d'impression ») et
+porte cinq onglets : Planches, Chromie, Agrandissement, Fond perdu, Master.
+Elle n'a plus d'onglet d'assemblage : le PDF de contrôle se demande d'ici, ou
+par « Le tout en PDF » du même menu. Une partie seulement de l'album se tire
+par ses pages, comme à l'impression (`--pages "couv, 1-8"`).
 
 4. **La chromie** (facultative) : les couleurs de l'album telles qu'elles
    partent à l'imprimeur (au curseur, ou une LUT importée) et le profil CMYK
@@ -270,13 +273,15 @@ node "$S" upscale-batch <projet> --dpi 300 --yes --wait
 
 7. **Le fond perdu, puis le master.** Le fond perdu AJOUTE de la matière
    autour de chaque page (rien ne part plus à la coupe) : en miroir, gratuit
-   et par défaut ; ou généré par Bria, environ 0,02 $ la page, fabriqué une
+   et par défaut ; ou généré par Bria, environ 0,04 $ la page, fabriqué une
    fois et gardé, s'il y a une clé Bria dans Mon compte. Le génératif se
    chiffre et se confirme comme l'agrandissement ; le master le reprend
-   ensuite. A4 à 3 mm de fond perdu, traits de coupe, CMYK et pages de garde
-   par défaut ; une couverture à plat sort dans son propre fichier, avec un
-   rembord de 15 mm (`--rembord`, à la demande de l'imprimeur), le tout dans
-   un zip.
+   ensuite. A4 à 3 mm de fond perdu, traits de coupe et CMYK par défaut ; une
+   couverture à plat sort dans son propre fichier, avec un rembord de 15 mm
+   (`--rembord`, à la demande de l'imprimeur). Le travail fini rend l'adresse
+   du master (`url`) et, à part, celle de la couverture (`urlCouverture`) :
+   donne-les à la personne, et dis-lui que l'atelier efface ces fichiers
+   quatorze jours après leur fabrication.
 
 ```bash
 node "$S" fond-perdu <projet>                       # chiffre, ne lance rien

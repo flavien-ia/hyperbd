@@ -115,27 +115,31 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" create-planche <projet> --ti
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" write <plancheId> --file <planche.json>
 ```
 
-Le fichier porte le script modulaire : un en-tête, une case par entrée, une
-ligne d'ambiance. Le script d'une case contient sa description ET ses répliques,
-au format `Nom : texte`, une par ligne.
+Le fichier porte le script modulaire : une case par entrée. **Chaque case
+se suffit à elle-même** : depuis que l'atelier fabrique une planche à partir
+de ses cases, une case n'hérite plus de rien, ni de l'en-tête de la planche,
+ni de son ambiance, ni de ses références. Le script d'une case contient sa
+description ET ses répliques, au format `Nom : texte`, une par ligne.
 
 ```json
 {
   "sceneId": "<id de la scène>",
   "scriptModules": {
-    "header": "<la structure de la double page, en une phrase par page>",
+    "header": "",
     "cases": [
       {
         "id": "c1",
         "page": "left",
         "layout": { "x": 0.02, "y": 0.03, "w": 0.46, "h": 0.55 },
         "intro": "Case dominante de la page de gauche.",
-        "script": "<plan, angle, geste, décor>\nMira : <réplique>",
+        "script": "<plan, angle, geste, décor, lumière>\n@Mira regarde @Tobias.\nMira : <réplique>",
+        "ambiance": "<facultatif : la lumière et les couleurs de CETTE case>",
         "characterIds": ["<variante>"],
-        "decorIds": ["<décor>"]
+        "decorIds": ["<décor>"],
+        "plateIds": ["<la planche de style>"]
       }
     ],
-    "footer": "<l'ambiance : lumière, couleurs dominantes>"
+    "footer": ""
   },
   "draft": {
     "characterIds": ["<toutes les variantes de la planche>"],
@@ -144,6 +148,22 @@ au format `Nom : texte`, une par ligne.
   }
 }
 ```
+
+Quatre choses à tenir, toutes vérifiées dans l'atelier :
+
+- **`plateIds` dans CHAQUE case.** C'est la planche de style qui porte l'image
+  et le texte de la direction artistique. Une case qui ne la nomme pas se
+  dessine sans style ; celle de `draft` ne sert qu'à la planche entière.
+- **`header` et `footer` restent vides** (les deux champs sont obligatoires,
+  mais l'atelier n'envoie plus l'en-tête d'une planche, et présente son
+  ambiance comme un champ ancien, à vider). La lumière et l'atmosphère se
+  disent dans le texte de chaque case, ou dans son `ambiance`.
+- **`@Nom` dans le texte d'une case** rattache un personnage ou un décor à ses
+  images de référence (« @Mira », « @Augustin Crane ») : le nom doit être
+  celui d'une entrée citée dans `characterIds` ou `decorIds` de la case. Sans
+  l'arobase, le modèle reçoit les images sans savoir qui est qui.
+- Une case sans personnage (un décor, un objet, un insert) garde quand même
+  son décor et son style.
 
 **Ne mets ni `size` dans `draft`, ni `pageSeule`** : l'atelier connaît le
 format de l'album (la double page). Une taille portrait posée là fait sortir

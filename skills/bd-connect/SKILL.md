@@ -26,14 +26,14 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" me
 
 ## Étape 1 : obtenir un jeton
 
-Le jeton est ce qui te permet d'agir au nom de la personne. Il se crée dans son espace, page **Mon compte**, section **Jetons d'API**, et n'est affiché **qu'une fois**.
+Le jeton est ce qui te permet d'agir au nom de la personne. Il se crée dans son espace, page **Mon compte**, onglet **Clés API**, section **Jetons d'API**, et n'est affiché **qu'une fois**.
 
 Dis-lui, dans ces termes (adapte l'adresse si `--url` est fourni) :
 
 > Pour que je puisse travailler dans l'atelier, il me faut un jeton d'accès.
 >
-> 1. Ouvre **https://app.studio-entremondes.fr/compte**
-> 2. Dans **Jetons d'API**, crée un jeton (nomme-le par exemple « Claude Code »)
+> 1. Ouvre **https://app.studio-entremondes.fr/compte?onglet=cles** (Mon compte, onglet « Clés API »)
+> 2. Dans **Jetons d'API**, clique « Créer un jeton » (nomme-le par exemple « Claude Code », garde les trois droits cochés : Lire, Écrire, Générer)
 > 3. Copie-le et colle-le ici : il ne sera plus affiché ensuite
 
 Attends le jeton. Il commence par `sek_`.

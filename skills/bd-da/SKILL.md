@@ -236,10 +236,12 @@ node "$S" new-doc <projet> --kind bible-graphique --title "Bible graphique" \
 node "$S" promote-image <imageId> --style "<nom de la piste>"
 ```
 
-5. **La police du lettrage** : le catalogue de l'atelier en propose seize,
-   libres de droits, avec un aperçu. Montre-les ; une police à soi s'importe
-   dans Mon compte (« Mes polices », avec l'attestation des droits). C'est un
-   réglage de l'ALBUM : vue Lettrage, bouton « Réglages de l'album », ou
+5. **La police du lettrage** : le catalogue de l'atelier en propose une
+   vingtaine, libres de droits, avec un aperçu (`police <projet>` les
+   liste). Montre-les ; une police à soi s'importe dans Mon compte, onglet
+   « Polices » (« Mes polices », avec l'attestation des droits). C'est un
+   réglage de l'ALBUM : dans la vue Planche, bascule « Lettrage », l'engrenage
+   « Réglages de l'album » (onglets Police, Langue, Folios), ou
    `node "$S" police <projet> --set <id>` (`--essai` d'abord si des planches
    sont déjà lettrées : le bilan dit les bulles qui changeraient de forme).
    Un tome neuf hérite de la police du tome précédent de l'univers.
@@ -277,12 +279,3 @@ Termine par `🎉 DIRECTION ARTISTIQUE POSÉE`.
   séance.
 - N'invente pas un style « inspiré de » un auteur vivant nommément. Décris des
   qualités graphiques, pas une signature à imiter.
-
-## En mode tuto
-
-Si `me` dit `parcours.actif`, suis le protocole de
-`${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par le contexte
-(« Étape n sur 11 : ... »), termine par l'instruction miroir (où aller dans
-l'atelier, quoi regarder, puis quoi taper), marque un « vu » quand la
-personne dit qu'elle a regardé, une étape à la fois. En `--auto`, dis que le
-tuto ne s'applique pas, et déroule.

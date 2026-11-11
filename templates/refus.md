@@ -29,7 +29,7 @@ Quand on attend une génération, un échec sort avec ces champs (`raison`,
 | `credit_epuise` | le compte OpenAI de la personne n'a plus de crédit prépayé | **s'arrêter** : rien ne passera avant un rechargement sur platform.openai.com (Billing). Le dire, avec le nombre de planches qui restent |
 | `plafond_facturation` | la limite de dépense mensuelle du compte OpenAI est atteinte | **s'arrêter** : la relever dans platform.openai.com (Billing, Limits), ou attendre le mois suivant. Le dire |
 | `limite_debit` | trop de demandes en trop peu de temps | **attendre** une minute, puis reprendre la même demande, une seule fois de suite ; si ça recommence, espacer les lancements |
-| `cle_refusee` | la clé enregistrée dans Mon compte est révoquée, mal copiée, ou sans droit sur ce modèle | **s'arrêter** et renvoyer vers Mon compte (ou `/start-hyperbd`) pour la remplacer. Ne pas réessayer : chaque essai échouera |
+| `cle_refusee` | la clé enregistrée dans Mon compte est révoquée, mal copiée, ou sans droit sur ce modèle | **s'arrêter** et renvoyer vers Mon compte, onglet « Clés API » (ou `/start-hyperbd`) : une carte déjà configurée n'a plus de champ, il faut « Retirer cette clé » puis coller la nouvelle. Ne pas réessayer : chaque essai échouera |
 | `autre` | réseau, incident chez le fournisseur, bug | **réessayer une fois**, puis s'arrêter et montrer le message brut |
 
 Deux règles qui priment :

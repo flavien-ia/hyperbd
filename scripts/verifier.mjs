@@ -138,11 +138,72 @@ const lettrage = readFileSync(join(RACINE, "templates/juges/lettrage.md"), "utf8
 ok(/VALIDER \| AJUSTER \| REFAIRE/.test(lettrage), "le juge lettrage porte son verdict propre");
 ok(/Ce que recouvre chaque bulle/.test(lettrage), "le juge lettrage exige le relevé des visages");
 
+// ── 9. Ce que les skills demandent au CLI existe ────────────────────────────
+// Chaque appel `studio.mjs" <commande> --option` (ou `"$S" <commande>`) écrit
+// dans une skill ou un gabarit doit nommer une commande implémentée, et des
+// options que le CLI lit vraiment : une option citée et jamais lue est
+// ignorée en silence, et la skill croit avoir demandé ce qu'elle n'a pas eu.
+function* textesDuMetier() {
+  for (const s of skills) yield [`skills/${s}/SKILL.md`, readFileSync(join(skillsDir, s, "SKILL.md"), "utf8")];
+  for (const f of fichiers(join(RACINE, "templates"))) {
+    if (f.endsWith(".md")) yield [f.slice(RACINE.length + 1).split("\\").join("/"), readFileSync(f, "utf8")];
+  }
+}
+// Lue directement (`o.option`), ou par son nom (`o["option"]`, `texteDe("option", ...)`).
+const optionLue = (opt) => cli.includes(`"${opt}"`) || new RegExp(`\\bo\\.${opt}\\b`).test(cli);
+let appels = 0;
+let appelsKo = 0;
+for (const [nom, texte] of textesDuMetier()) {
+  for (const m of texte.matchAll(/(?:studio\.mjs"|"\$S")[ \t]+([a-z][a-z-]*)([^\n`]*)/g)) {
+    appels++;
+    const [, commandeCitee, suite] = m;
+    if (!implementees.has(commandeCitee)) {
+      appelsKo++;
+      ok(false, "commande citée mais absente du CLI", `${nom} : ${commandeCitee}`);
+      continue;
+    }
+    for (const option of suite.matchAll(/--([a-z][a-z-]*)/g)) {
+      if (!optionLue(option[1])) {
+        appelsKo++;
+        ok(false, "option citée mais jamais lue par le CLI", `${nom} : ${commandeCitee} --${option[1]}`);
+      }
+    }
+  }
+}
+ok(appelsKo === 0, `${appels} appels au CLI dans les skills et gabarits : commandes et options existent`);
+
+// ── 10. Les restes d'anciennes versions ne reviennent pas ───────────────────
+// Chaque motif a déjà égaré quelqu'un : le tuto en onze étapes, des options
+// retirées, l'ancien cadre de génération, Mon compte sans son onglet.
+const PERIMES = [
+  [/sur 11\b/, "le tuto en onze étapes (il en a quatre)"],
+  [/--dialogue-mode/, "l'option --dialogue-mode (retirée : l'atelier impose le lettrage posé)"],
+  [/--sans-pages-de-garde|pages de garde/, "les pages de garde du master (retirées de l'atelier)"],
+  [/prompt_template/, "l'ancien cadre de génération (la DA vit dans le Prompt de style)"],
+  [/app\.studio-entremondes\.fr\/compte(?!\?onglet=)/, "Mon compte sans son onglet (jetons et clés : ?onglet=cles)"],
+];
+let perimes = 0;
+for (const [nom, texte] of textesDuMetier()) {
+  for (const [motif, quoi] of PERIMES) {
+    if (motif.test(texte)) {
+      perimes++;
+      ok(false, "passage périmé", `${nom} : ${quoi}`);
+    }
+  }
+}
+ok(perimes === 0, "aucun passage périmé connu dans les skills et gabarits");
+
 // ── La mise à jour : ce qu'elle promet selon l'endroit où vit le plugin ────
 // Une vraie installation, dans des dossiers jetables (scripts/update/recette-place.mjs).
 const recettePlace = spawnSync(process.execPath, [join(RACINE, "scripts/update/recette-place.mjs")], { encoding: "utf8" });
 if (recettePlace.status !== 0) console.log(recettePlace.stdout + recettePlace.stderr);
 ok(recettePlace.status === 0, "la mise à jour ne promet une sauvegarde que là où elle dure");
+
+// ── Le client, contre un faux atelier local (scripts/recette-client.mjs) ────
+// Ce que le client envoie ou refuse d'envoyer, sans réseau et sans dépense.
+const recetteClient = spawnSync(process.execPath, [join(RACINE, "scripts/recette-client.mjs")], { encoding: "utf8" });
+if (recetteClient.status !== 0) console.log(recetteClient.stdout + recetteClient.stderr);
+ok(recetteClient.status === 0, "le client envoie ce qu'il doit (couverture, rangement des lots, options retirées)");
 
 console.log(`\n${echecs === 0 ? "STATIQUE : tout tient." : `STATIQUE : ${echecs} échec(s).`}`);
 process.exitCode = echecs ? 1 : 0;

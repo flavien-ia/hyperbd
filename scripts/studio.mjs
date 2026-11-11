@@ -36,9 +36,7 @@
 //            [--gabarit habille|schema|aucun] (planche entière : par défaut, elle
 //             part de ses cases dès qu'une case est retenue, posées à leur
 //             place dans le gabarit ; « aucun » = le prompt seul)
-//            [--dialogue-mode overlay|empty-bubbles|model]
-//            (défaut overlay : le texte se compose ensuite, il ne se cuit
-//             jamais dans l'image)
+//            (le texte ne se dessine jamais dans l'image : le lettrage le pose)
 //            [--model gpt-image-2.5-flare|gpt-image-2.5-sunburst]
 //            [--size WxH] (omise : celle de l'atelier, case et couverture comprises)
 //                      [--extra "..."] [--wait]
@@ -134,8 +132,11 @@
 //   sources-public <projet> [--off]        ouvrir (ou fermer) la page publique
 //   sources-public <projet> --etat         est-elle ouverte ?
 //
-//   -- le cadre de génération (la DA verrouillée) --
-//   get-template <projet>                  le cadre en vigueur
+//   -- l'ancien cadre de génération (hérité : la direction artistique n'y vit plus) --
+//       (La direction artistique vit dans le « Prompt de style » de la
+//        planche de style, par set-entry, et dans le style des cases, par
+//        style-cases.)
+//   get-template <projet>                  l'ancien cadre, s'il en reste un
 //   set-template <projet> --file cadre.txt [--label "DA v2"] [--double-page "..."]
 //
 //   -- les travaux longs (agrandissement, fond perdu, exports) --
@@ -154,7 +155,7 @@
 //   export <projet> --kind avec-texte|sans-texte|calques|pdf|master
 //          master : [--etape assemblage|final] [--methode miroir|bria]
 //                   [--rognage 210x297] [--fond-perdu 3] [--sans-traits] [--rgb]
-//                   [--sans-pages-de-garde] [--exige-upscale] [--rembord 15]
+//                   [--exige-upscale] [--rembord 15]
 //          [--locale xx] [--planches id,id | --pages "1-5, 8, couv, 4e"] [--wait]
 //
 // Sortie : JSON sur stdout (exit 0), ou `{ "erreur": ... }` (exit 1). Un échec
@@ -381,6 +382,72 @@ async function attendreJob(jobId, maxMs = 900000) {
   return { job: { id: jobId, status: "timeout" } };
 }
 
+/** Les blocs qui prennent place dans le récit : la Toile les range elle-même. */
+const TYPES_DU_RECIT = new Set(["scene", "acte"]);
+
+/**
+ * Range un lot de blocs sur l'établi, sans jamais rien recouvrir.
+ *
+ * Un lot posé sans position partait toujours du même point (0, 0) : les
+ * propositions s'empilaient les unes sur les autres, et sous les scènes, qui
+ * commencent au même endroit. Vu sur un album réel : quatre notes d'annonce
+ * superposées, des fiches cachées derrière le récit.
+ *
+ * Le récit court vers la droite à partir de x = 0, et sa hauteur change avec
+ * la lecture choisie (le temps, les personnages, les lieux). Le seul espace
+ * qui ne bouge jamais est à GAUCHE du récit : c'est l'établi. Chaque lot s'y
+ * pose en rangées de quatre, sous le lot précédent, avec un vide entre deux
+ * lots pour qu'ils se lisent comme des grappes.
+ *
+ * On ne touche à rien de ce que le lot a déjà placé : un bloc qui porte `x`
+ * et `y`, ou un lot qui donne son `ancre`, garde ses positions.
+ */
+async function rangerLeLot(projet, lot) {
+  const noeuds = Array.isArray(lot?.nodes) ? lot.nodes : [];
+  const aPlacer = noeuds.filter(
+    (n) => !TYPES_DU_RECIT.has(n.type) && !(Number.isFinite(n.x) && Number.isFinite(n.y)),
+  );
+  if (lot?.ancre || aPlacer.length === 0) {
+    // Une scène sans position se pose à l'origine : sa place vient du récit.
+    return {
+      ...lot,
+      nodes: noeuds.map((n) =>
+        TYPES_DU_RECIT.has(n.type) ? { ...n, x: n.x ?? 0, y: n.y ?? 0 } : n,
+      ),
+    };
+  }
+
+  const PAS_X = 320;
+  const PAR_LIGNE = 4;
+  const GAUCHE = -(PAR_LIGNE * PAS_X + 80);
+  const hauteurDe = (type) => (type === "image" ? 320 : 180);
+
+  // Le bas de ce qui occupe déjà l'établi (les blocs libres à gauche du récit).
+  const { nodes: existants = [] } = await appel(`/projects/${projet}/nodes`);
+  let bas = null;
+  for (const b of existants) {
+    if (TYPES_DU_RECIT.has(b.type) || !(b.x < 0)) continue;
+    bas = Math.max(bas ?? -Infinity, b.y + hauteurDe(b.type));
+  }
+  const y0 = bas === null ? 0 : Math.ceil((bas + 160) / 20) * 20;
+  const pasY = aPlacer.some((n) => n.type === "image") ? 380 : 240;
+
+  let rang = 0;
+  return {
+    ...lot,
+    nodes: noeuds.map((n) => {
+      if (TYPES_DU_RECIT.has(n.type)) return { ...n, x: n.x ?? 0, y: n.y ?? 0 };
+      if (Number.isFinite(n.x) && Number.isFinite(n.y)) return n;
+      const place = {
+        x: GAUCHE + (rang % PAR_LIGNE) * PAS_X,
+        y: y0 + Math.floor(rang / PAR_LIGNE) * pasY,
+      };
+      rang++;
+      return { ...n, ...place };
+    }),
+  };
+}
+
 const commandes = {
   async connect() {
     if (!o.url || !o.token) {
@@ -396,10 +463,12 @@ const commandes = {
   me: () => appel("/me"),
 
   /**
-   * Le parcours d'accueil : les onze étapes, avec pour chacune le texte du
-   * Guide de l'atelier et celui du harnais, ce qui est fait (dérivé des
-   * données) et l'étape courante. `--activer` lance le tuto, `--arreter` le
-   * suspend, `--vu` marque une étape « à regarder » comme vue.
+   * Le parcours d'accueil : ses quatre étapes (le harnais, les clés et la
+   * connexion, le premier univers, le premier projet), avec pour chacune le
+   * texte du Guide de l'atelier et celui du harnais, ce qui est fait (dérivé
+   * des données) et l'étape courante. `--activer` lance le tuto, `--arreter`
+   * le suspend, `--vu` confirme la seule étape que l'atelier ne peut pas
+   * constater lui-même (l'installation du harnais).
    */
   parcours: () => {
     if (o.activer) {
@@ -658,10 +727,22 @@ const commandes = {
      * Un script refusé à l'écriture laisse la planche sans cases ; une
      * génération lancée juste derrière partait quand même, sur le prompt de
      * planche nu, et se payait pour une image hors sujet. Vécu le 2026-11-09.
+     *
+     * Une couverture ou une quatrième, elle, se génère sans cases : c'est sa
+     * règle (une image pleine page, décrite par `description`). La garde ne
+     * vaut donc que pour une planche du récit.
      */
     const { planche } = await appel(`/planches/${arg(0)}`);
     const cases = planche?.scriptModules?.cases ?? [];
-    if (cases.length === 0) {
+    const pleinePage = planche?.kind === "couverture" || planche?.kind === "quatrieme";
+    if (cases.length === 0 && pleinePage && mode === "planche") {
+      const decrite = (planche?.scriptModules?.description ?? "").trim() !== "";
+      if (!decrite) {
+        throw new Error(
+          "Cette couverture n'a ni cases ni description : écris ce que montre la page (write --file, champ description) avant de générer. Rien n'a été dépensé.",
+        );
+      }
+    } else if (cases.length === 0) {
       throw new Error(
         "Cette planche n'a pas encore de cases : écris son gabarit (write --file) avant de générer. Rien n'a été dépensé.",
       );
@@ -675,22 +756,10 @@ const commandes = {
         n: o.n ? Number(o.n) : 1,
         quality: typeof o.quality === "string" ? o.quality : "medium",
         mode,
-        /**
-         * Le texte ne se dessine PAS dans l'image.
-         *
-         * L'atelier connaît trois modes, et son défaut historique
-         * (« model ») demande au modèle d'écrire lui-même les dialogues. Il
-         * les écrit alors dans une police de son invention, définitivement
-         * cuite dans les pixels : plus de dérivation depuis le script, plus
-         * de police d'album, plus de traduction, plus d'export sans texte.
-         * Toute la chaîne de lettrage devient inatteignable.
-         *
-         * Le harnais impose donc « overlay » : le modèle réserve les espaces
-         * et n'écrit rien. Surchargeable par --dialogue-mode pour qui veut
-         * délibérément une planche où le modèle écrit.
-         */
-        dialogueMode:
-          typeof o["dialogue-mode"] === "string" ? o["dialogue-mode"] : "overlay",
+        // Le texte ne se dessine jamais dans l'image : l'atelier l'impose
+        // lui-même depuis le 2026-10-16 (le lettrage pose les bulles), et
+        // l'ancienne option --dialogue-mode n'avait plus aucun effet.
+        dialogueMode: "overlay",
         ...(typeof o.case === "string" ? { caseId: o.case } : {}),
         ...(mode === "planche" && typeof o.gabarit === "string"
           ? { gabarit: o.gabarit }
@@ -850,19 +919,19 @@ const commandes = {
    *
    * C'est la façon de proposer : les cinq prémisses arrivent ensemble, la
    * personne les voit d'un regard et arbitre. Les positions sont facultatives :
-   * l'atelier range les blocs libres en grille, et une scène n'en a pas (elle
-   * prend son rang dans le récit, sa hauteur vient de la lentille).
+   * sans elles, les blocs libres se rangent sur l'établi, à gauche du récit,
+   * sous le lot précédent (voir `rangerLeLot`), et une scène n'en a pas (elle
+   * prend son rang dans le récit, sa hauteur vient de la lecture choisie).
    */
-  scenario() {
+  async scenario() {
     // Sans lot, c'est une lecture : la Toile telle qu'elle est, comme
     // `nodes`. Poser exige un fichier.
     if (!o.file) {
       return appel(`/projects/${arg(0)}/nodes${o.ecartes ? "?ecartes=1" : ""}`);
     }
-    return appel(`/projects/${arg(0)}/scenario`, {
-      method: "POST",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
-    });
+    const lot = JSON.parse(readFileSync(o.file, "utf8"));
+    const places = await rangerLeLot(arg(0), lot);
+    return appel(`/projects/${arg(0)}/scenario`, { method: "POST", body: places });
   },
 
   "write-node"() {
@@ -1230,7 +1299,7 @@ const commandes = {
           method: "PUT",
           body: { ouvert: !o.off },
         }),
-  // ── Le cadre de génération (la DA verrouillée) ──────────────────────────
+  // ── L'ancien cadre de génération (hérité : la DA n'y vit plus) ──────────
 
   "get-template": () => appel(`/projects/${arg(0)}/prompt-template`),
 
@@ -1364,7 +1433,7 @@ const commandes = {
           // Les pages écrites comme à l'impression : « 1-5, 8, couv, 4e ».
           ...(typeof o.pages === "string" ? { pages: o.pages } : {}),
           // Les réglages d'imprimeur du master ; les défauts sont ceux de
-          // l'atelier (A4, 3 mm, traits, CMYK, pages de garde).
+          // l'atelier (A4, 3 mm, traits, CMYK).
           ...(kind === "export-master" ? rognageDe() : {}),
           // L'étape : « assemblage » (le PDF de contrôle, RGB, au format
           // rogné, sans fond perdu) ou « final » (le fichier de l'imprimeur).
@@ -1381,9 +1450,6 @@ const commandes = {
             : {}),
           ...(kind === "export-master" && o["sans-traits"] ? { traitsDeCoupe: false } : {}),
           ...(kind === "export-master" && o.rgb ? { cmyk: false } : {}),
-          ...(kind === "export-master" && o["sans-pages-de-garde"]
-            ? { pagesDeGarde: false }
-            : {}),
           // Le rembord d'une couverture à plat (15 mm par défaut) : ce qui
           // se replie sur le carton.
           ...(kind === "export-master" && o.rembord !== undefined

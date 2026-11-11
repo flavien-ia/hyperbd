@@ -33,6 +33,8 @@ if (!plancheId) {
   process.exit(2);
 }
 const largeurMm = Number(opt("largeur-mm", "420"));
+/** La demi-largeur de la bande de reliure, en fraction de la double page : 1 cm sur 42. */
+const RELIURE = 1 / 42;
 
 const lire = (...a) => JSON.parse(execFileSync("node", [STUDIO, ...a]).toString());
 const { planche } = lire("planche", plancheId);
@@ -98,8 +100,10 @@ bulles.forEach((b, i) => {
         "la rentrer dans sa case, ou réduire sa largeur",
       );
     }
-    if (!pageSeule && c.page !== "both" && bx.x0 < 0.515 && bx.x1 > 0.485) {
-      dire(n, "mord sur la reliure", "la décaler hors de la bande centrale (x entre 0,485 et 0,515)");
+    // La bande que l'atelier hachure : 1 cm de chaque côté du pli, sur une
+    // double page de 42 cm (`RELIURE_RATIO` de l'atelier, 1/21).
+    if (!pageSeule && c.page !== "both" && bx.x0 < 0.5 + RELIURE && bx.x1 > 0.5 - RELIURE) {
+      dire(n, "mord sur la reliure", "la décaler hors de la bande centrale (x entre 0,476 et 0,524)");
     }
     if (!b.tail) {
       dire(n, "n'a pas de queue", "lui donner une queue qui pointe la bouche du locuteur");

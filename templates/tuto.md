@@ -35,7 +35,11 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" parcours
 ## 2. Situer, puis une étape à la fois
 
 En tuto, la skill commence par une ligne qui situe : « Étape 4 sur 4 : votre
-premier projet. » (numéro = `faites + 1`, titre = celui de l'étape courante).
+premier projet. » Le numéro est le RANG de l'étape courante dans la liste que
+rend `parcours` (celle qui porte `courante: true`), et le titre est le sien :
+c'est ce que le Guide de l'atelier affiche. Ne compte pas `faites + 1` : dès
+qu'une étape est faite dans le désordre (un projet créé avant les clés), les
+deux côtés ne diraient plus le même numéro.
 Elle ne déroule jamais deux étapes d'un coup : c'est la personne qui fait le
 geste suivant, et c'est à cela qu'elle apprend.
 
@@ -58,5 +62,8 @@ n'applique pas ce protocole.
 
 `parcours --arreter` suspend le tuto (le Guide de l'atelier reste dans son
 en-tête) ; `parcours --activer` le reprend là où les données en sont. Il se
-termine de lui-même au premier projet : ensuite, `/bd-brief`, et la
-documentation du processus prend le relais.
+termine de lui-même quand les quatre étapes sont faites (un projet créé sans
+les clés ne le termine pas : il reste l'étape des clés). Ensuite, `/bd-brief`,
+et la documentation du processus prend le relais. Une fois terminé, le Guide
+quitte l'en-tête de l'atelier ; il se rappelle depuis Mon compte, onglet
+« Général », bouton « Relancer le Guide ».

@@ -76,8 +76,8 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" me
 
 > Pour que je puisse travailler dans ton atelier, il me faut un jeton d'accès.
 >
-> 1. Ouvre **https://app.studio-entremondes.fr/compte**
-> 2. Dans **Jetons d'API**, crée un jeton (nomme-le par exemple « Claude Code »)
+> 1. Ouvre **https://app.studio-entremondes.fr/compte?onglet=cles** (Mon compte, onglet « Clés API »)
+> 2. Dans **Jetons d'API**, clique « Créer un jeton » (nomme-le par exemple « Claude Code », garde les trois droits cochés : Lire, Écrire, Générer)
 > 3. Copie-le et colle-le ici : il ne sera plus affiché ensuite
 
 C'est le seul moment où quelque chose se colle ici : dis-le, pour que la
@@ -97,11 +97,14 @@ La réponse de l'atelier dit quelles clés sont en place. L'atelier ne dépense 
 
 **Les clés ne passent jamais par la conversation.** Mon compte les vérifie auprès de leur service, les chiffre, et ne les réaffiche jamais ; ici, elles resteraient en clair dans l'historique. Pour **chaque clé absente**, explique en clair les trois choses ci-dessous, puis termine toujours par la même consigne :
 
-> Colle-la dans **Mon compte** (https://app.studio-entremondes.fr/compte),
-> carte <nom du service>, puis « Vérifier et enregistrer ». Pas ici : l'atelier
-> la vérifie et la chiffre. Dis-moi quand c'est fait.
+> Colle-la dans **Mon compte**, onglet « Clés API »
+> (https://app.studio-entremondes.fr/compte?onglet=cles) : clique sur la carte
+> <nom du service> pour l'ouvrir, colle la clé, puis « Vérifier et
+> enregistrer ». Pas ici : l'atelier la vérifie et la chiffre. Dis-moi quand
+> c'est fait.
 
-Le mode d'emploi détaillé est aussi écrit sous chaque carte, dans Mon compte.
+Le mode d'emploi détaillé est aussi écrit dans chaque carte, une fois ouverte
+(« Comment obtenir la clé »).
 
 **Si la personne colle quand même une clé dans la conversation** : ne la répète pas, ne l'utilise pas, ne l'écris nulle part. Dis-lui que sa place est Mon compte, et qu'elle peut la régénérer chez le fournisseur si elle préfère qu'elle ne reste pas dans l'historique de la conversation.
 
@@ -127,7 +130,7 @@ Le mode d'emploi détaillé est aussi écrit sous chaque carte, dans Mon compte.
 ### Bria (facultatif : le fond perdu de l'impression)
 
 - **À quoi ça sert** : prolonger chaque planche au-delà de son bord, pour le fond perdu du master d'impression, en générant la matière qui manque. Sans elle, le fond perdu se fait en miroir, gratuitement.
-- **Ce que ça coûte** : à l'usage, environ 0,02 $ par page prolongée, une seule fois par page (le résultat est gardé).
+- **Ce que ça coûte** : à l'usage, environ 0,04 $ par page prolongée, une seule fois par page (le résultat est gardé). L'atelier chiffre toujours avant de lancer.
 - **Comment l'obtenir** : un compte sur platform.bria.ai, un moyen de paiement (offre à l'usage), puis une clé sur la page des clés d'API.
 
 Dis clairement ce qui est bloquant (OpenAI et R2 : sans eux, rien ne se dessine) et ce qui peut attendre (Topaz et Bria : le jour où l'on imprime). Puis demande à la personne de te dire quand elle a renseigné ses clés, et revérifie :
