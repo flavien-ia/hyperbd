@@ -663,13 +663,24 @@ const commandes = {
 
     const octets = Buffer.from(await r.arrayBuffer());
     writeFileSync(o.out, octets);
+    // Un en-tête ne porte pas d'accents : l'atelier les encode, on les rend
+    // lisibles (c'est sur ces phrases qu'une skill décide quoi faire).
+    const lisible = (s) => {
+      try {
+        return decodeURIComponent(s);
+      } catch {
+        return s;
+      }
+    };
     const avertissements = r.headers.get("x-avertissements");
     return {
       ok: true,
       fichier: o.out,
       octets: octets.length,
       dimensions: r.headers.get("x-dimensions"),
-      ...(avertissements ? { avertissements: avertissements.split(" | ") } : {}),
+      ...(avertissements
+        ? { avertissements: lisible(avertissements).split(" | ") }
+        : {}),
     };
   },
 
