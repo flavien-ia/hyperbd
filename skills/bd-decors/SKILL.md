@@ -77,21 +77,37 @@ nombre d'images et le coût estimé ; en guidé, fais-la valider.
 - Un motif : une seule image nette, **sur fond neutre** : elle servira de
   référence, pas d'illustration.
 
+Le prompt : **pars de celui que l'atelier assemble** (le cadre de la DA, la
+description du lieu, la consigne du geste, et les références), le même que
+l'auteur voit dans l'onglet Générer de la fiche. Complète-le sans changer son
+ordre : le style d'abord, le lieu ensuite.
+
 ```bash
-node "$S" essai <projet> --kind decor --label "<lieu> : plan large" --prompt-file decor-<lieu>-large.txt --size paysage --wait
-node "$S" essai <projet> --kind decor --label "<lieu> : contrechamp" --prompt-file decor-<lieu>-contre.txt --size paysage --wait
-node "$S" essai <projet> --kind motif --label "<motif>" --prompt-file motif-<motif>.txt --size carre --wait
+node "$S" prompt-element <projet> <entrée> --geste angle
+node "$S" prompt-element <projet> <entrée> --geste motif
 ```
 
-Le prompt : **le cadre de la DA** d'abord, le lieu ensuite. Puis le regard
-(`_vision-qa`), la sélection dans la **planche contact**
-(`app.studio-entremondes.fr/projet/<projet>?m=essais&genre=decor`), la
-promotion et l'étoile (trois au plus), et le texte de rappel :
+Lance les essais **sur l'élément** (`--entree`, sa variante s'il en a) : leurs
+images vont à la rubrique « À juger » de sa fiche, pas à la planche contact.
 
 ```bash
-node "$S" promote-image <imageId> --entry <entryId>
+node "$S" essai <projet> --entree <entrée> --kind decor --label "<lieu> : plan large" --prompt-file decor-<lieu>-large.txt --size paysage --refs <id,id> --wait
+node "$S" essai <projet> --entree <entrée> --kind decor --label "<lieu> : contrechamp" --prompt-file decor-<lieu>-contre.txt --size paysage --refs <id,id> --wait
+node "$S" essai <projet> --entree <entrée> --kind motif --label "<motif>" --prompt-file motif-<motif>.txt --size carre --wait
+```
+
+Puis le regard (`_vision-qa`), dont tu écris le verdict sur l'essai
+(`verdict <essaiId> --texte "..."`, et `ecarter <imageId>` pour une image que
+le regard refuse franchement). La personne juge dans **l'atelier de
+création** : la fiche du lieu (ou de l'objet) dans l'univers, rubrique « À
+juger » (Garder, Écarter) ; relis ses décisions avec `candidates <projet>
+<entrée>`. Quand c'est toi qui gardes (en `--auto`, ou sur sa demande) : la
+promotion et l'étoile (trois au plus). Puis le texte de rappel :
+
+```bash
+node "$S" promote-image <imageId> --entry <entrée>
 node "$S" star <projet> <imageId>
-node "$S" set-entry <projet> <entryId> --file patch.json
+node "$S" set-entry <projet> <entrée> --file patch.json
 ```
 
 ## Étape 3 : livrer

@@ -74,8 +74,10 @@ les lieux) : annonce le partage avant la première génération.
 
 Quand les quatre étapes sont faites, récapitule : le monde en trois phrases,
 la piste graphique retenue, le casting, les lieux. Dis où tout se voit dans
-l'atelier : l'univers (onglets Personnages, Décors, Style), le Dossier pour
-la bible et la bible graphique, la planche contact pour les essais.
+l'atelier : l'univers (onglets Personnages, Décors, Style ; chaque fiche est
+l'atelier de création de l'élément, avec ses images à juger), le Dossier pour
+la bible et la bible graphique, la planche contact pour les pistes de la
+direction artistique.
 
 Annonce la suite : le récit, avec `/bd-scenario`.
 

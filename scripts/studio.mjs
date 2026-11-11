@@ -121,15 +121,26 @@
 //   -- le laboratoire (images sans planche) --
 //   essai <projet> --prompt-file F [--kind K] [--label L] [--n 1]
 //         [--quality low] [--size WxH|paysage|portrait|carre]
-//         [--refs id,id] [--essais id,id] [--wait]
+//         [--refs id,id] [--essais id,id] [--entree <variante>] [--wait]
 //         (--prompt "..." pour un prompt court ; --prompt-file dès qu'il a
-//          des paragraphes, des guillemets ou des accents)
+//          des paragraphes, des guillemets ou des accents ; --entree vise un
+//          élément de l'univers : ses images vont à « À juger » dans son
+//          atelier de création, pas à la planche contact)
 //   essais <projet> [--kind K]             ce que le laboratoire a produit
 //   essai-detail <id>                      un essai et ses images
 //   keep <imageId> [--off]                 retenir une image (survit à la purge)
 //   promote-image <imageId> --entry <id>   la verser dans la bibliothèque
 //   promote-image <imageId> --style "N"    en faire une planche de style
 //   drop-essai <id>
+//
+//   -- l'atelier de création (les éléments de l'univers) --
+//   prompt-element <projet> <entrée> [--geste G]
+//                                          le prompt assemblé par l'atelier (style, description,
+//                                          consigne) et ses références : references, portrait,
+//                                          angle, motif, libre
+//   candidates <projet> <entrée>           les images d'essai à juger pour cet élément
+//   verdict <essaiId> --texte "..."        écrire son verdict sur un essai (l'auteur le lit)
+//   ecarter <imageId> [--reprendre]        écarter une candidate (ou la reprendre)
 //
 //   -- les univers --
 //   univers                                les siens, et les univers ouverts des autres
@@ -1087,6 +1098,7 @@ const commandes = {
         ...(typeof o.essais === "string"
           ? { essaiImageIds: o.essais.split(",") }
           : {}),
+        ...(typeof o.entree === "string" ? { entryId: o.entree } : {}),
       },
     });
     if (!o.wait) return lancement;
@@ -1115,6 +1127,28 @@ const commandes = {
     }),
 
   "drop-essai": () => appel(`/essais/${arg(0)}`, { method: "DELETE" }),
+
+  // ── L'atelier de création ───────────────────────────────────────────────
+  "prompt-element": () =>
+    appel(
+      `/projects/${arg(0)}/universe/entries/${arg(1)}/prompt${
+        typeof o.geste === "string" ? `?geste=${o.geste}` : ""
+      }`,
+    ),
+  candidates: () => appel(`/projects/${arg(0)}/universe/entries/${arg(1)}/candidates`),
+  verdict() {
+    const texte = texteDe("texte", "texte-file");
+    if (texte === undefined) throw new Error(`Il faut --texte "..." (ou --texte-file).`);
+    return appel(`/essais/${arg(0)}`, {
+      method: "PATCH",
+      body: { verdict: texte.trim() || null },
+    });
+  },
+  ecarter: () =>
+    appel(`/essai-images/${arg(0)}/ecarter`, {
+      method: "POST",
+      body: { ecartee: !o.reprendre },
+    }),
 
   // ── L'établi (le bac à sable du projet) ─────────────────────────────────
   etabli: () => {

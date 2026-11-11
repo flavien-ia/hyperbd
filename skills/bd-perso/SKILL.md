@@ -1,6 +1,6 @@
 ---
 name: bd-perso
-description: Les personnages de l'album, de bout en bout : d'abord le casting comme un graphe de forces (qui incarne quoi, ce qui les lie et les charge), proposé dans l'univers où l'auteur retient ou écarte chaque personnage, avec sa fiche, ses variantes, sa couleur de bulle et une vérification anti-ressemblance ; puis le dessin des seuls retenus (planche de références et portrait par variante, jugés dans la planche contact, versés dans l'univers). Vient après la direction artistique. Se rappelle autant qu'on veut : ne propose et ne dessine que ce qui manque. Utiliser quand la personne dit « les personnages », « /bd-perso », « qui raconte cette histoire », « dessine les personnages ».
+description: Les personnages de l'album, de bout en bout : d'abord le casting comme un graphe de forces (qui incarne quoi, ce qui les lie et les charge), proposé dans l'univers où l'auteur retient ou écarte chaque personnage, avec sa fiche, ses variantes, sa couleur de bulle et une vérification anti-ressemblance ; puis le dessin des seuls retenus (planche de références et portrait par variante, jugés dans l'atelier de création de chaque personnage, gardés dans l'univers). Vient après la direction artistique. Se rappelle autant qu'on veut : ne propose et ne dessine que ce qui manque. Utiliser quand la personne dit « les personnages », « /bd-perso », « qui raconte cette histoire », « dessine les personnages ».
 argument-hint: "[projet] [--auto] [--budget <dollars>] [--sans-dessin]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et une clé d'images configurée dans l'atelier."
 ---
@@ -163,34 +163,61 @@ Par variante, **deux images** :
 - **le portrait** (format portrait) : le visage, en gros, dans la lumière de
   la DA.
 
-Le prompt : **le cadre de la DA** + l'apparence (la description et la fiche)
-+ ce qui distingue cette variante. Toujours dans cet ordre : le style
-d'abord, le sujet ensuite. **Ne fais jamais porter à la planche de style
-l'identité d'un personnage** : elle dit à quoi ressemble l'ALBUM. Si tu en
-détoures une figure, donne-la comme référence SÉPARÉE de costume et de visage.
-**Décris le costume en matière et en coupe, pas en nom** (« long manteau de
-toile de travail usée, col montant à patte boutonnée, tissu froissé et mat »,
-pas « veste de toile »).
+Le prompt : **pars de celui que l'atelier assemble** pour la variante. Il met
+déjà, dans l'ordre, le cadre de la DA (le style coché par défaut), la
+description du personnage et celle de la variante, et la consigne du geste ;
+il donne aussi les références, étoilées de la variante d'abord, style ensuite.
+C'est le même prompt que l'auteur voit dans l'onglet Générer de la fiche :
+ce que tu lances, il peut le relancer pareil.
 
 ```bash
-node "$S" essai <projet> --kind personnage --label "<variante> : références" \
-  --prompt-file ref-<variante>.txt --size paysage --wait
-node "$S" essai <projet> --kind personnage --label "<variante> : portrait" \
-  --prompt-file portrait-<variante>.txt --size portrait --wait
+node "$S" prompt-element <projet> <variante> --geste references
+node "$S" prompt-element <projet> <variante> --geste portrait
+```
+
+Complète-le si besoin, sans changer son ordre (le style d'abord, le sujet
+ensuite). **Ne fais jamais porter à la planche de style l'identité d'un
+personnage** : elle dit à quoi ressemble l'ALBUM. Si tu en détoures une
+figure, donne-la comme référence SÉPARÉE de costume et de visage. **Décris le
+costume en matière et en coupe, pas en nom** (« long manteau de toile de
+travail usée, col montant à patte boutonnée, tissu froissé et mat », pas
+« veste de toile »). Si ce qui manque est dans la description elle-même,
+corrige la description (`set-entry`) plutôt que le seul prompt : elle repart
+avec chaque génération.
+
+Lance les essais **sur la variante** (`--entree`) : leurs images vont à la
+rubrique « À juger » de la fiche, sous la variante, pas à la planche contact.
+Les références sont celles que `prompt-element` a rendues, dans cet ordre.
+
+```bash
+node "$S" essai <projet> --entree <variante> --kind personnage --label "<variante> : références"   --prompt-file ref-<variante>.txt --size paysage --refs <id,id> --wait
+node "$S" essai <projet> --entree <variante> --kind personnage --label "<variante> : portrait"   --prompt-file portrait-<variante>.txt --size portrait --refs <id,id> --wait
 ```
 
 Puis :
 
 1. **Le regard** : passe par `_vision-qa` (silhouette lisible en petit ? traits
    re-descriptibles avec des mots ? vues cohérentes entre elles ? DA tenue ?).
-2. **La sélection** : la personne choisit dans la **planche contact** de
-   l'atelier (`app.studio-entremondes.fr/projet/<projet>?m=essais&genre=personnage`),
-   où elle peut aussi verser elle-même une image dans la variante. Le juge
-   choisit en `--auto`.
-3. **La promotion** vers la variante, images étoilées (trois au plus) :
+   **Écris son verdict sur l'essai**, en une ou deux phrases que l'auteur lira
+   sous les images (ce qui tient, ce qui cloche) ; écarte toi-même une image
+   que le regard refuse franchement :
 
 ```bash
-node "$S" promote-image <imageId> --entry <entryId>
+node "$S" verdict <essaiId> --texte "Silhouette nette en petit ; le profil perd la cicatrice."
+node "$S" ecarter <imageId>
+```
+
+2. **La sélection** : la personne juge dans **l'atelier de création** de
+   l'élément : la fiche du personnage dans l'univers, rubrique « À juger »
+   sous la variante (Garder en fait une référence, Écarter la retire). Dis-lui
+   où regarder. Relis ensuite ce qu'elle a décidé (`candidates <projet>
+   <entrée>` : ce qui reste à juger ; `universe` : ce qui est devenu
+   référence). Le juge choisit en `--auto`.
+3. **La promotion** vers la variante, quand c'est toi qui gardes (en `--auto`,
+   ou sur sa demande dans la conversation), images étoilées (trois au plus) :
+
+```bash
+node "$S" promote-image <imageId> --entry <variante>
 node "$S" star <projet> <imageId>
 ```
 

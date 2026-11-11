@@ -20,8 +20,8 @@ pendant que tu y travailles par l'atelier. Elle a deux zones :
   chapitres. C'est ce qui est **retenu**, ou proposé pour l'être.
 - **au-dessus, l'établi** : le brouillon du récit, en mots. Des idées (de
   scène, de rebondissement, de thème) et des bouts de dialogue (répliques).
-  C'est ce qu'on **essaie**. Pas d'images ici : elles vivent dans l'univers et
-  dans la planche contact.
+  C'est ce qu'on **essaie**. Pas d'images ici : elles vivent dans l'univers
+  (l'atelier de création de chaque élément) et dans la planche contact.
 
 Le but de la vue : un fil construit, et plus rien qui traîne sur l'établi.
 Ces conventions existent pour qu'aucun des deux ne défasse le travail de
@@ -257,4 +257,5 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" journal-add <projet> --file 
 Le corps liste, quand c'est utile, ce que la décision a touché (une ligne
 « Propagé : ... »). Les textes du projet se lisent dans le **Dossier** de
 l'atelier (`app.studio-entremondes.fr/projet/<projet>?m=dossier&doc=<genre>`),
-les essais d'images dans la **planche contact** (`?m=essais`).
+les essais d'images sans élément (la direction artistique) dans la **planche
+contact** (`?m=essais`), ceux d'un élément dans sa fiche de l'univers.
