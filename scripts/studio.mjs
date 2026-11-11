@@ -101,8 +101,8 @@
 //   write-doc <id> --body-file F.md [--title T]
 //
 //   -- l'établi (le bac à sable du projet, au-dessus du fil) --
-//   etabli <projet> [--ranges] [--ecartees]   les cartes (idées, répliques, questions, images)
-//   etabli-add <projet> --texte "..." [--genre idee|replique|question] [--groupe G]
+//   etabli <projet> [--ranges] [--ecartees]   les cartes (idées, répliques)
+//   etabli-add <projet> --texte "..." [--genre idee|replique] [--groupe G]
 //   etabli-add <projet> --file cartes.json    { cartes: [{ texte, genre?, groupe? }] } (1 à 60)
 //                                          le serveur les place ; posées par Claude, ce sont
 //                                          des propositions (pointillé, Retenir / Écarter)

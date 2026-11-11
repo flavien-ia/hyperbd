@@ -18,8 +18,10 @@ pendant que tu y travailles par l'atelier. Elle a deux zones :
 
 - **en bas, le fil du récit** : les scènes dans l'ordre, groupées par
   chapitres. C'est ce qui est **retenu**, ou proposé pour l'être.
-- **au-dessus, l'établi** : le bac à sable du projet. Des idées, des bouts de
-  dialogue (répliques), des questions, des images. C'est ce qu'on **essaie**.
+- **au-dessus, l'établi** : le brouillon du récit, en mots. Des idées (de
+  scène, de rebondissement, de thème) et des bouts de dialogue (répliques).
+  C'est ce qu'on **essaie**. Pas d'images ici : elles vivent dans l'univers et
+  dans la planche contact.
 
 Le but de la vue : un fil construit, et plus rien qui traîne sur l'établi.
 Ces conventions existent pour qu'aucun des deux ne défasse le travail de
@@ -32,8 +34,7 @@ l'autre, et pour que l'établi se vide au lieu de s'encombrer.
 | des scènes, des chapitres, des rappels | le fil | `scenario <projet> --file lot.json` |
 | des pistes, des alternatives, des prémisses | l'établi, en groupe nommé | `etabli-add <projet> --file cartes.json` |
 | un bout de dialogue à placer plus tard | l'établi, genre `replique` | `etabli-add … --genre replique` |
-| une question pour la personne | l'établi, genre `question` | `etabli-add … --genre question` |
-| une image d'essai à rapprocher du récit | l'établi | `etabli-image <projet> --essai-image <id>` |
+| une question pour la personne | **la conversation**, jamais l'établi | tu la poses, et sa réponse va où elle sert |
 | un personnage, un lieu | **l'univers**, jamais la vue Scénario | `new-entry … --proposition` (voir `/bd-perso`, `/bd-decors`) |
 
 **Tu ne donnes jamais de positions.** L'atelier place tout : une scène prend
@@ -80,8 +81,7 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" etabli-add <projet> --file <
   "cartes": [
     { "texte": "Piste A : la ville engloutie\nLa mer monte, et ...", "groupe": "Trois prémisses" },
     { "texte": "Piste B : ...", "groupe": "Trois prémisses" },
-    { "texte": "MIRA : Je ne suis pas venue pour qu'on en parle.", "genre": "replique" },
-    { "texte": "Faut-il que la lettre soit datée ?", "genre": "question" }
+    { "texte": "MIRA : Je ne suis pas venue pour qu'on en parle.", "genre": "replique" }
   ]
 }
 ```
@@ -91,8 +91,11 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" etabli-add <projet> --file <
 - La **première ligne** d'une idée est son titre : c'est ce qui deviendra le
   titre de la scène si elle passe dans le fil. Le reste est son synopsis
   (400 caractères gardés), puis ses notes.
-- Une carte que tu poses est une **proposition** (pointillé, Retenir, Écarter,
-  et « Répondu » pour une question).
+- Une carte que tu poses est une **proposition** (pointillé, Retenir, Écarter).
+  Une carte écartée disparaît de la vue (« Écartées » la montre).
+- Un personnage ou un décor de l'univers peut s'attacher à une idée (la
+  personne l'y glisse depuis la palette) : il entrera au casting de la scène
+  que l'idée deviendra.
 - Une dizaine de cartes au plus d'un coup : au-delà, la personne ne peut plus
   arbitrer, elle subit. Découpe en étapes.
 
@@ -113,9 +116,9 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" etabli-ranger <projet> --ids
   synopsis, une réplique va au dialogue, une image est jointe.
 - `--scene <id>` : les cartes **complètent** cette scène (une idée va à ses
   notes, une réplique à son dialogue, ou à ses notes si la scène a déjà ses
-  planches, une image lui est jointe).
+  planches).
 - **Un groupe fait UNE scène** : son nom en devient le titre.
-- **Une question ne se range pas** : on y répond.
+- Les personnages et les décors attachés aux cartes entrent dans la scène.
 
 Les cartes rangées quittent l'établi. C'est ainsi qu'il se vide.
 
@@ -168,9 +171,9 @@ Trois règles en découlent :
 - **C'est ICI qu'une réplique se corrige une fois la scène découpée**, et
   plus dans le script des cases (voir `/bd-lettrage`).
 
-**La vue Lectures** (bascule en haut de la vue Scénario) montre le même récit
-lu en hauteur : le temps, les personnages, les lieux, les fils du récit, le
-statut. C'est la vue d'analyse ; tu n'y poses rien.
+Dans la vue, un clic sur un personnage ou un décor de la palette met ses
+scènes en lumière dans le fil : c'est ainsi que la personne vérifie qui
+apparaît où.
 
 ## Le récit suit la conversation
 
@@ -193,8 +196,6 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" drop-etabli <carte>
   (rangée dans une scène par `etabli-ranger`, ou mise à la corbeille par
   `drop-etabli` quand elle est entrée dans un document) ;
 - ce qu'elle écarte passe en `ecartee` (une scène : `ecarte`, avec la raison) ;
-- une question à laquelle elle a répondu passe en `retenue` (« Répondu ») et
-  sa réponse va où elle sert (la scène, la bible, le journal) ;
 - une scène qu'elle a validée passe en `valide`.
 
 Un récit où tout reste en proposition ment : il montre comme des hypothèses
@@ -232,8 +233,8 @@ Ce que tu en tires :
   Tu ne le modifies pas sans le dire, jamais silencieusement.
 - **L'ordre et les chapitres** sont des décisions d'auteur.
 - **Ce que la personne a groupé** sur l'établi, elle le considère lié.
-- **Ce qui traîne** : une question sans réponse, une proposition jamais
-  arbitrée, mérite d'être relancée plutôt qu'ignorée.
+- **Ce qui traîne** : une proposition jamais arbitrée mérite d'être relancée
+  plutôt qu'ignorée.
 
 ## Ce que tu ne fais jamais
 

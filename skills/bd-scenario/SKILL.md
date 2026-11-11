@@ -1,6 +1,6 @@
 ---
 name: bd-scenario
-description: Construit le récit dans la vue Scénario de l'atelier : les chapitres et les scènes dans le fil (leurs personnages, leurs lieux, leur budget de planches, qui doit tomber sur le format visé), les alternatives et les questions sur l'établi, la mise en scène, les rappels qui relient un setup à son écho, les documents du monde ; puis un audit de cohérence mené par plusieurs relecteurs en parallèle, le pitch d'une page à valider, et le relevé des personnages et des lieux que le récit a fait naître. Vient après l'univers (/bd-univers). Utiliser quand la personne dit « écris le scénario », « /bd-scenario », « on structure l'histoire ».
+description: Construit le récit dans la vue Scénario de l'atelier : les chapitres et les scènes dans le fil (leurs personnages, leurs lieux, leur budget de planches, qui doit tomber sur le format visé), les alternatives sur l'établi, la mise en scène, les rappels qui relient un setup à son écho, les documents du monde ; puis un audit de cohérence mené par plusieurs relecteurs en parallèle, le pitch d'une page à valider, et le relevé des personnages et des lieux que le récit a fait naître. Vient après l'univers (/bd-univers). Utiliser quand la personne dit « écris le scénario », « /bd-scenario », « on structure l'histoire ».
 argument-hint: "[projet] [--auto]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
@@ -112,7 +112,7 @@ Ces champs ont un nom, et c'est sous ce nom que l'atelier, le contrôle
   relèvera ceux qui reviennent (étape 8).
 - `intrigues` nomme les fils du récit qui traversent la scène (l'intrigue
   principale, l'arc d'un personnage) : c'est facultatif, et cela donne à la
-  personne une lecture par fil dans la vue Lectures.
+  personne une lecture du récit par fil.
 - `budgetPlanches` compte des PLANCHES de l'atelier. Si l'album est en doubles
   pages, une planche vaut deux pages imprimées : dis-le quand tu annonces le
   total, pour que « 24 planches » ne soit pas lu comme 24 pages.
@@ -137,7 +137,8 @@ répliques d'esquisse (une ligne par réplique, « Nom : texte »). Ce
 est découpée, l'atelier n'affiche plus que le texte lettré sur ses planches,
 et c'est lui qu'on corrige (voir `_recit`). Le casting
 (`meta.castingIds`) se donne dès la création : c'est lui que la carte montre,
-et lui qui dessine les fils de présence de la vue Lectures. Ces textes
+et lui qui fait ressortir les scènes d'un personnage quand la personne le met
+en lumière depuis la palette. Ces textes
 s'écrivent par
 `write-node <scène> --file` avec `{ "body": "...", "notes": "...",
 "dialogue": "..." }` ; un champ de `meta` s'y corrige de la même façon

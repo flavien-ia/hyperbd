@@ -145,9 +145,9 @@ récit comparera au total des scènes, dans la vue Scénario.
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-project <projet> --planches-visees <N>
 ```
 
-Pose ensuite sur l'établi les premières **questions ouvertes** (genre
-`question`) : ce qui reste à trancher et qu'on ne veut pas oublier. Consigne
-la décision de distance au journal, avec les trois écartées et pourquoi. Le
+Consigne au journal les premières **questions ouvertes** (ce qui reste à
+trancher et qu'on ne veut pas oublier), et la décision de distance, avec les
+trois écartées et pourquoi. Le
 brief se lit dans le **Dossier** de l'atelier
 (`app.studio-entremondes.fr/projet/<projet>?m=dossier&doc=brief`).
 
