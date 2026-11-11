@@ -89,7 +89,7 @@
 //   promote <id> [--acte]                  une note devient une scène (un chapitre avec --acte)
 //   reorder-scenes <projet> --file <json>  l'ordre du récit
 //   node-image <id> --file <image.png>     déposer un fichier sur un bloc image
-//   drop-node <id>                         retirer un bloc de la Toile (corbeille, 30 jours)
+//   drop-node <id>                         retirer un bloc du scénario (corbeille, 30 jours)
 //   edges <projet>                         les liens
 //   new-edge --from A --to B [--type T] [--label L]
 //   drop-edge <id>
@@ -876,7 +876,7 @@ const commandes = {
     return appel(`/projects/${arg(0)}/folios`, { method: "PUT", body: changements });
   },
 
-  // ── La Toile ────────────────────────────────────────────────────────────
+  // ── Le scénario : le fil du récit et ses blocs ─────────────────────────
 
   nodes: () =>
     appel(`/projects/${arg(0)}/nodes${o.ecartes ? "?ecartes=1" : ""}`),

@@ -163,8 +163,8 @@ Termine par `🎉 BRIEF POSÉ`.
 ## Règles
 
 - **Ne commence jamais à inventer l'histoire ici.** Le brief cadre, il ne
-  raconte pas. Une idée d'univers qui te vient : pose-la comme note sur la
-  Toile, elle servira à l'étape suivante.
+  raconte pas. Une idée d'univers qui te vient : pose-la en carte sur
+  l'établi (`etabli-add`), elle servira à l'étape suivante.
 - **Un document source ne se résume pas de mémoire.** Si tu ne l'as pas lu en
   entier, dis-le et lis-le.
 - **Ne promets pas un coût exact.** Le nombre de tentatives par planche dépend

@@ -65,10 +65,12 @@ confondent.
 pas des lois : un écart motivé et consigné n'est pas une faute. Les juges
 évaluent l'effet obtenu, jamais l'obéissance.
 
-**Le travail est partagé.** Le scénario vit sur une Toile : un canvas de blocs
-typés que la personne et Claude manipulent ensemble, l'une à la souris, l'autre
-par l'API. Ce que Claude propose arrive en trait interrompu, à adopter ou à
-écarter d'un geste. Et ce que l'atelier protège, Claude le respecte : un
+**Le travail est partagé.** Le scénario vit dans la vue Scénario de l'atelier,
+que la personne et Claude manipulent ensemble, l'une à la souris, l'autre par
+l'API : l'établi, où l'on pose des idées et des répliques, et le fil du récit,
+où les scènes se rangent dans l'ordre, par chapitres. Ce que Claude propose
+arrive marqué comme tel, sur l'établi ou dans l'univers, à garder ou à écarter
+d'un geste. Et ce que l'atelier protège, Claude le respecte : un
 lettrage retouché ne se ré-écrase pas depuis le script, une page verrouillée
 ne bouge plus.
 

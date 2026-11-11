@@ -182,7 +182,7 @@ const PERIMES = [
   [/prompt_template/, "l'ancien cadre de génération (la DA vit dans le Prompt de style)"],
   [/app\.studio-entremondes\.fr\/compte(?!\?onglet=)/, "Mon compte sans son onglet (jetons et clés : ?onglet=cles)"],
   [/`_toile`/, "la skill _toile (devenue _recit : le fil et l'établi)"],
-  [/sur la Toile|la Corbeille du rail/, "la Toile comme lieu de travail (c'est le fil du récit, ou l'établi)"],
+  [/sur\s+(la|une)\s+Toile|la Corbeille du rail/, "la Toile comme lieu de travail (c'est le fil du récit, ou l'établi)"],
   [/"ancre"\s*:/, "une ancre de lot (l'atelier place tout, un agent ne donne jamais de positions)"],
 ];
 // Les skills-relais gardent les anciens noms le temps d'une version : elles ne
