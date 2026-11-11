@@ -122,8 +122,15 @@ cible NUMÉROTÉES, la bible de voix, le brief, et pour chaque planche le rendu
 lettré dans la langue :
 
 ```bash
-node "$S" rendu <plancheId> --out <fichier.png> --locale <code> --largeur 1200
+node "$S" rendu <plancheId> --out <fichier.png> --locale <code> --brouillon --largeur 1200
 ```
+
+`--brouillon` est indispensable ici : tant qu'une langue n'est pas validée,
+l'atelier sert le texte du script à sa place (un lecteur ne doit pas tomber
+sur une traduction inachevée). Sans lui, tu ferais juger des planches en
+langue source. La réponse le dit dans `avertissements` : lis-la, et si elle
+annonce « le texte du script est servi », le rendu n'est pas celui de la
+traduction.
 
 **Regarde toi-même les rendus avant de les soumettre** : une bulle qui
 déborde se voit sans juge. Une réplique trop longue se recoupe ; on ne réduit

@@ -45,6 +45,14 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" costs <projet>
 Annonce ensuite, en clair : le nombre de planches du scope, le coût estimé, le
 coût déjà dépensé sur le projet.
 
+**La qualité des images se dit avant de générer.** Applique
+`${CLAUDE_SKILL_DIR}/../../templates/qualite.md` : si le journal ne porte
+pas encore d'entrée « Qualité des images », c'est la première fois ; annonce
+les réglages (les cases en qualité moyenne, la planche entière en haute
+définition), ce que ça coûte, dis à la personne qu'elle peut en changer à
+tout moment (en te le demandant, ou dans l'atelier), demande si ça lui
+convient, et consigne sa réponse. Si l'entrée existe, applique-la.
+
 ## Étape 1 : planche par planche, dans l'ordre du récit
 
 Pour chaque planche du scope, dans l'ordre où on la lira :
@@ -73,8 +81,14 @@ indépendantes : lance-les ensemble, puis regarde-les ensemble.
 génère la planche entière :
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" generate <plancheId> --mode planche --quality medium --wait
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" generate <plancheId> --mode planche --quality high --wait
 ```
+
+La planche entière est l'image qu'on lit et qu'on imprime : elle se génère
+en **haute** définition par défaut (3408 x 2416 pour une double page), les
+cases restant en moyenne puisqu'elles ne servent que de matière. Si la
+personne a retenu une autre qualité (voir le journal), c'est la sienne qui
+part, pour les cases comme pour la planche.
 
 L'atelier pose chaque case retenue à son emplacement exact sur la double
 page (les cases encore vides restent en réserve numérotée), envoie ce gabarit

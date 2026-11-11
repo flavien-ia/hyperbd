@@ -26,7 +26,8 @@
 //                  [--kind couverture|quatrieme]  (uniques, place fixe)
 //   drop-planche <plancheId>               retirer une planche de l'album
 //   rendu <plancheId> --out f.png          la planche lettrée, en image
-//         [--largeur 1536] [--locale en] [--sans-texte] [--calque]
+//         [--largeur 1536] [--locale en [--brouillon]] [--sans-texte] [--calque]
+//         (--brouillon : la traduction telle qu'elle est écrite, avant validation)
 //         [--repere] (grille chiffrée, cases et bulles numérotées : pour placer)
 //   write <planche> --file <json>          écrit titre / script / casting
 //   a-plat <couverture>                    la couverture devient une couverture à plat
@@ -638,6 +639,8 @@ const commandes = {
     const q = new URLSearchParams();
     if (o.largeur) q.set("largeur", String(o.largeur));
     if (typeof o.locale === "string") q.set("locale", o.locale);
+    // Une traduction pas encore validée : la voir quand même, pour la relire.
+    if (o.brouillon) q.set("brouillon", "1");
     if (o["sans-texte"]) q.set("texte", "0");
     if (o.calque) q.set("calque", "1");
     if (o.repere) q.set("repere", "1");

@@ -49,6 +49,10 @@ const serveur = http.createServer((req, res) => {
     if (req.method === "POST" && /\/generations$/.test(chemin)) return rendre({ generationId: "g1", status: "running" }, 202);
     if (req.method === "POST" && /\/scenario$/.test(chemin)) return rendre({ nodeIds: [], edgeIds: [] }, 201);
     if (req.method === "POST" && /\/jobs$/.test(chemin)) return rendre({ jobId: null, devis: {} });
+    if (req.method === "GET" && /\/rendu(\?|$)/.test(chemin)) {
+      res.writeHead(200, { "content-type": "image/png", "x-dimensions": "10x10" });
+      return res.end(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    }
     rendre({ error: { message: "route inconnue du faux atelier" } }, 404);
   });
 });
@@ -132,6 +136,14 @@ ok(r.recues.filter((x) => x.methode === "GET").length === 0, "et la Toile n'est 
 r = await lancer(["export", "vide", "--kind", "master", "--sans-pages-de-garde", "--rgb"]);
 const params = postes(r, /jobs$/)[0]?.corps.params ?? {};
 ok(!("pagesDeGarde" in params) && params.cmyk === false, "le master n'envoie plus le champ que l'atelier refuse", JSON.stringify(params));
+
+// ── Le rendu d'une traduction avant sa validation ──────────────────────────
+r = await lancer(["rendu", "pleine", "--out", join(maison, "r.png"), "--locale", "en", "--brouillon"]);
+const demande = r.recues.find((x) => /\/rendu\?/.test(x.chemin))?.chemin ?? "";
+ok(r.code === 0 && /locale=en/.test(demande) && /brouillon=1/.test(demande), "le rendu d'une langue en cours demande le brouillon", demande);
+
+r = await lancer(["rendu", "pleine", "--out", join(maison, "r.png"), "--locale", "en"]);
+ok(!/brouillon/.test(r.recues.find((x) => /\/rendu\?/.test(x.chemin))?.chemin ?? ""), "et ne le demande pas sans l'option");
 
 serveur.close();
 rmSync(maison, { recursive: true, force: true });

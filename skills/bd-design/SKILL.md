@@ -154,10 +154,15 @@ décors, la génération de planche, le lettrage.
 ```bash
 node "$S" create-planche <projet> --title "<titre de la scène>"
 node "$S" write <plancheId> --file script.json      # puis vérifie qu'il a pris
-node "$S" generate <plancheId> --mode case --case <caseId> --wait   # chaque case
+node "$S" generate <plancheId> --mode case --case <caseId> --quality medium --wait   # chaque case
 node "$S" validate <varianteId> --case <caseId>
-node "$S" generate <plancheId> --mode planche --wait
+node "$S" generate <plancheId> --mode planche --quality high --wait
 ```
+
+La qualité est celle que la personne a retenue : elle s'annonce et se demande
+à la première génération du projet, puis se consigne au journal (voir
+`${CLAUDE_SKILL_DIR}/../../templates/qualite.md`).
+Par défaut : les cases en moyenne, la planche entière en haute définition.
 
 Ne donne aucune taille : l'atelier connaît la double page, et chaque case
 sort au ratio de son emplacement.
@@ -170,7 +175,18 @@ sort au ratio de son emplacement.
 node "$S" derive-lettrage <plancheId>
 ```
 
-7. Présente le résultat.
+7. Présente le résultat. **Si la personne l'accepte, valide la planche et son
+   lettrage** : c'est ce que le pilote d'album (`/bd-album`) vérifie avant de
+   commencer, et une planche test restée sans validation l'arrête.
+
+```bash
+node "$S" validate <varianteId>                # l'image de la planche entière
+node "$S" set-lettrage <plancheId> --valider   # son lettrage, une fois les bulles à leur place
+```
+
+   Les bulles se posent d'abord comme le dit `/bd-lettrage` (rendu avec
+   repères, contrôle, juge). En `--auto`, valide si le regard a rendu
+   VALIDER, et dis-le.
 
 Si la planche test échoue, ce n'est pas un échec de l'étape : c'est
 exactement ce à quoi elle sert. Dis ce qui a cassé, et où : la DA, une

@@ -74,6 +74,14 @@ album qui n'a pas cherché.
 
 ## Étape 3 : générer, pour de vrai
 
+**C'est souvent la première génération du projet : la qualité s'annonce
+maintenant.** Applique `${CLAUDE_SKILL_DIR}/../../templates/qualite.md` :
+dis les réglages (les pistes en basse qualité, pour comparer des intentions ;
+plus tard les cases en moyenne et la planche finale en haute définition), ce
+que ça coûte, que la personne peut en changer à tout moment (en te le
+demandant, ou dans l'atelier), demande si ça lui convient, et consigne sa
+réponse au journal.
+
 Par piste, **deux images** de la scène étalon. Deux, parce qu'une seule ne dit
 rien de la stabilité du style, et c'est justement ce qu'on veut mesurer.
 

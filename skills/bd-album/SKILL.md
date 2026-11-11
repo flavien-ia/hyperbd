@@ -80,10 +80,17 @@ Compose, sans rien dépenser :
 - la liste des scènes validées dans l'ordre du récit, chacune avec son
   budget de planches (`meta.budgetPlanches`) et son état (découpée ou non,
   planches produites ou non, lettrage fait ou non) ;
+- **la qualité des images**, telle que le journal l'a retenue (à défaut :
+  les cases en moyenne, la planche entière en haute définition). Si aucune
+  entrée ne l'a encore fixée, pose la question ici, avec le plan, comme le
+  demande
+  `${CLAUDE_SKILL_DIR}/../../templates/qualite.md` :
+  c'est elle qui fait le prix ;
 - le total de planches à produire, le coût estimé (le coût moyen d'une
-  planche du projet jusqu'ici, `costs`, ou à défaut le tarif du modèle en
-  qualité choisie, multiplié par le nombre de planches et par 1,5 pour les
-  reprises) ;
+  planche du projet jusqu'ici, `costs`, s'il a été mesuré dans la même
+  qualité ; à défaut, par planche, ses cases en moyenne plus la planche
+  entière dans la qualité retenue, autour de 0,50 $ en haute, le tout
+  multiplié par 1,5 pour les reprises) ;
 - **l'ordre** : le récit, toujours. Produire dans l'ordre est ce qui permet
   de juger la continuité contre la planche précédente validée.
 - avec `--depuis <scène>` : le plan commence à cette scène, les précédentes

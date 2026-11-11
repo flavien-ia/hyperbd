@@ -236,7 +236,9 @@ node "$S" write <plancheId> --file couverture.json
    Une case se génère seule (`generate --mode case --case <id>`), à la
    taille de son emplacement. Une couverture sans case est la règle.
 
-4. **Générer**, en qualité finale, la page entière (la taille est celle de
+4. **Générer**, en qualité finale (haute par défaut, ou celle que la personne
+   a retenue : voir `${CLAUDE_SKILL_DIR}/../../templates/qualite.md`),
+   la page entière (la taille est celle de
    l'atelier : portrait, ou les proportions de la couverture à plat, dos
    compris) :
 
