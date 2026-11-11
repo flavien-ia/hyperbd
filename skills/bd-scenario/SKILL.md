@@ -99,11 +99,11 @@ Ces champs ont un nom, et c'est sous ce nom que l'atelier, le contrôle
 }
 ```
 
-- `dateDiegetique` est la date telle qu'on la lit sur la carte ; `dateSort`
-  est sa clé de tri (`AAAA`, `AAAA-MM` ou `AAAA-MM-JJ`), celle qui place la
-  scène sur l'axe du temps. Donne les deux, et une clé différente par scène
-  quand deux scènes partagent un mois (ajoute le jour) : à clé égale, l'ordre
-  dans le temps est tiré au sort.
+- **La date est facultative, et son format est imposé** : `dateSort` vaut
+  `AAAA`, `AAAA-MM` ou `AAAA-MM-JJ`, et `dateDiegetique` est la même date en
+  toutes lettres, exactement (« 2031 », « Mars 2031 », « 5 mars 2031 »). Pas de
+  date en phrase libre (« le soir du discours ») : l'atelier ne la propose plus
+  et la montre comme à remplacer. Une scène sans date n'a ni l'un ni l'autre.
 - `castingIds` prend l'identifiant du PERSONNAGE retenu dans l'univers (le
   conteneur que rend `universe`, pas l'une de ses variantes de costume). Ce
   sont eux que la carte de la scène montre dans le fil.
