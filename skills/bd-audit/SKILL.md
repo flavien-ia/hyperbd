@@ -33,7 +33,7 @@ node "$S" journal <projet>           # les décisions déjà prises
 node "$S" sources <projet>           # s'il y a des sources
 ```
 
-`nodes` rend la Toile sans les corps. Le texte d'une scène se lit par
+`nodes` rend le récit sans les corps. Le texte d'une scène se lit par
 `node <scène>` : une fois la scène découpée, son `dialogue` est **le texte
 lettré sur ses planches**, celui qu'on imprime, assemblé avec une ligne
 « ## Planche : <titre> » par planche. C'est lui qu'on audite, pas le script
@@ -108,7 +108,7 @@ propose. Pas de généralités.
 
 En guidé : propose les corrections une par une, groupées par nature. En
 `--auto` : applique ce qui est factuel et sans ambiguïté (orthographes, dates
-qui découlent d'un calcul) dans les bibles, les fiches, la Toile et les
+qui découlent d'un calcul) dans les bibles, les fiches, le récit et les
 scripts pas encore lettrés, et **laisse tout le reste** en liste, dont toute
 réplique déjà lettrée (voir plus bas).
 
@@ -123,7 +123,7 @@ en `--auto` : c'est une règle de l'atelier. Propose la correction exacte ;
 en `--auto`, elle reste dans la liste. Une fois acceptée, elle se fait dans
 le lettrage, jamais en re-dérivant depuis le script : réécris le `dialogue`
 de la scène (`write-node <scène>`, en gardant chaque ligne « ## Planche : »
-intacte, voir `_toile`), ou le texte d'une seule planche
+intacte, voir `_recit`), ou le texte d'une seule planche
 (`set-lettrage <planche> --text-file`). Les bulles suivent : une réplique
 corrigée garde sa bulle et sa place.
 

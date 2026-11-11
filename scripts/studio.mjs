@@ -76,12 +76,14 @@
 //   archive <projet> [--out F.zip]         tout le projet (lignes, fichiers, univers) dans un .zip,
 //                                          réimportable dans l'atelier (« Importer un projet »)
 //
-//   -- la Toile (le scénario) --
-//   nodes <projet> [--ecartes]             les blocs et les liens (sans les corps)
+//   -- le récit (le fil de la vue Scénario) --
+//   nodes <projet> [--ecartes]             les scènes, les chapitres, les liens (sans les corps)
 //   node <id>                              un bloc, corps compris
-//   new-node <projet> --file <json>        poser un bloc
-//   scenario <projet> --file <json>        poser un lot de blocs et de liens
-//                                          (sans --file : lit la Toile, comme `nodes`)
+//   new-node <projet> --file <json>        poser une scène ou un chapitre
+//   scenario <projet> --file <json>        poser un lot de scènes, de chapitres et de rappels
+//                                          (sans --file : lit le récit, comme `nodes`). Le
+//                                          serveur place tout : jamais de positions. Un bloc
+//                                          libre d'un lot part sur l'établi.
 //   write-node <id> --file <json>          écrire un bloc
 //   set-status <id> --status S [--raison R] valider ou écarter
 //   promote <id> [--acte]                  une note devient une scène (un chapitre avec --acte)
@@ -97,6 +99,20 @@
 //   new-doc <projet> --kind K --title T --body-file F.md   (le même, depuis un .md)
 //   write-doc <id> --file <json>           le réécrire
 //   write-doc <id> --body-file F.md [--title T]
+//
+//   -- l'établi (le bac à sable du projet, au-dessus du fil) --
+//   etabli <projet> [--ranges] [--ecartees]   les cartes (idées, répliques, questions, images)
+//   etabli-add <projet> --texte "..." [--genre idee|replique|question] [--groupe G]
+//   etabli-add <projet> --file cartes.json    { cartes: [{ texte, genre?, groupe? }] } (1 à 60)
+//                                          le serveur les place ; posées par Claude, ce sont
+//                                          des propositions (pointillé, Retenir / Écarter)
+//   etabli-set <carteId> [--texte T] [--genre G] [--statut a-voir|retenue|ecartee]
+//   etabli-ranger <projet> --ids a,b (--scene <id> | --apres <id> | --debut | --fin) [--titre T]
+//                                          des cartes passent dans le récit : une scène neuve,
+//                                          ou une scène complétée (un groupe fait UNE scène)
+//   etabli-image <projet> --essai-image <id> [--texte T]   poser une image d'essai sur l'établi
+//   drop-etabli <carteId>                  une carte à la corbeille
+//   set-project <projet> --planches-visees N   le format visé de l'album (le fil le compte)
 //   journal <projet> [--limite N]          les décisions
 //   journal-add <projet> --file <json>     en consigner une
 //   version <projet>                       le numéro du dernier changement
@@ -115,9 +131,21 @@
 //   promote-image <imageId> --style "N"    en faire une planche de style
 //   drop-essai <id>
 //
+//   -- les univers --
+//   univers                                les siens, et les univers ouverts des autres
+//   universe-prompt <projet> [--file F.md] le prompt d'univers (ce qui part avec chaque
+//                                          génération) ; --file l'écrit
+//   derive <universId> [--inventaire]      partir d'un univers ouvert en le COPIANT chez soi
+//                                          (--inventaire : ce que la copie emporterait)
+//   copie <universId> [--attendre]         la copie des images ; --attendre la mène à son terme
+//
 //   -- écrire dans la bibliothèque de l'univers --
 //   new-entry <projet> --kind K --name N [--parent id] [--color hex]
-//             [--snippet "..." | --snippet-file F]
+//             [--snippet "..." | --snippet-file F]   (le portrait visuel, pour l'image)
+//             [--fiche "..." | --fiche-file F.md]    (qui il est, ce qu'il veut : pour le récit)
+//             [--proposition]                        Claude PROPOSE : l'auteur retient ou
+//                                                    écarte dans l'univers (onglet Personnages)
+//   entry <projet> <entryId>                une entrée entière, fiche comprise
 //   set-entry <projet> <entryId> --file patch.json
 //   drop-entry <projet> <entryId>
 //   entry-image <projet> <entryId> --file image.png    dépose et inscrit
@@ -381,72 +409,6 @@ async function attendreJob(jobId, maxMs = 900000) {
     }
   }
   return { job: { id: jobId, status: "timeout" } };
-}
-
-/** Les blocs qui prennent place dans le récit : la Toile les range elle-même. */
-const TYPES_DU_RECIT = new Set(["scene", "acte"]);
-
-/**
- * Range un lot de blocs sur l'établi, sans jamais rien recouvrir.
- *
- * Un lot posé sans position partait toujours du même point (0, 0) : les
- * propositions s'empilaient les unes sur les autres, et sous les scènes, qui
- * commencent au même endroit. Vu sur un album réel : quatre notes d'annonce
- * superposées, des fiches cachées derrière le récit.
- *
- * Le récit court vers la droite à partir de x = 0, et sa hauteur change avec
- * la lecture choisie (le temps, les personnages, les lieux). Le seul espace
- * qui ne bouge jamais est à GAUCHE du récit : c'est l'établi. Chaque lot s'y
- * pose en rangées de quatre, sous le lot précédent, avec un vide entre deux
- * lots pour qu'ils se lisent comme des grappes.
- *
- * On ne touche à rien de ce que le lot a déjà placé : un bloc qui porte `x`
- * et `y`, ou un lot qui donne son `ancre`, garde ses positions.
- */
-async function rangerLeLot(projet, lot) {
-  const noeuds = Array.isArray(lot?.nodes) ? lot.nodes : [];
-  const aPlacer = noeuds.filter(
-    (n) => !TYPES_DU_RECIT.has(n.type) && !(Number.isFinite(n.x) && Number.isFinite(n.y)),
-  );
-  if (lot?.ancre || aPlacer.length === 0) {
-    // Une scène sans position se pose à l'origine : sa place vient du récit.
-    return {
-      ...lot,
-      nodes: noeuds.map((n) =>
-        TYPES_DU_RECIT.has(n.type) ? { ...n, x: n.x ?? 0, y: n.y ?? 0 } : n,
-      ),
-    };
-  }
-
-  const PAS_X = 320;
-  const PAR_LIGNE = 4;
-  const GAUCHE = -(PAR_LIGNE * PAS_X + 80);
-  const hauteurDe = (type) => (type === "image" ? 320 : 180);
-
-  // Le bas de ce qui occupe déjà l'établi (les blocs libres à gauche du récit).
-  const { nodes: existants = [] } = await appel(`/projects/${projet}/nodes`);
-  let bas = null;
-  for (const b of existants) {
-    if (TYPES_DU_RECIT.has(b.type) || !(b.x < 0)) continue;
-    bas = Math.max(bas ?? -Infinity, b.y + hauteurDe(b.type));
-  }
-  const y0 = bas === null ? 0 : Math.ceil((bas + 160) / 20) * 20;
-  const pasY = aPlacer.some((n) => n.type === "image") ? 380 : 240;
-
-  let rang = 0;
-  return {
-    ...lot,
-    nodes: noeuds.map((n) => {
-      if (TYPES_DU_RECIT.has(n.type)) return { ...n, x: n.x ?? 0, y: n.y ?? 0 };
-      if (Number.isFinite(n.x) && Number.isFinite(n.y)) return n;
-      const place = {
-        x: GAUCHE + (rang % PAR_LIGNE) * PAS_X,
-        y: y0 + Math.floor(rang / PAR_LIGNE) * pasY,
-      };
-      rang++;
-      return { ...n, ...place };
-    }),
-  };
 }
 
 const commandes = {
@@ -929,23 +891,22 @@ const commandes = {
   },
 
   /**
-   * Pose un lot de blocs (et leurs liens) d'un coup.
-   *
-   * C'est la façon de proposer : les cinq prémisses arrivent ensemble, la
-   * personne les voit d'un regard et arbitre. Les positions sont facultatives :
-   * sans elles, les blocs libres se rangent sur l'établi, à gauche du récit,
-   * sous le lot précédent (voir `rangerLeLot`), et une scène n'en a pas (elle
-   * prend son rang dans le récit, sa hauteur vient de la lecture choisie).
+   * Pose un lot de scènes, de chapitres et de rappels d'un coup, dans le fil
+   * du récit. Une scène prend son rang dans le récit ; un bloc libre du lot
+   * (une note, une question) part sur l'établi, où l'atelier le place. On ne
+   * donne jamais de positions. Pour poser des idées ou des alternatives,
+   * `etabli-add` est la commande faite pour ça.
    */
   async scenario() {
-    // Sans lot, c'est une lecture : la Toile telle qu'elle est, comme
+    // Sans lot, c'est une lecture : le récit tel qu'il est, comme
     // `nodes`. Poser exige un fichier.
     if (!o.file) {
       return appel(`/projects/${arg(0)}/nodes${o.ecartes ? "?ecartes=1" : ""}`);
     }
+    // Le lot part tel quel : c'est l'atelier qui place (le fil range les
+    // scènes à leur rang, l'établi pose les blocs libres sous les cartes).
     const lot = JSON.parse(readFileSync(o.file, "utf8"));
-    const places = await rangerLeLot(arg(0), lot);
-    return appel(`/projects/${arg(0)}/scenario`, { method: "POST", body: places });
+    return appel(`/projects/${arg(0)}/scenario`, { method: "POST", body: lot });
   },
 
   "write-node"() {
@@ -1155,6 +1116,106 @@ const commandes = {
 
   "drop-essai": () => appel(`/essais/${arg(0)}`, { method: "DELETE" }),
 
+  // ── L'établi (le bac à sable du projet) ─────────────────────────────────
+  etabli: () => {
+    const q = new URLSearchParams();
+    if (o.ranges) q.set("ranges", "1");
+    if (o.ecartees) q.set("ecartees", "1");
+    const s2 = q.toString();
+    return appel(`/projects/${arg(0)}/etabli${s2 ? `?${s2}` : ""}`);
+  },
+
+  "etabli-add"() {
+    const cartes = o.file
+      ? JSON.parse(readFileSync(o.file, "utf8")).cartes
+      : [
+          {
+            texte: texteDe("texte", "texte-file"),
+            ...(typeof o.genre === "string" ? { genre: o.genre } : {}),
+            ...(typeof o.groupe === "string" ? { groupe: o.groupe } : {}),
+          },
+        ];
+    if (!Array.isArray(cartes) || cartes.some((c) => !c?.texte)) {
+      throw new Error('Il faut --texte "..." (ou --texte-file F), ou --file avec { cartes: [{ texte }] }.');
+    }
+    return appel(`/projects/${arg(0)}/etabli`, { method: "POST", body: { cartes } });
+  },
+
+  "etabli-set": () =>
+    appel(`/etabli/${arg(0)}`, {
+      method: "PATCH",
+      body: {
+        ...(texteDe("texte", "texte-file") !== undefined ? { texte: texteDe("texte", "texte-file") } : {}),
+        ...(typeof o.genre === "string" ? { genre: o.genre } : {}),
+        ...(typeof o.statut === "string" ? { statut: o.statut } : {}),
+      },
+    }),
+
+  "etabli-ranger"() {
+    if (typeof o.ids !== "string") throw new Error("Il faut --ids <carte,carte> (un groupe suffit : il fait une scène).");
+    const ids = o.ids.split(",").map((x) => x.trim()).filter(Boolean);
+    const ou =
+      typeof o.scene === "string"
+        ? { sceneId: o.scene }
+        : typeof o.apres === "string"
+          ? { apres: o.apres }
+          : o.debut
+            ? { debut: true }
+            : o.fin
+              ? { fin: true }
+              : null;
+    if (!ou) throw new Error("Où ranger ? --scene <id> (la compléter), --apres <id>, --debut ou --fin (une scène neuve).");
+    return appel(`/projects/${arg(0)}/etabli/ranger`, {
+      method: "POST",
+      body: { ids, ...ou, ...(typeof o.titre === "string" ? { titre: o.titre } : {}) },
+    });
+  },
+
+  "etabli-image": () => {
+    if (typeof o["essai-image"] !== "string") throw new Error("Il faut --essai-image <id d'une image d'essai>.");
+    return appel(`/projects/${arg(0)}/etabli/images`, {
+      method: "POST",
+      body: { essaiImageId: o["essai-image"], ...(typeof o.texte === "string" ? { texte: o.texte } : {}) },
+    });
+  },
+
+  "drop-etabli": () => appel(`/etabli/${arg(0)}`, { method: "DELETE" }),
+
+  "set-project"() {
+    const n = o["planches-visees"];
+    if (n === undefined) throw new Error("Il faut --planches-visees N (ou --planches-visees aucun).");
+    return appel(`/projects/${arg(0)}`, {
+      method: "PATCH",
+      body: { planchesVisees: n === "aucun" ? null : Number(n) },
+    });
+  },
+
+  // ── Les univers ────────────────────────────────────────────────────────
+  univers: () => appel("/universes"),
+
+  /** Le prompt d'univers : ce qui part avec chaque génération. `--file` l'écrit. */
+  "universe-prompt"() {
+    if (!o.file) return appel(`/projects/${arg(0)}/universe/prompt`);
+    return appel(`/projects/${arg(0)}/universe/prompt`, {
+      method: "PUT",
+      body: { prompt: lireTexte(o.file) },
+    });
+  },
+
+  derive: () =>
+    o.inventaire
+      ? appel(`/universes/${arg(0)}/derive`)
+      : appel(`/universes/${arg(0)}/derive`, { method: "POST", body: {} }),
+
+  async copie() {
+    if (!o.attendre) return appel(`/universes/${arg(0)}/copie`);
+    let etat = (await appel(`/universes/${arg(0)}/copie`)).copie;
+    for (let i = 0; i < 400 && etat?.etat === "en-cours"; i++) {
+      etat = (await appel(`/universes/${arg(0)}/copie`, { method: "POST", body: {} })).copie;
+    }
+    return { copie: etat };
+  },
+
   // ── Écrire dans la bibliothèque ─────────────────────────────────────────
 
   "new-entry": () =>
@@ -1168,8 +1229,12 @@ const commandes = {
           : {}),
         ...(typeof o.parent === "string" ? { parentId: o.parent } : {}),
         ...(typeof o.color === "string" ? { bubbleColor: o.color } : {}),
+        ...(texteDe("fiche", "fiche-file") !== undefined ? { fiche: texteDe("fiche", "fiche-file") } : {}),
+        ...(o.proposition ? { statut: "propose" } : {}),
       },
     }),
+
+  entry: () => appel(`/projects/${arg(0)}/universe/entries/${arg(1)}`),
 
   "set-entry"() {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");

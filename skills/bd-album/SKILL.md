@@ -65,7 +65,7 @@ Le pré-vol, sinon arrêt net avec la raison :
 
 1. **Une planche test validée** existe (une planche avec image validée et
    lettrage validé, hors scènes ou dans la scène étalon). Sinon :
-   `/bd-design`.
+   `/bd-planche-test`.
 2. **La bible de voix** et **la bible graphique** existent. Sinon `/bd-voix`,
    `/bd-da`.
 3. **Le budget**, en dollars. `--auto` et `--full-auto` l'exigent ; en guidé,

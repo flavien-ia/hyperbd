@@ -32,7 +32,7 @@ ok(plugin.repository === "https://github.com/flavien-ia/hyperbd", "URL du dépô
 // ── 2. Chaque skill : dossier = frontmatter, description non vide ───────────
 const skillsDir = join(RACINE, "skills");
 const skills = readdirSync(skillsDir).filter((d) => statSync(join(skillsDir, d)).isDirectory());
-ok(skills.length === 23, "23 skills", String(skills.length));
+ok(skills.length === 27, "27 skills", String(skills.length));
 for (const s of skills) {
   const f = join(skillsDir, s, "SKILL.md");
   if (!existsSync(f)) { ok(false, `SKILL.md manquant`, s); continue; }
@@ -48,7 +48,7 @@ for (const s of skills) {
   // ne le signale.
   if (desc && /[<>]/.test(desc)) ok(false, `chevron dans la description (Claude Desktop refuse le zip)`, s);
 }
-console.log("  ok   frontmatters des 23 skills (nom = dossier, description, sans chevron)");
+console.log("  ok   frontmatters des 27 skills (nom = dossier, description, sans chevron)");
 
 // ── 3. Chaque chemin ${CLAUDE_SKILL_DIR}/../../<x> référencé EXISTE ─────────
 const refs = new Set();
@@ -181,6 +181,16 @@ const PERIMES = [
   [/--sans-pages-de-garde|pages de garde/, "les pages de garde du master (retirées de l'atelier)"],
   [/prompt_template/, "l'ancien cadre de génération (la DA vit dans le Prompt de style)"],
   [/app\.studio-entremondes\.fr\/compte(?!\?onglet=)/, "Mon compte sans son onglet (jetons et clés : ?onglet=cles)"],
+  [/`_toile`/, "la skill _toile (devenue _recit : le fil et l'établi)"],
+  [/sur la Toile|la Corbeille du rail/, "la Toile comme lieu de travail (c'est le fil du récit, ou l'établi)"],
+  [/"ancre"\s*:/, "une ancre de lot (l'atelier place tout, un agent ne donne jamais de positions)"],
+];
+// Les skills-relais gardent les anciens noms le temps d'une version : elles ne
+// font que renvoyer vers les nouvelles commandes.
+const RELAIS = new Set(["bd-personnages", "bd-design"]);
+const ANCIENNES = [
+  [/\/bd-personnages\b/, "/bd-personnages (devenu /bd-perso)"],
+  [/\/bd-design\b/, "/bd-design (devenu /bd-perso, /bd-decors, /bd-planche-test)"],
 ];
 let perimes = 0;
 for (const [nom, texte] of textesDuMetier()) {
@@ -188,6 +198,13 @@ for (const [nom, texte] of textesDuMetier()) {
     if (motif.test(texte)) {
       perimes++;
       ok(false, "passage périmé", `${nom} : ${quoi}`);
+    }
+  }
+  if ([...RELAIS].some((r) => nom.includes(r))) continue;
+  for (const [motif, quoi] of ANCIENNES) {
+    if (motif.test(texte)) {
+      perimes++;
+      ok(false, "ancienne commande", `${nom} : ${quoi}`);
     }
   }
 }

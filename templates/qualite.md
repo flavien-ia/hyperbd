@@ -1,6 +1,7 @@
 # La qualité des images : l'annoncer, la demander, la retenir
 
-> Lu par toutes les skills qui génèrent : `/bd-da`, `/bd-design`,
+> Lu par toutes les skills qui génèrent : `/bd-da`, `/bd-perso`, `/bd-decors`,
+> `/bd-planche-test`,
 > `/bd-planches`, `/bd-couverture`, `/bd-album`. Une seule règle : la
 > personne sait ce qu'elle paie et dans quelle définition, avant la première
 > image, et elle peut en changer quand elle veut.

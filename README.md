@@ -22,13 +22,15 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 | `/start-hyperbd` | prépare tout, une fois : Node.js s'il manque, le jeton, le tour des clés en expliquant chacune |
 | `/new-bd` | commence une bande dessinée : crée le projet dans l'atelier et enchaîne sur le brief |
 | `/bd-connect` | relie Claude Code à l'atelier (jeton d'accès, état des clés) |
-| `/bd-status` | fait le point sur un album : avancement (jusqu'aux pages verrouillées), langues, versions, coûts, prochaines planches |
+| `/bd-status` | fait le point sur un album : l'univers, le récit, l'avancement (jusqu'aux pages verrouillées), langues, versions, coûts, prochaines planches |
 | `/bd-brief` | le point de départ : source, message, format, distance de transposition, devis |
-| `/bd-univers` | la prémisse (par pistes contrastées) et la bible du monde |
-| `/bd-personnages` | le casting comme graphe de forces : les personnages et leurs variantes dans la bibliothèque, leurs fiches et leurs tensions sur la Toile |
-| `/bd-scenario` | chapitres, scènes, mise en scène, rappels, budget, audit et pitch |
-| `/bd-da` | la direction artistique : pistes contrastées générées, jugées, verrouillées |
-| `/bd-design` | personnages, décors et motifs dessinés, puis la planche test |
+| `/bd-univers` | le pilote de la phase univers : fait le point, puis enchaîne la bible, la direction artistique, les personnages et les lieux, en s'arrêtant à chaque décision |
+| `/bd-bible` | la prémisse (par pistes contrastées, posées sur l'établi), la bible du monde et le prompt d'univers ; aucune image |
+| `/bd-da` | la direction artistique : pistes contrastées générées sur une scène étalon ou une image clé, jugées dans la planche contact, verrouillées |
+| `/bd-perso` | les personnages de bout en bout : le casting comme graphe de forces, proposé dans l'univers (l'auteur retient ou écarte), puis le dessin des seuls retenus |
+| `/bd-decors` | les lieux : ceux du monde avant le récit, ceux que les scènes ont fait naître après ; proposés dans l'univers, puis dessinés |
+| `/bd-scenario` | le récit dans la vue Scénario : chapitres et scènes dans le fil, alternatives sur l'établi, rappels, budget face au format visé, audit, pitch, et le relevé des personnages et des lieux qui manquent |
+| `/bd-planche-test` | la planche test, sur une vraie scène : la preuve que tout le pipeline tient |
 | `/bd-voix` | la bible de voix, éprouvée en aveugle : on retire les noms, on attribue, on compte |
 | `/bd-dialogues` | une scène découpée en planches et en cases, dialogues écrits dans les cases |
 | `/bd-planches` | le gros œuvre : chaque planche fabriquée de ses cases (les cases d'abord, puis la planche qui les intègre), regardée, validée |
@@ -48,8 +50,8 @@ Le plan complet vit dans `Plan du harnais HyperBD.md`.
 produites sous des angles imposés, puis jugées par des relecteurs en aveugle
 (originalité, dramaturgie, cohérence, fidélité au message, incarnation, voix,
 grammaire visuelle) qui ne savent ni qui a écrit ni ce qu'on espérait. Le
-gagnant est greffé de ce que les autres avaient de meilleur ; les écartés vont
-dans la Corbeille de la Toile et au journal, avec leur raison.
+gagnant est greffé de ce que les autres avaient de meilleur ; les écartés sont
+écartés sur l'établi et au journal, avec leur raison.
 
 **Ce qui peut se mesurer n'est pas confié à un juge.** Un modèle qui s'auto-note
 se trouve toujours bon. La différenciation des voix, par exemple, ne se déclare

@@ -48,6 +48,10 @@ const serveur = http.createServer((req, res) => {
     if (req.method === "GET" && (m = /^\/projects\/(\w+)\/nodes/.exec(chemin))) return rendre({ nodes: toiles[m[1]], edges: [] });
     if (req.method === "POST" && /\/generations$/.test(chemin)) return rendre({ generationId: "g1", status: "running" }, 202);
     if (req.method === "POST" && /\/scenario$/.test(chemin)) return rendre({ nodeIds: [], edgeIds: [] }, 201);
+    if (req.method === "POST" && /\/etabli$/.test(chemin)) return rendre({ ids: ["c1"] }, 201);
+    if (req.method === "POST" && /\/etabli\/ranger$/.test(chemin)) return rendre({ sceneId: "s9", creee: true }, 201);
+    if (req.method === "POST" && /\/universe\/entries$/.test(chemin)) return rendre({ entry: { id: "e1" } }, 201);
+    if (req.method === "PATCH" && /^\/projects\/\w+$/.test(chemin)) return rendre({ ok: true });
     if (req.method === "POST" && /\/jobs$/.test(chemin)) return rendre({ jobId: null, devis: {} });
     if (req.method === "GET" && /\/rendu(\?|$)/.test(chemin)) {
       res.writeHead(200, { "content-type": "image/png", "x-dimensions": "10x10" });
@@ -104,33 +108,31 @@ ok(r.code === 1 && postes(r, /generations$/).length === 0, "une planche du réci
 r = await lancer(["generate", "pleine", "--mode", "planche", "--dialogue-mode", "model"]);
 ok(r.code === 0 && postes(r, /generations$/)[0]?.corps.dialogueMode === "overlay", "l'ancienne option --dialogue-mode n'a plus d'effet");
 
-// ── Le rangement des lots ──────────────────────────────────────────────────
+// ── Les lots et l'établi : l'atelier place, le client transmet ────────────
 const notes = (n) => Array.from({ length: n }, (_, i) => ({ type: "note", title: `Piste ${i + 1}` }));
 
-r = await lancer(["scenario", "vide", "--file", lot(notes(6))]);
-let poses = postes(r, /scenario$/)[0]?.corps.nodes ?? [];
-ok(poses.length === 6 && poses.every((n) => n.x < -200), "Toile vide : les six notes sont à gauche du récit", poses.map((n) => `${n.x},${n.y}`).join(" "));
-ok(new Set(poses.map((n) => `${n.x},${n.y}`)).size === 6, "aucune note n'est posée sur une autre");
-ok(poses[0].y === 0 && poses[4].y === 240, "quatre par rangée, la cinquième à la rangée suivante");
-
-r = await lancer(["scenario", "occupee", "--file", lot([...notes(2), { type: "scene", title: "S" }, { type: "acte", title: "C" }])]);
-poses = postes(r, /scenario$/)[0]?.corps.nodes ?? [];
-const libres = poses.filter((n) => n.type === "note");
-ok(libres.every((n) => n.y >= 240 + 320 + 160), "établi occupé : le lot se pose sous le bloc le plus bas, avec un vide", libres.map((n) => `${n.x},${n.y}`).join(" "));
-ok(poses.filter((n) => n.type !== "note").every((n) => n.x === 0 && n.y === 0), "une scène et un chapitre sans position se posent à l'origine");
-
-r = await lancer(["scenario", "recit", "--file", lot([{ type: "image", title: "Essai" }, ...notes(4)])]);
-poses = postes(r, /scenario$/)[0]?.corps.nodes ?? [];
-ok(poses[0].y === 0 && poses[4].y === 380, "un lot qui porte une image prend des rangées plus hautes", poses.map((n) => `${n.x},${n.y}`).join(" "));
-
-r = await lancer(["scenario", "occupee", "--file", lot([{ type: "note", title: "Placée", x: 50, y: 60 }, ...notes(1)])]);
-poses = postes(r, /scenario$/)[0]?.corps.nodes ?? [];
-ok(poses[0].x === 50 && poses[0].y === 60 && poses[1].x < 0, "un bloc déjà placé garde sa place, l'autre est rangé");
-
-r = await lancer(["scenario", "occupee", "--file", lot(notes(2), { ancre: { x: 500, y: 500 } })]);
+r = await lancer(["scenario", "occupee", "--file", lot([...notes(2), { type: "scene", title: "S" }])]);
 const envoye = postes(r, /scenario$/)[0]?.corps;
-ok(envoye?.ancre?.x === 500 && envoye.nodes.every((n) => n.x === undefined), "un lot qui donne son ancre est transmis tel quel");
-ok(r.recues.filter((x) => x.methode === "GET").length === 0, "et la Toile n'est pas relue pour rien");
+ok(envoye?.nodes?.length === 3 && envoye.nodes.every((n) => n.x === undefined && n.y === undefined), "un lot part tel quel : jamais de positions calculées par le client");
+ok(r.recues.filter((x) => x.methode === "GET").length === 0, "et le récit n'est pas relu pour rien");
+
+r = await lancer(["etabli-add", "vide", "--texte", "Une idée", "--genre", "replique", "--groupe", "G"]);
+const carte = postes(r, /etabli$/)[0]?.corps;
+ok(carte?.cartes?.[0]?.texte === "Une idée" && carte.cartes[0].genre === "replique" && carte.cartes[0].groupe === "G", "etabli-add pose une carte, son genre et son groupe", JSON.stringify(carte));
+
+r = await lancer(["etabli-ranger", "vide", "--ids", "a,b", "--apres", "s1", "--titre", "T"]);
+const rangement = postes(r, /etabli\/ranger$/)[0]?.corps;
+ok(rangement?.ids?.join() === "a,b" && rangement.apres === "s1" && rangement.titre === "T", "etabli-ranger dit quelles cartes, et où", JSON.stringify(rangement));
+
+r = await lancer(["etabli-ranger", "vide", "--ids", "a"]);
+ok(r.code === 1 && postes(r, /etabli\/ranger$/).length === 0, "etabli-ranger sans destination est refusé avant d'écrire");
+
+r = await lancer(["new-entry", "vide", "--kind", "character", "--name", "Marthe", "--fiche", "Une archiviste.", "--proposition"]);
+const entree = postes(r, /universe\/entries$/)[0]?.corps;
+ok(entree?.statut === "propose" && entree.fiche === "Une archiviste.", "new-entry --proposition pose une proposition, fiche comprise", JSON.stringify(entree));
+
+r = await lancer(["set-project", "vide", "--planches-visees", "48"]);
+ok(r.recues.some((x) => x.methode === "PATCH" && x.corps?.planchesVisees === 48), "set-project règle le format visé");
 
 // ── Le master ──────────────────────────────────────────────────────────────
 r = await lancer(["export", "vide", "--kind", "master", "--sans-pages-de-garde", "--rgb"]);

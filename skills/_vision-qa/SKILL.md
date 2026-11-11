@@ -1,6 +1,6 @@
 ---
 name: _vision-qa
-description: Helper interne. Fait REGARDER une image produite (essai ou planche) par un subagent en aveugle, comparée à ses références, et boucle sur la génération avec un delta correctif tant que le verdict le demande. Appelé par /bd-da, /bd-design et la production des planches. Ne pas invoquer directement.
+description: Helper interne. Fait REGARDER une image produite (essai ou planche) par un subagent en aveugle, comparée à ses références, et boucle sur la génération avec un delta correctif tant que le verdict le demande. Appelé par /bd-da, /bd-perso, /bd-decors, /bd-planche-test et la production des planches. Ne pas invoquer directement.
 user-invocable: false
 allowed-tools: Bash, Read, Write, Agent
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et curl."

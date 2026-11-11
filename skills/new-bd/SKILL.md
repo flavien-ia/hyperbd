@@ -38,10 +38,25 @@ Un univers, c'est la bibliothèque du projet : personnages, décors, images de r
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects
 ```
 
-- **Aucun projet** : un univers neuf sera créé avec le projet, rien à demander.
-- **Des projets existent** : liste les univers distincts qu'ils portent (`universeName`, avec le titre du projet qui l'utilise) et demande, en une question : « Un univers neuf, ou réutiliser celui de <projet> ? » Réutiliser n'a de sens que pour une suite ou un spin-off ; en cas de doute, recommande l'univers neuf.
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" univers
+```
 
-`--univers <id>` en argument saute la question.
+Trois possibilités, à proposer en une seule question quand il y a un choix :
+
+- **Un univers neuf** (le défaut, rien à demander s'il n'y a ni projet ni univers ouvert qui s'impose) : il est créé avec le projet.
+- **Un univers à soi** (`miens`) : réutiliser n'a de sens que pour une suite ou un spin-off ; en cas de doute, recommande l'univers neuf.
+- **Partir d'un univers ouvert** (`ouverts`, partagé sous licence libre par d'autres auteurs) : on le **copie** chez soi. La copie est à la personne, elle la complète (ses personnages, ses décors, ses variantes) ; l'original n'est jamais touché, et ce qu'il deviendra ne changera rien à l'album. Sa licence et son crédit suivent. Avant de copier, dis ce que la copie emportera :
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" derive <universId> --inventaire
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" derive <universId>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" copie <copieId> --attendre
+```
+
+La copie se crée tout de suite ; ses images arrivent par lots (`copie --attendre` les mène au bout). Le projet se crée ensuite sur la COPIE (`--universe <copieId>`).
+
+`--univers <id>` en argument saute la question (un univers ouvert d'un autre est alors copié, comme ci-dessus).
 
 ## Étape 3 : créer le projet
 
@@ -51,11 +66,11 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-project --title "<titre 
 
 Avec `--universe <id>` si un univers existant a été choisi. La réponse donne `project.slug` et `project.id`.
 
-Dis que le projet existe, et donne son adresse : `https://app.studio-entremondes.fr/projet/<slug>?vue=scenario` (la Toile, vide pour l'instant : le brief va la peupler).
+Dis que le projet existe, et donne son adresse : `https://app.studio-entremondes.fr/projet/<slug>?vue=scenario` (la vue Scénario : l'établi en haut, le fil du récit en bas, vides pour l'instant).
 
 ## Étape 4 : enchaîner sur le brief
 
-Sans attendre, **charge la skill `bd-brief` et suis-la** pour ce projet (donne-lui le slug, et le chemin du document source s'il y en a un, `--source` ou cité dans la conversation). Le projet existant déjà, `bd-brief` n'en recrée pas ; il pose le brief, la distance de transposition, le devis, et annonce la suite (`/bd-univers`).
+Sans attendre, **charge la skill `bd-brief` et suis-la** pour ce projet (donne-lui le slug, et le chemin du document source s'il y en a un, `--source` ou cité dans la conversation). Le projet existant déjà, `bd-brief` n'en recrée pas ; il pose le brief, la distance de transposition, le devis, le format visé, et annonce la suite (`/bd-univers` : le monde, la direction artistique, les personnages et les lieux, avant le récit).
 
 ## Règles
 

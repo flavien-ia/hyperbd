@@ -1,6 +1,6 @@
 ---
 name: bd-da
-description: Pose la direction artistique de l'album. Compose 3 à 5 pistes graphiques franchement contrastées, les fait générer en vrai sur une même scène étalon, les fait juger sur leur lisibilité en petit et leur robustesse sur soixante planches, puis verrouille le cadre, la palette, la police et la bible graphique. Utiliser après le scénario, quand la personne dit « la direction artistique », « à quoi ça ressemble », « /bd-da », « le style de l'album ».
+description: Pose la direction artistique de l'album. Compose 3 à 5 pistes graphiques franchement contrastées, les fait générer en vrai sur une même scène étalon (ou, avant le récit, sur une image clé composée depuis la prémisse), les montre dans la planche contact de l'atelier, les fait juger sur leur lisibilité en petit et leur robustesse sur soixante planches, puis verrouille le cadre, la palette, la police et la bible graphique. Deuxième étape de la phase univers (que /bd-univers enchaîne), après la bible et avant les personnages. Utiliser quand la personne dit « la direction artistique », « à quoi ça ressemble », « /bd-da », « le style de l'album ».
 argument-hint: "[projet] [--auto] [--budget 5]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et curl."
 ---
@@ -26,7 +26,8 @@ planche 43, quand le modèle aura légèrement dérivé quarante-deux fois.
 S="${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs"
 node "$S" project <projet>
 node "$S" docs <projet>          # brief, bible, et déjà une bible graphique ?
-node "$S" nodes <projet>         # la structure, pour choisir la scène étalon
+node "$S" nodes <projet>         # le récit, s'il existe déjà : une scène étalon possible
+node "$S" universe <projet>      # un style déjà posé ? (un univers fourni, une copie)
 node "$S" me                     # les clés en place ?
 ```
 
@@ -37,21 +38,27 @@ généré, et cette étape n'a pas de version « à blanc » utile.
 Si une bible graphique existe déjà, ne la refais pas en silence : montre ce
 qu'elle dit et demande s'il s'agit de la revoir ou de repartir de zéro.
 
-## Étape 1 : la scène étalon
+## Étape 1 : la scène étalon, ou l'image clé
 
 Toutes les pistes seront générées sur **la même scène**. C'est ce qui rend le
 choix possible : comparer un portrait et une scène de foule ne compare rien.
 
-Une bonne scène étalon :
+La direction artistique vient **avant le récit** (c'est elle qui donne envie de
+continuer, et les personnages se dessinent dans son style). Le plus souvent il
+n'y a donc pas encore de scène validée. Deux cas :
 
-- est déjà validée dans la structure (pas une scène qu'on invente ici) ;
-- fait tenir ensemble **deux personnages principaux au moins** et **un lieu
-  fort** ;
-- comporte à la fois un plan large et un visage : le style doit prouver qu'il
-  tient aux deux échelles.
+- **Une scène validée existe** (un album repris, une suite) : prends-la comme
+  scène étalon si elle fait tenir ensemble deux personnages au moins et un
+  lieu fort, avec un plan large et un visage.
+- **Sinon, compose une IMAGE CLÉ** depuis la prémisse et la bible : le moment
+  le plus emblématique de l'histoire telle qu'on la devine, avec ses figures
+  (décrites par leur rôle, pas encore par un visage arrêté), son lieu, sa
+  lumière, un plan large et un visage. Écris-la en un paragraphe, fais-la
+  valider en guidé, et consigne-la au journal : c'est elle que la planche test
+  rappellera plus tard.
 
-En guidé : propose-en deux ou trois, laisse choisir. En `--auto` : prends la
-plus dense en casting parmi les scènes validées, et dis laquelle.
+En `--auto` : la scène validée la plus dense en casting, sinon l'image clé ;
+dis laquelle.
 
 ## Étape 2 : composer les pistes
 
@@ -114,35 +121,19 @@ d'une image.
 
    Les pistes se jugent **en parallèle** : elles sont indépendantes.
 
-2. Pose les pistes sur la Toile, **une grappe par piste**, toutes dans un
-   seul lot (voir `_toile`). Une grappe fait quatre blocs, dans cet ordre :
-   la note de la piste (son nom en titre, son bloc de style en corps), ses
-   deux images (type `image`, `refId` = l'identifiant de l'image d'essai),
-   et une note qui porte le verdict du juge. Quatre blocs, c'est une ligne
-   de la grille où l'atelier range un lot : chaque piste se lit sur sa ligne.
+2. Envoie la personne dans la **planche contact** de l'atelier, filtrée sur
+   la direction artistique :
+   `app.studio-entremondes.fr/projet/<projet>?m=essais&genre=da-piste`.
+   Chaque piste y est une rangée : son nom, son prompt, ses images ; la case
+   « taille vignette » les montre en petit, comme une piste doit se juger.
+   La personne regarde les pistes là, en vrai, pas dans le chat. Chaque essai
+   porte le nom de sa piste (`--label`) : c'est ce qui permet de s'y
+   retrouver.
 
-```bash
-node "$S" scenario <projet> --file pistes.json
-```
-
-```json
-{
-  "nodes": [
-    { "type": "note", "title": "Piste : <nom>", "body": "<bloc de style>" },
-    { "type": "image", "title": "<nom> 1", "refId": "<id de l'image d'essai>" },
-    { "type": "image", "title": "<nom> 2", "refId": "<id de l'image d'essai>" },
-    { "type": "note", "title": "Verdict : <PORTEUSE ou non>", "body": "<ce que le juge a vu, où ça cassera>" }
-  ],
-  "edges": [
-    { "from": 0, "to": 1 }, { "from": 0, "to": 2 }, { "from": 0, "to": 3 }
-  ],
-  "ancre": { "x": 0, "y": 0 }
-}
-```
-
-   Si la Toile porte déjà des blocs libres, choisis une `ancre` (le coin
-   haut-gauche du lot) à côté d'eux plutôt que dessus : leurs positions sont
-   dans `nodes`. La personne regarde les pistes là, en vrai, pas dans le chat.
+   Pose aussi sur l'établi, en un groupe nommé « Pistes graphiques », une
+   carte par piste : son nom en première ligne, son bloc de style, puis le
+   verdict du juge (`etabli-add`, voir `_recit`). C'est là que la personne
+   lit côte à côte ce que chaque piste promet et où elle cassera.
 
 3. Restitue en clair : pour chaque piste, ce que le juge a vu, à quoi ça
    ressemble, **où ça cassera**, et son verdict.
@@ -254,13 +245,16 @@ node "$S" promote-image <imageId> --style "<nom de la piste>"
    sont déjà lettrées : le bilan dit les bulles qui changeraient de forme).
    Un tome neuf hérite de la police du tome précédent de l'univers.
 
-6. **Les pistes perdantes** écartées avec leur raison, sur la Toile et au
-   journal : chaque bloc de leur grappe passe en `ecarte`, avec la raison
-   (elle se lit dans la Corbeille du rail), et la grappe gagnante en
-   `valide`.
+6. **Les pistes perdantes** écartées avec leur raison, au journal et sur
+   l'établi : leur carte passe en `ecartee` ; la carte de la piste gagnante
+   quitte l'établi (elle vit désormais dans la bible graphique). Dans la
+   planche contact, les images de la piste retenue se gardent (Retenir) ;
+   les autres seront purgées après trente jours.
 
 ```bash
-node "$S" set-status <bloc> --status ecarte --raison "<pourquoi cette piste ne tiendra pas>"
+node "$S" etabli-set <carte> --statut ecartee
+node "$S" drop-etabli <carte de la piste retenue>
+node "$S" keep <imageId>
 ```
 
 ## Étape 7 : livrer
@@ -269,8 +263,12 @@ Récapitule : la piste retenue et pourquoi, ce qu'elle porte, où elle cassera
 et ce qu'on surveillera, la police, et le coût réel dépensé
 (`node "$S" costs <projet>`).
 
-Annonce la suite (`/bd-design` : les personnages et les décors, puis la
-planche test).
+Dis où tout se voit : le style dans l'univers (onglet Style), la bible
+graphique dans le **Dossier** (`?m=dossier&doc=bible-graphique`), les essais
+dans la planche contact.
+
+Annonce la suite : les personnages (`/bd-perso`), ou laisse `/bd-univers`
+enchaîner s'il t'a appelé.
 
 Termine par `🎉 DIRECTION ARTISTIQUE POSÉE`.
 

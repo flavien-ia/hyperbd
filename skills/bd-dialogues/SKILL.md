@@ -47,7 +47,7 @@ lu dès que la première planche est rattachée à la scène.
 
 **Une scène déjà lettrée ne se redécoupe pas ici.** Si ses planches ont un
 lettrage, ses dialogues vivent désormais dans ce lettrage : une retouche de
-réplique passe par le dialogue de la scène sur la Toile (voir `_toile`) ou par
+réplique passe par le dialogue de la scène (voir `_recit`) ou par
 `/bd-lettrage`, jamais par un nouveau script suivi d'une nouvelle dérivation,
 qui effacerait ce que la personne a corrigé. Redécouper une scène lettrée est
 une décision lourde : dis-le, et ne le fais que si la personne le demande.

@@ -1,112 +1,89 @@
 ---
 name: bd-univers
-description: Construit le monde de la bande dessinée : la prémisse (par exploration de plusieurs pistes contrastées, jamais la première venue), puis la bible du projet (cadre, mécaniques et leur coût, forces en présence, conventions verrouillées, graines pour la suite). Utiliser après le brief, quand la personne dit « construis l'univers », « /bd-univers », « on invente le monde ».
-argument-hint: "[projet] [--auto]"
+description: Le pilote de la phase univers : fait le point sur ce que l'univers du projet contient déjà (prompt, bible, style, personnages, lieux), puis enchaîne dans l'ordre la bible du monde (/bd-bible), la direction artistique (/bd-da), les personnages (/bd-perso) et les lieux (/bd-decors), en s'arrêtant à chaque décision de l'auteur. Reprend à la première étape qui manque. Utiliser après le brief, quand la personne dit « construis l'univers », « /bd-univers », « on invente le monde », « on fait tout l'univers ».
+argument-hint: "[projet] [--auto] [--budget <dollars>]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
 
-# L'univers : un monde qui tient debout
+# L'univers : le monde, son allure, ses gens, ses lieux
 
 ## Communication
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français).
 - Parle un langage simple et concret. N'expose jamais de nom de script ni de jargon technique.
-- Montre l'avancement sous forme d'une courte liste à cocher.
+- Montre l'avancement sous forme d'une courte liste à cocher, les quatre étapes de l'univers.
 
-Tu construis le monde où l'histoire aura lieu. Un monde tient debout quand ses
-règles ont un prix : ce qu'elles permettent, ce qu'elles interdisent, ce
-qu'elles coûtent à qui s'en sert.
+Tu mènes la phase univers d'un album, avant son récit. Tu n'as **aucune
+logique à toi** : tu fais le point, tu ordonnes, et tu passes la main à la
+skill de chaque étape, qui fait le travail. On peut toujours appeler ces
+quatre skills une par une ; toi, tu évites qu'on en oublie une ou qu'on les
+prenne dans le désordre.
 
-## Étape 0 : reprendre le fil
+Pourquoi l'univers avant le récit : la direction artistique donne envie de
+continuer, et les personnages doivent être vus tôt. Un scénario écrit pour
+des personnages qu'on a déjà sous les yeux s'écrit mieux.
 
-Lis le brief, l'architecture du message s'il y en a une, et l'état de la Toile
-(les conventions de travail sont dans `_toile`).
-
-```bash
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" docs <projet> --kind brief
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" nodes <projet>
-```
-
-Sans brief, invoque `bd-brief` : construire un monde sans savoir à qui l'on
-parle, c'est décorer avant de savoir où sont les murs.
-
-## Étape 1 : la prémisse, en plusieurs pistes
-
-**Jamais la première idée.** La première qui vient est la plus disponible, donc
-la plus commune : celle que tout le monde a déjà eue.
-
-1. Choisis 3 à 5 angles dans `templates/angles-divergence.md`, adaptés au sujet
-   et à la distance de transposition retenue.
-2. Écris un candidat par angle, **sans les comparer entre eux pendant que tu les
-   écris** (un candidat qui regarde les autres se met à leur ressembler).
-   Chacun tient en un paragraphe : la prémisse, ce qu'elle permet de raconter,
-   ce qu'elle coûte.
-3. Pose-les sur la Toile en une grappe annoncée (cf. `_toile`).
-4. Fais juger par `_juge` : `originalite` et `incarnation` en parallèle, plus
-   `fidelite` si le projet a une source.
-5. **Synthétise** : le gagnant, greffé de ce que les autres avaient de meilleur.
-   Une synthèse n'est pas un compromis mou : c'est le meilleur candidat, rendu
-   plus fort par une idée volée à un autre.
-6. Les écartés passent en `ecarte` avec leur raison. Ils resservent : une piste
-   abandonnée pour ce tome devient souvent la graine du suivant.
-
-En guidé, la personne tranche. En `--auto`, le panel tranche et tu consignes.
-
-## Étape 2 : la bible
-
-Section par section. Ce qui appartient au MONDE va dans la bibliothèque de
-l'univers (il resservira pour une suite ou un autre medium) ; ce qui appartient
-à CE tome va dans un document de projet.
-
-1. **Le cadre** : quand, où, dans quelle société. Assez pour situer, pas plus :
-   une bible n'est pas un atlas.
-2. **Les mécaniques, avec leur prix.** Pour chaque règle du monde (une
-   technologie, un pouvoir, une institution, une contrainte), écris :
-   - ce qu'elle permet,
-   - ce qu'elle interdit,
-   - **ce qu'elle coûte** à qui s'en sert,
-   - comment on peut la contourner, et ce que ça coûte encore.
-
-   C'est la section qui sépare un monde d'un décor. Un pouvoir sans prix rend
-   tous les enjeux nuls.
-3. **Les forces en présence.** Si le projet porte un message, c'est ici qu'il se
-   distribue : chaque position importante devient une force, avec ses raisons
-   et ses aveuglements. Aucune ne doit avoir tort sur toute la ligne.
-4. **Les conventions verrouillées** : comment on nomme les choses, la
-   typographie du projet, ce qu'on n'écrit jamais. Verrouille-les MAINTENANT :
-   une convention décidée à la planche trente oblige à reprendre les vingt-neuf
-   premières.
-5. **Les graines** : ce qu'on installe sans l'exploiter, pour plus tard. Une
-   section à part, marquée comme telle.
-
-Écris la bible au fil de l'eau dans l'atelier (`kind: bible`), pas d'un bloc à
-la fin : ce qui n'est pas écrit se perd. Elle s'écrit en Markdown, dans un
-fichier : créée une fois, puis réécrite à chaque avancée.
+## Étape 0 : l'état des lieux
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-doc <projet> --kind bible --title "Bible" --body-file bible.md
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" write-doc <id> --body-file bible.md
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" project <projet>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" docs <projet>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" universe-prompt <projet>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" universe <projet>
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" journal <projet> --limite 20
 ```
 
-## Étape 3 : la relecture
+Sans brief, invoque d'abord `bd-brief`.
 
-Fais juger la bible par `coherence` (elle se contredit ?) et `originalite`
-(elle ressemble à quoi ?). Boucle jusqu'à PASS, trois passes au maximum.
+Ce que tu en tires, étape par étape :
 
-## Étape 4 : livrer
+| Étape | Faite quand | Sinon |
+|---|---|---|
+| 1. La bible | un document `bible` existe, et le prompt d'univers n'est pas vide | `/bd-bible` |
+| 2. La direction artistique | un style est coché par défaut dans l'univers (`styles`, `styleDefault: true`) et le document `bible-graphique` existe | `/bd-da` |
+| 3. Les personnages | les personnages que la bible fait agir sont retenus dans l'univers, avec une fiche (`aFiche`) et des références (`nbImages` > 0 sur leurs variantes), et aucune proposition n'attend (`propositions`) | `/bd-perso` |
+| 4. Les lieux | les lieux que la bible nomme ont leur décor, avec des références | `/bd-decors` |
 
-Récapitule en clair : la prémisse retenue et pourquoi, les trois ou quatre
-mécaniques qui structurent le monde, les forces en présence. Annonce la suite
-(`/bd-personnages`).
+**Sur un univers déjà fourni** (HELO, la copie d'un univers ouvert), une
+grande partie est faite : dis-le, et ne relance que ce qui manque pour CET
+album. Un univers copié se reconnaît à son crédit « d'après … » ; sa copie
+d'images peut être en cours (`copie <univers>`) : attends qu'elle soit finie
+avant de juger ce qui manque (`copie <univers> --attendre`).
+
+Montre la liste à cocher à la personne, et dis par où tu reprends.
+
+## Étapes 1 à 4 : passer la main, s'arrêter aux décisions
+
+Pour chaque étape qui manque, dans l'ordre : **charge la skill de l'étape et
+suis-la** pour ce projet. Chacune s'arrête aux décisions qui reviennent à
+l'auteur :
+
+1. `/bd-bible` : le choix de la prémisse parmi les pistes posées sur l'établi.
+2. `/bd-da` : le choix d'une piste graphique, jugée dans la planche contact.
+3. `/bd-perso` : le casting (retenir ou écarter chaque proposition), puis les
+   références de chaque personnage retenu.
+4. `/bd-decors` : les lieux à dessiner, puis leurs références.
+
+Entre deux étapes, coche la liste et dis en une phrase ce qui vient d'être
+posé et ce qui vient. En `--auto`, tu enchaînes sans attendre, le panel de
+juges tranche à la place de l'auteur, et tout va au journal. Le `--budget`
+se partage entre les étapes qui génèrent des images (la DA, les personnages,
+les lieux) : annonce le partage avant la première génération.
+
+## Livrer
+
+Quand les quatre étapes sont faites, récapitule : le monde en trois phrases,
+la piste graphique retenue, le casting, les lieux. Dis où tout se voit dans
+l'atelier : l'univers (onglets Personnages, Décors, Style), le Dossier pour
+la bible et la bible graphique, la planche contact pour les essais.
+
+Annonce la suite : le récit, avec `/bd-scenario`.
 
 Termine par `🎉 UNIVERS POSÉ`.
 
 ## Règles
 
-- **Une mécanique sans coût est un trou.** Si tu ne sais pas dire ce qu'une
-  règle coûte, elle n'est pas finie.
-- **Ne meuble pas.** Une bible de cent pages dont dix servent est pire qu'une
-  bible de dix pages : personne ne la relit, et les contradictions s'y cachent.
-- **N'invente pas de faits sur le monde réel.** Si le projet a une source, ce
-  qui vient d'elle doit rester vrai, y compris transposé.
-- Ce que la personne a validé sur la Toile ne se réécrit pas sans le dire.
+- **Rien à toi** : pas de génération, pas d'écriture de bible, pas de
+  personnage créé ici. Tout passe par la skill de l'étape.
+- **Une décision de l'auteur ne se prend pas à sa place**, sauf en `--auto`.
+- **On reprend, on ne recommence pas** : une étape faite reste faite.

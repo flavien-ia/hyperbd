@@ -59,7 +59,7 @@ Trois conditions, sinon **arrête-toi et dis laquelle manque** :
 1. **La bible graphique existe et le cadre est verrouillé.** Sinon : `/bd-da`.
    Une couverture dans un autre style que l'album ment sur ce qu'il contient.
 2. **Le héros (ou les figures que la couverture montrera) a ses variantes
-   dessinées et ses images de référence étoilées.** Sinon : `/bd-design`.
+   dessinées et ses images de référence étoilées.** Sinon : `/bd-perso`.
    La couverture montre un visage en très grand : c'est là qu'une dérive se
    voit le plus.
 3. **Le budget.** En guidé, annonce le coût estimé et attends l'accord. **En

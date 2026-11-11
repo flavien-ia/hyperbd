@@ -34,7 +34,8 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" costs <projet>
    Dessiner avant d'avoir arrêté le style, c'est produire des images à jeter.
 2. **Les variantes sont castées et ont leurs images de référence étoilées.**
    Une planche se caste avec des VARIANTES (un costume, un âge, un état), pas
-   avec des personnages en général. Sinon : `/bd-design`.
+   avec des personnages en général. Sinon : `/bd-perso` (et `/bd-decors`
+   pour un décor récurrent sans références).
 3. **Les scripts modulaires et le gabarit sont posés** : cases, répliques,
    et l'emplacement de chaque case sur la double page. Sinon :
    `/bd-dialogues`.

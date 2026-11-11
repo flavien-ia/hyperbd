@@ -1,6 +1,7 @@
 # Quand le fournisseur refuse : la doctrine
 
-> Lu par `/bd-dialogues` (avant d'écrire), `/bd-design`, `/bd-couverture` et
+> Lu par `/bd-dialogues` (avant d'écrire), `/bd-perso`, `/bd-decors`,
+> `/bd-planche-test`, `/bd-couverture` et
 > `/bd-planches` (au moment de payer), `/bd-album` (qui enchaîne tout) et
 > `/bd-status` (qui rend compte). Une seule règle par cas, pour que deux
 > skills ne répondent jamais différemment au même refus.

@@ -27,7 +27,7 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" universe <projet>
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" nodes <projet>
 ```
 
-**Sans casting, arrête-toi** : renvoie vers `/bd-personnages`. Une voix se pose
+**Sans casting, arrête-toi** : renvoie vers `/bd-perso`. Une voix se pose
 sur quelqu'un, pas sur un rôle.
 
 Si une bible de voix existe déjà, dis ce qu'elle couvre et propose de la

@@ -66,7 +66,7 @@ node "$S" derive-lettrage <plancheId>
 
 Les répliques viennent du script de la planche : c'est leur naissance, et elle
 n'a lieu **qu'une fois**. Ensuite, le lettrage est le dialogue qui fait foi :
-c'est lui qu'on imprime, lui que la Toile montre dans la fiche de la scène,
+c'est lui qu'on imprime, lui que la vue Scénario montre dans la fiche de la scène,
 lui qu'on traduit. Le script des cases n'est plus que le brouillon du
 découpage, et il n'est pas tenu à jour.
 
@@ -92,8 +92,8 @@ suivi d'une nouvelle dérivation :
 
 - pour une planche : écris son texte complet dans un fichier, puis
   `set-lettrage <planche> --text-file <texte.txt>` ;
-- pour une scène entière : réécris le `dialogue` de la scène sur la Toile, en
-  gardant chaque ligne « ## Planche : <titre> » intacte (voir `_toile`).
+- pour une scène entière : réécris le `dialogue` de la scène (`write-node`), en
+  gardant chaque ligne « ## Planche : <titre> » intacte (voir `_recit`).
 
 Les bulles suivent le texte, comme dans l'éditeur : une réplique corrigée
 garde sa bulle et sa place, une réplique retirée emporte la sienne, une
@@ -292,7 +292,7 @@ Termine par `🎉 LETTRAGE POSÉ (n planches)`.
 - **Tu ne touches jamais aux couleurs de bulles.** Elles viennent des
   personnages de la bibliothèque et valent pour tout l'album : les changer ici
   les désaccorderait d'une planche à l'autre. Si deux couleurs se confondent,
-  dis-le et renvoie vers `/bd-personnages`.
+  dis-le et renvoie vers `/bd-perso`.
 - **Tu ne changes pas la police.** Elle est arrêtée par la bible graphique,
   et se règle dans l'album (`/bd-da`, ou les Réglages de l'album).
 - **Un ordre de lecture cassé ne se rattrape par rien.** Ni par la beauté du

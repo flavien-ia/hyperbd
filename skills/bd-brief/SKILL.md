@@ -88,8 +88,9 @@ toi-même et justifie chaque réponse au journal.
 ## Étape 3 : la distance de transposition
 
 **C'est le choix qui pilote tout l'aval.** Propose les quatre, avec un
-mini-pitch écrit POUR CE SUJET (pas une définition générale), pose-les sur la
-Toile comme propositions, et laisse arbitrer.
+mini-pitch écrit POUR CE SUJET (pas une définition générale), pose-les sur
+l'établi de la vue Scénario, en un groupe nommé « Distance de transposition »
+(une carte par distance, voir `_recit`), et laisse arbitrer.
 
 | Distance | Ce que c'est | Sa force | Son risque |
 |---|---|---|---|
@@ -101,14 +102,13 @@ Toile comme propositions, et laisse arbitrer.
 Recommande, argumente en une phrase, mais ne tranche pas à la place de la
 personne en mode guidé. En `--auto`, tranche et consigne pourquoi.
 
-Une fois le choix fait, **la Toile le dit** : la distance retenue passe en
-`valide`, les trois autres en `ecarte`, chacune avec sa raison. Elles quittent
-la Toile pour la Corbeille du rail, où la personne les retrouve avec ce qui
-les a écartées.
+Une fois le choix fait, **l'établi le dit** : les trois autres passent en
+`ecartee`, et leur raison va au journal ; la retenue entre dans le brief, et
+sa carte quitte l'établi.
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <bloc retenu> --status valide
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <bloc> --status ecarte --raison "<pourquoi pas celle-ci, pour ce sujet>"
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" etabli-set <carte> --statut ecartee
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" drop-etabli <carte retenue>
 ```
 
 ## Étape 4 : créer le projet
@@ -120,7 +120,7 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects
 Si tu viens de `/new-bd`, le projet existe déjà : c'est lui. Sinon, crée-le
 (un titre de travail suffit, il se change ensuite, dans l'atelier ou par
 `rename`), et fais-le **avant** de poser les distances de l'étape 3 : sans
-projet, pas de Toile.
+projet, pas d'établi.
 
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-project --title "<titre de travail>"
@@ -138,14 +138,25 @@ Puis écris deux documents dans l'atelier, chacun depuis un fichier Markdown :
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-doc <projet> --kind brief --title "Brief" --body-file brief.md
 ```
 
-Pose ensuite sur la Toile les premières **questions ouvertes** : ce qui reste à
-trancher et qu'on ne veut pas oublier. Consigne la décision de distance au
-journal, avec les trois écartées et pourquoi.
+Écris aussi le **format visé**, en planches : c'est le nombre que le fil du
+récit comparera au total des scènes, dans la vue Scénario.
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-project <projet> --planches-visees <N>
+```
+
+Pose ensuite sur l'établi les premières **questions ouvertes** (genre
+`question`) : ce qui reste à trancher et qu'on ne veut pas oublier. Consigne
+la décision de distance au journal, avec les trois écartées et pourquoi. Le
+brief se lit dans le **Dossier** de l'atelier
+(`app.studio-entremondes.fr/projet/<projet>?m=dossier&doc=brief`).
 
 ## Étape 5 : livrer
 
 Récapitule en clair : ce qu'on raconte, à qui, le format, la distance retenue,
-le coût attendu. Puis annonce la suite (`/bd-univers`) et ce qu'elle fera.
+le coût attendu. Puis annonce la suite, `/bd-univers`, et ce qu'elle fera :
+le monde (la bible), sa direction artistique, ses personnages et ses lieux,
+avant le récit.
 
 Termine par `🎉 BRIEF POSÉ`.
 
