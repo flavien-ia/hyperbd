@@ -4,6 +4,25 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.13.1 (11 novembre 2026)
+
+### Corrections
+- **La couverture se génère de nouveau.** La garde ajoutée en 0.13.0 (pas de génération sur une planche sans cases) bloquait aussi la couverture et la quatrième, qui n'ont pas de cases par nature.
+- **Les propositions de Claude ne s'empilent plus sur la Toile.** Chaque lot se range sur l'établi, à gauche du récit, sous le lot précédent : plus de notes superposées ni de fiches cachées sous les scènes.
+- **Le scénario validé s'inscrit sur la Toile.** `/bd-scenario` passe chapitres et scènes en « validé » à la signature du pitch. Sans cela, la direction artistique, les dialogues et le pilote d'album n'avaient rien sur quoi s'appuyer.
+- **Le master** n'envoie plus une option que l'atelier refusait.
+
+### Améliorations
+- **La Toile suit la conversation.** Ce que vous décidez en répondant à Claude y est reporté aussitôt (retenu, écarté avec sa raison, encore en discussion), et Claude retire ses notes d'annonce avant de rendre la main.
+- **Chaque case porte son style** et nomme ses personnages par « @Nom », pour que les images de référence soient attribuées au bon personnage.
+- **Le scénario nomme ses champs** : synopsis, lieu, date, planches prévues, casting, fils du récit. Les rappels entre scènes se tracent d'une commande.
+- Jetons et clés : le harnais vous envoie au bon onglet de Mon compte, « Clés API ».
+- Le contrôle du lettrage reprend la bande de reliure de l'atelier (1 cm de chaque côté du pli). Le prix de Bria est à jour (0,04 $ la page).
+- Le tuto parle de ses quatre étapes partout.
+
+### Coulisses
+- Le banc de vérification contrôle que chaque commande et chaque option citées par une skill existent, et essaie le client contre un faux atelier, sans réseau ni dépense.
+
 ## v0.13.0 (9 novembre 2026)
 
 ### Nouveautés
