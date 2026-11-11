@@ -4,6 +4,20 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.15.0 (11 novembre 2026)
+
+### Nouveautés
+- **L'atelier de création** : chaque personnage, décor ou objet de l'univers se travaille désormais dans son propre atelier, dans l'app. Claude y lance ses essais directement sur la bonne variante, et les images arrivent dans la fiche de l'élément, sous « À juger », où vous gardez celles qui deviennent des références et écartez les autres.
+- **Le même prompt pour vous et pour Claude** : `/bd-perso` et `/bd-decors` partent du prompt que l'atelier assemble (style de l'univers, description, variante, consigne). Ce que Claude génère, vous le regénérez à l'identique depuis l'onglet Générer.
+- **Le verdict de Claude** : après chaque essai, Claude écrit son avis sur l'image, affiché à côté d'elle, et peut écarter de lui-même ce qui ne tient pas.
+
+### Améliorations
+- **La planche contact** ne rassemble plus que les essais qui ne visent pas un élément, à commencer par les pistes de direction artistique.
+- **`/bd-univers`** présente l'atelier de création comme l'endroit où l'on juge les images d'un élément.
+
+### Coulisses
+- Nouvelles commandes de l'outil du studio pour lire le prompt d'un élément, ses images à juger, poser un verdict et écarter une image.
+
 ## v0.14.1 (11 novembre 2026)
 
 ### Corrections
