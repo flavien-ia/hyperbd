@@ -4,6 +4,24 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.14.0 (11 novembre 2026)
+
+### Nouveautés
+- **La nouvelle vue Scénario** : le récit se construit dans le fil, en bas (les scènes dans l'ordre, groupées par chapitres), à partir de l'établi, au-dessus, où Claude et vous posez des idées et des répliques. Glisser une idée entre deux scènes en fait une scène ; la glisser sur une scène la complète. Claude travaille désormais là, sans jamais placer de bloc à la main.
+- **L'univers avant le récit** : `/bd-univers` enchaîne maintenant le monde (`/bd-bible`), la direction artistique, les personnages (`/bd-perso`) et les lieux (`/bd-decors`), en s'arrêtant à chacune de vos décisions.
+- **Les personnages proposés dans l'univers** : Claude écrit leur fiche et vous les propose ; vous retenez ou écartez, et seuls les retenus sont dessinés.
+- **Partir d'un univers ouvert** : `/new-bd` propose de copier l'univers d'un autre auteur, pour le compléter chez vous sans jamais toucher l'original.
+- **La planche test** a sa commande, `/bd-planche-test`, sur une vraie scène.
+
+### Améliorations
+- **La direction artistique se juge sur une image clé** quand le récit n'existe pas encore, dans la planche contact de l'atelier.
+- **Le scénario se termine par un relevé** des personnages et des lieux qui manquent encore.
+- **Le format visé** se règle au brief et se compare au total des scènes.
+- **La date d'une scène** a un format imposé, et reste facultative.
+
+### Changements de commande
+- `/bd-personnages` et `/bd-design` renvoient vers les nouvelles commandes pendant cette version.
+
 ## v0.13.2 (11 novembre 2026)
 
 ### Améliorations
