@@ -91,7 +91,8 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" etabli-add <projet> --file <
 - La **première ligne** d'une idée est son titre : c'est ce qui deviendra le
   titre de la scène si elle passe dans le fil. Le reste est son synopsis
   (400 caractères gardés), puis ses notes.
-- Une carte que tu poses est une **proposition** (pointillé, Retenir, Écarter).
+- Une carte que tu poses porte ta marque et un bouton Écarter. Sur l’établi,
+  on ne « retient » pas une carte : la garder, c’est la ranger dans le fil.
   Une carte écartée disparaît de la vue (« Écartées » la montre).
 - Un personnage ou un décor de l'univers peut s'attacher à une idée (la
   personne l'y glisse depuis la palette) : il entrera au casting de la scène
@@ -186,7 +187,6 @@ attendre la fin de la skill :
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <scène> --status valide
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <scène> --status ecarte --raison "<pourquoi, dans ses mots>"
 # une carte de l'établi
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" etabli-set <carte> --statut retenue
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" etabli-set <carte> --statut ecartee
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" drop-etabli <carte>
 ```
