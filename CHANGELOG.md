@@ -4,6 +4,12 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.14.1 (11 novembre 2026)
+
+### Corrections
+- **Une idée d'univers notée pendant le brief** va sur l'établi, comme le reste, et plus sur l'ancienne Toile.
+- **Le README et l'aide de connexion** décrivent la nouvelle vue Scénario (l'établi et le fil du récit).
+
 ## v0.14.0 (11 novembre 2026)
 
 ### Nouveautés
