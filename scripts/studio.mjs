@@ -207,7 +207,7 @@
 // de génération ou d'essai y ajoute `raison`, `conduite` et, pour un refus de
 // sécurité, ses `motifs` : c'est sur eux qu'une reformulation doit porter.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, realpathSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, realpathSync, chmodSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname, resolve, sep } from "node:path";
 
@@ -264,6 +264,14 @@ function ecrireAcces(acces) {
   writeFileSync(FICHIER_ACCES, JSON.stringify(acces, null, 2) + "\n", {
     mode: 0o600,
   });
+  // `mode` ne vaut qu'à la création : un fichier qui existait déjà garde ses
+  // droits d'avant. On les resserre à chaque écriture. (Sous Windows, ce mode
+  // ne protège rien : le fichier tient par les droits du profil utilisateur.)
+  try {
+    chmodSync(FICHIER_ACCES, 0o600);
+  } catch {
+    // Système de fichiers sans droits Unix : rien de plus à faire ici.
+  }
 }
 
 /**

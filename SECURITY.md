@@ -39,7 +39,10 @@ que vous avez installé est bien ce qui a été publié.
 ## Ce qu'il touche sur votre machine
 
 - `~/.hyperbd/acces.json` : l'adresse de l'atelier et le jeton d'accès que vous
-  avez donné à `/bd-connect`, en lecture réservée à votre compte (mode 0600).
+  avez donné à `/bd-connect`. Sur macOS et Linux, le fichier est réservé à
+  votre compte (mode 0600, réappliqué à chaque écriture). Sous Windows, ce mode
+  ne protège rien : le fichier est protégé seulement par les droits de votre
+  profil utilisateur (`C:\Users\<vous>`), comme le reste de vos documents.
   Le plugin ne l'écrit nulle part ailleurs (ni dans un dépôt, ni dans un
   fichier du projet) et ne le passe jamais en argument d'une commande : il le
   lit sur l'entrée standard (`connect --token -`), ce qui le tient hors de la
