@@ -73,7 +73,7 @@ console.log("Où vit le plugin");
 {
   const mp = placeDuPlugin(`C:/Users/x/.claude/plugins/marketplaces/local-desktop-app-uploads/${NOM}`, NOM);
   ok("un dossier de marketplace : la sauvegarde tient", mp.place === "marketplace" && mp.backupKept === true && mp.desktop === false, JSON.stringify(mp));
-  const rpm = placeDuPlugin("C:\\Users\\x\\AppData\\Roaming\\Claude\\Claude-Data\\claude_pzs8sxrjxfjjc\\rpm\\a859f234\\c851960e\\plugin_01E2Fc5UoFNisCLPWJVHhihQ", NOM);
+  const rpm = placeDuPlugin("C:\\Users\\x\\AppData\\Roaming\\Claude\\Claude-Data\\claude_abcd1234efgh5\\rpm\\0a1b2c3d\\4e5f6a7b\\plugin_01AbCdEfGhIjKlMnOpQrStUv", NOM);
   ok("le registre de Claude Desktop : pas de promesse, et Desktop le dit", rpm.place === "desktop" && rpm.backupKept === false && rpm.desktop === true, JSON.stringify(rpm));
   const ailleurs = placeDuPlugin(`/home/x/plugins/${NOM}`, NOM);
   ok("ailleurs : pas de promesse, pas Desktop", ailleurs.place === "hors_marketplace" && ailleurs.backupKept === false && ailleurs.desktop === false, JSON.stringify(ailleurs));
@@ -132,7 +132,7 @@ globalThis.fetch = async (url) => {
   let r = installer(marche);
   ok("dans un dossier de marketplace : installée, sauvegarde gardée et annoncée", r.ok === true && version(marche) === "9.9.9" && r.backupKept === true && r.desktop === false && existsSync(r.backup) && version(r.backup) === "1.0.0", JSON.stringify(r));
 
-  const desktop = join(boite, "Claude-Data", "claude_pzs8sxrjxfjjc", "rpm", "a859f234", "c851960e", "plugin_01TESTdesktop");
+  const desktop = join(boite, "Claude-Data", "claude_abcd1234efgh5", "rpm", "0a1b2c3d", "4e5f6a7b", "plugin_01TESTdesktop");
   r = installer(desktop);
   ok("dans le registre de Desktop : installée, aucune sauvegarde promise", r.ok === true && version(desktop) === "9.9.9" && r.backupKept === false && r.desktop === true && r.place === "desktop", JSON.stringify(r));
 
