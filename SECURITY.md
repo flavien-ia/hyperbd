@@ -78,12 +78,30 @@ que vous avez installé est bien ce qui a été publié.
 
 Chaque version publiée a une empreinte SHA-256, affichée sur la page de
 téléchargement de l'atelier et dans les notes de la release GitHub
-correspondante. `/update-hyperbd` calcule l'empreinte de ce qu'il a téléchargé
-et **refuse d'installer** en cas d'écart.
+correspondante ; GitHub calcule aussi la sienne sur l'archive de la release.
+`/update-hyperbd` télécharge l'archive par l'atelier, calcule son empreinte, et
+ne l'installe que si :
 
-Sa limite, dite simplement : une empreinte publiée par le site qui sert aussi
-le fichier prouve que le transfert est intact, pas que le site est honnête. La
-release GitHub est le second canal ; comparez les deux si cela compte pour vous.
+- **GitHub la confirme** : l'empreinte calculée par GitHub sur l'archive de la
+  release `v<version>`, ou celle des notes de cette release. L'empreinte de
+  l'atelier seule ne suffit pas : publiée par le site qui sert aussi le
+  fichier, elle prouverait que le transfert est intact, pas que le site est
+  honnête ;
+- **aucune source disponible ne dit autre chose** : si l'atelier et GitHub
+  divergent, rien n'est installé.
+
+Si GitHub ne répond pas, ou ne publie aucune empreinte pour cette version, la
+mise à jour est **refusée** et le message dit quoi faire : réessayer plus tard,
+ou comparer soi-même l'empreinte indiquée à celle de la release GitHub. Il n'y
+a pas d'option pour passer outre. La même règle s'applique quand on installe
+une archive déjà téléchargée (`install --zip`) : l'empreinte est recalculée sur
+le fichier. Le numéro de version lu dans l'archive doit avoir la forme `X.Y.Z`,
+et l'extraction refuse une archive de plus de 50 Mo une fois décompressée ou
+dont un fichier a un CRC-32 faux.
+
+La limite qui reste : si quelqu'un tient à la fois l'atelier et le compte
+GitHub du projet, ces contrôles ne le voient pas. Les tags signés ci-dessous
+sont là pour ce cas.
 Le code est public sur
 [flavien-ia/hyperbd](https://github.com/flavien-ia/hyperbd), sous licence
 Apache 2.0.

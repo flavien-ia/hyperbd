@@ -14,13 +14,15 @@
 //   node update-hyperbd.mjs install  --zip FICHIER [--plugin-dir DIR]
 //
 // Aucun compte, aucune clé : le plugin est open source, la version publiée se lit sur
-// l'atelier (qui la lit sur GitHub) et l'archive se télécharge sans jeton.
+// l'atelier (qui la lit sur GitHub) et l'archive se télécharge sans jeton. `download`
+// et `install` n'acceptent qu'une archive dont l'empreinte SHA-256 est confirmée par
+// la release GitHub de sa version (voir controlerEmpreinte), et refusent sinon.
 //
 // Sortie (stdout) : un objet JSON unique. Codes : 0 = fait, 1 = erreur, 2 = réseau injoignable.
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync, renameSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { inflateRawSync } from "node:zlib";
+import { inflateRawSync, crc32 } from "node:zlib";
 import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,6 +35,13 @@ const MANIFESTE_COURANT = `${ATELIER}/api/plugin/current`;
 const TELECHARGEMENT = `${ATELIER}/api/plugin/download`;
 /** Si l'atelier ne répond pas, la release GitHub dit au moins la version. */
 const RELEASE_GITHUB = "https://api.github.com/repos/flavien-ia/hyperbd/releases/latest";
+/** La release d'une version précise : GitHub y calcule lui-même l'empreinte de l'archive. */
+const RELEASE_GITHUB_TAG = (version) => `https://api.github.com/repos/flavien-ia/hyperbd/releases/tags/v${version}`;
+/** Une version, et rien d'autre : elle finit dans des noms de fichiers et des adresses. */
+const FORMAT_VERSION = /^\d+\.\d+\.\d+$/;
+/** Plafonds : l'archive publiée pèse moins d'un mégaoctet, décompressée comprise. */
+const TAILLE_MAX_ARCHIVE = 50 * 1024 * 1024;
+const TAILLE_MAX_DECOMPRESSEE = 50 * 1024 * 1024;
 /** Le nom de la marketplace où Claude Desktop range ce qu'on lui téléverse. */
 const MARKETPLACE_TELEVERSEMENTS = "local-desktop-app-uploads";
 const DOSSIER_TRAVAIL = path.join(homedir(), ".hyperbd", "updates");
@@ -55,6 +64,10 @@ function rendre(objet, code = 0) {
 
 function lireJson(p) {
   return JSON.parse(readFileSync(p, "utf8"));
+}
+
+function versionValide(v) {
+  return typeof v === "string" && FORMAT_VERSION.test(v);
 }
 
 function comparerVersions(a, b) {
@@ -127,7 +140,7 @@ async function versionPubliee() {
     const r = await fetch(MANIFESTE_COURANT, { headers: ENTETES });
     if (r.ok) {
       const j = await r.json();
-      if (j?.version) return { version: j.version, sha256: j.sha256 ?? null, source: "atelier" };
+      if (versionValide(j?.version)) return { version: j.version, sha256: j.sha256 ?? null, source: "atelier" };
     }
   } catch {
     // L'atelier ne répond pas : la release GitHub dira la version.
@@ -136,15 +149,84 @@ async function versionPubliee() {
   if (!r.ok) throw new Error(`GitHub a répondu ${r.status}`);
   const j = await r.json();
   const version = String(j.tag_name || "").replace(/^v/, "");
-  if (!version) throw new Error("aucune release publiée");
+  if (!versionValide(version)) throw new Error("aucune release publiée sous un numéro lisible");
   const sha = /\b([0-9a-f]{64})\b/.exec(String(j.body || ""))?.[1] ?? null;
   return { version, sha256: sha, source: "github" };
+}
+
+// ── Vérification de l'empreinte ─────────────────────────────────────────────
+// L'archive se télécharge par l'atelier ; l'empreinte que l'atelier publie prouve
+// seulement que le transfert est intact, pas que l'atelier est honnête. La source
+// indépendante est GitHub : l'empreinte que GitHub calcule lui-même sur l'archive
+// de la release (champ `digest`), et celle écrite dans les notes de la release.
+// Règle : au moins une source GitHub doit confirmer, et aucune source disponible
+// ne doit dire autre chose. Sinon, on n'installe pas.
+
+const HEX64 = /^[0-9a-f]{64}$/;
+
+async function empreintesPubliees(version) {
+  const sources = [];
+  const erreurs = [];
+  try {
+    const r = await fetch(MANIFESTE_COURANT, { headers: ENTETES });
+    if (r.ok) {
+      const j = await r.json();
+      const sha = String(j?.sha256 ?? "").toLowerCase();
+      if (j?.version === version && HEX64.test(sha)) sources.push({ source: "atelier", sha256: sha, independante: false });
+    } else erreurs.push(`atelier : ${r.status}`);
+  } catch (e) {
+    erreurs.push(`atelier : ${e.message}`);
+  }
+  try {
+    const r = await fetch(RELEASE_GITHUB_TAG(version), { headers: { ...ENTETES, Accept: "application/vnd.github+json" } });
+    if (r.ok) {
+      const j = await r.json();
+      const nomArchive = `hyperbd-v${version}.zip`;
+      const asset = (j.assets || []).find((a) => a?.name === nomArchive);
+      const digest = /^sha256:([0-9a-f]{64})$/i.exec(String(asset?.digest ?? ""))?.[1]?.toLowerCase();
+      if (digest) sources.push({ source: "github-archive", sha256: digest, independante: true });
+      const notes = /\b([0-9a-f]{64})\b/i.exec(String(j.body || ""))?.[1]?.toLowerCase();
+      if (notes) sources.push({ source: "github-notes", sha256: notes, independante: true });
+    } else erreurs.push(`GitHub : ${r.status}`);
+  } catch (e) {
+    erreurs.push(`GitHub : ${e.message}`);
+  }
+  return { sources, erreurs };
+}
+
+/** Rend null si l'archive est confirmée, sinon l'objet de refus à renvoyer tel quel. */
+async function controlerEmpreinte(version, empreinte) {
+  const { sources, erreurs } = await empreintesPubliees(version);
+  const discordantes = sources.filter((s) => s.sha256 !== empreinte);
+  if (discordantes.length > 0) {
+    return {
+      ok: false,
+      reason: "sha256-mismatch",
+      got: empreinte,
+      sources,
+      message:
+        "L'archive ne correspond pas à l'empreinte publiée (ou les sources publiées ne s'accordent pas entre elles). Rien n'a été installé. Réessayer plus tard ; si l'écart persiste, vérifier l'empreinte sur la release GitHub avant d'installer quoi que ce soit.",
+    };
+  }
+  if (!sources.some((s) => s.independante)) {
+    const pourquoi = erreurs.join(" ; ") || `aucune empreinte publiée sur GitHub pour la version ${version}`;
+    return {
+      ok: false,
+      reason: "sha256-unverifiable",
+      got: empreinte,
+      sources,
+      erreurs,
+      message: `Impossible de confirmer l'empreinte de l'archive auprès de GitHub (${pourquoi}). Rien n'a été installé. Réessayer plus tard, ou comparer à la main l'empreinte ${empreinte} à celle de la release v${version} sur https://github.com/flavien-ia/hyperbd/releases.`,
+    };
+  }
+  return null;
 }
 
 // ── Lecture d'archive zip (sans dépendance) ─────────────────────────────────
 // L'archive vient de `scripts/empaqueter.mjs` (deflate ou stockage, pas de zip64,
 // pas de chiffrement). Tout autre cas lève une erreur plutôt que d'écrire des
-// fichiers douteux.
+// fichiers douteux. Chaque entrée est décompressée sous un plafond commun, et son
+// CRC-32 est recalculé quand Node sait le faire (zlib.crc32, Node 20.15 et plus).
 
 function lireArchive(buf) {
   let fin = -1;
@@ -164,27 +246,43 @@ function lireArchive(buf) {
   for (let i = 0; i < nombre; i++) {
     if (buf.readUInt32LE(p) !== 0x02014b50) throw new Error("répertoire d'archive corrompu");
     const methode = buf.readUInt16LE(p + 10);
+    const crc = buf.readUInt32LE(p + 16);
     const tailleComp = buf.readUInt32LE(p + 20);
+    const taille = buf.readUInt32LE(p + 24);
     const lNom = buf.readUInt16LE(p + 28);
     const lExtra = buf.readUInt16LE(p + 30);
     const lComm = buf.readUInt16LE(p + 32);
     const decalage = buf.readUInt32LE(p + 42);
     const nom = buf.toString("utf8", p + 46, p + 46 + lNom);
-    entrees.push({ nom, methode, tailleComp, decalage });
+    entrees.push({ nom, methode, crc, tailleComp, taille, decalage });
     p += 46 + lNom + lExtra + lComm;
   }
 
+  let total = 0;
   return entrees
     .filter((e) => !e.nom.endsWith("/"))
     .map((e) => {
+      const reste = TAILLE_MAX_DECOMPRESSEE - total;
+      if (e.taille > reste) throw new Error(`archive trop volumineuse une fois décompressée : ${e.nom}`);
       if (buf.readUInt32LE(e.decalage) !== 0x04034b50) throw new Error(`entrée illisible : ${e.nom}`);
       const lNom = buf.readUInt16LE(e.decalage + 26);
       const lExtra = buf.readUInt16LE(e.decalage + 28);
       const debut = e.decalage + 30 + lNom + lExtra;
       const brut = buf.subarray(debut, debut + e.tailleComp);
-      if (e.methode === 0) return { nom: e.nom, contenu: brut };
-      if (e.methode === 8) return { nom: e.nom, contenu: inflateRawSync(brut) };
-      throw new Error(`compression non gérée (${e.methode}) : ${e.nom}`);
+      let contenu;
+      if (e.methode === 0) contenu = brut;
+      else if (e.methode === 8) {
+        try {
+          contenu = inflateRawSync(brut, { maxOutputLength: Math.max(1, reste) });
+        } catch (err) {
+          throw new Error(`entrée indécompressable ou trop volumineuse : ${e.nom} (${err.code || err.message})`);
+        }
+      } else throw new Error(`compression non gérée (${e.methode}) : ${e.nom}`);
+      if (contenu.length !== e.taille) throw new Error(`taille annoncée fausse : ${e.nom}`);
+      total += contenu.length;
+      if (total > TAILLE_MAX_DECOMPRESSEE) throw new Error("archive trop volumineuse une fois décompressée");
+      if (typeof crc32 === "function" && crc32(contenu) >>> 0 !== e.crc) throw new Error(`CRC-32 faux, archive abîmée : ${e.nom}`);
+      return { nom: e.nom, contenu };
     });
 }
 
@@ -256,7 +354,14 @@ async function cmdDownload() {
   if (!reponse.ok) {
     return rendre({ ok: false, message: `L'atelier a répondu ${reponse.status} au téléchargement.` }, 1);
   }
+  const annoncee = Number(reponse.headers?.get?.("content-length") || 0);
+  if (annoncee > TAILLE_MAX_ARCHIVE) {
+    return rendre({ ok: false, message: `Archive refusée : ${annoncee} octets, au-delà du plafond.` }, 1);
+  }
   const buf = Buffer.from(await reponse.arrayBuffer());
+  if (buf.length > TAILLE_MAX_ARCHIVE) {
+    return rendre({ ok: false, message: `Archive refusée : ${buf.length} octets, au-delà du plafond.` }, 1);
+  }
 
   let entrees;
   try {
@@ -268,38 +373,21 @@ async function cmdDownload() {
   if (!manifeste) {
     return rendre({ ok: false, message: "L'archive ne contient pas de plugin HyperBD." }, 1);
   }
-  const version = JSON.parse(manifeste.contenu.toString("utf8")).version;
+  let version;
+  try {
+    version = JSON.parse(manifeste.contenu.toString("utf8")).version;
+  } catch {
+    version = null;
+  }
+  if (!versionValide(version)) {
+    return rendre({ ok: false, message: "L'archive annonce un numéro de version illisible : rien n'a été gardé." }, 1);
+  }
   const empreinte = createHash("sha256").update(buf).digest("hex");
 
-  // Vérification d'intégrité : l'atelier publie l'empreinte de l'archive de la version
-  // courante, on refait le calcul sur ce qu'on a reçu. Un écart veut dire que le
-  // téléchargement n'est pas ce qui a été publié : on ne remplace pas une
-  // installation qui marche par un fichier dont on ne sait pas ce qu'il est.
-  //
-  // La comparaison n'a de sens que si le manifeste décrit LA MÊME version que
-  // l'archive reçue (un cache pas encore rafraîchi, une release survenue entre les
-  // deux appels) ; sinon on installe sans vérifier : refuser une mise à jour valide
-  // est la pire des deux erreurs. Idem quand aucune empreinte n'a été publiée.
-  let attendue = null;
-  try {
-    const p = await versionPubliee();
-    if (p.version === version && typeof p.sha256 === "string" && p.sha256.length === 64) attendue = p.sha256;
-  } catch {
-    // Manifeste injoignable : le téléchargement, lui, a réussi.
-  }
-  if (attendue && attendue !== empreinte) {
-    return rendre(
-      {
-        ok: false,
-        reason: "sha256-mismatch",
-        expected: attendue,
-        got: empreinte,
-        message:
-          "L'archive téléchargée ne correspond pas à l'empreinte publiée. Rien n'a été installé. Réessayer plus tard, et si l'écart persiste, vérifier l'empreinte sur la release GitHub avant d'installer quoi que ce soit.",
-      },
-      1,
-    );
-  }
+  // L'empreinte de ce qu'on a reçu doit être confirmée par GitHub (voir
+  // controlerEmpreinte) : pas d'empreinte vérifiable, pas d'archive gardée.
+  const refus = await controlerEmpreinte(version, empreinte);
+  if (refus) return rendre(refus, 1);
 
   const fichier = path.join(DOSSIER_TRAVAIL, `hyperbd-${version}.zip`);
   writeFileSync(fichier, buf);
@@ -310,11 +398,11 @@ async function cmdDownload() {
     files: entrees.length,
     sizeBytes: buf.length,
     sha256: empreinte,
-    sha256Verified: attendue !== null,
+    sha256Verified: true,
   });
 }
 
-function cmdInstall() {
+async function cmdInstall() {
   const zip = arg("--zip");
   if (!zip || !existsSync(zip)) return rendre({ ok: false, message: "Archive absente : passer --zip <fichier>." }, 1);
   const pluginDir = dossierPlugin();
@@ -331,14 +419,39 @@ function cmdInstall() {
   }
 
   const manifesteActuel = path.join(pluginDir, ".claude-plugin", "plugin.json");
-  const ancienne = existsSync(manifesteActuel) ? lireJson(manifesteActuel).version : "inconnue";
+  let ancienne = "inconnue";
+  try {
+    const v = existsSync(manifesteActuel) ? lireJson(manifesteActuel).version : null;
+    if (versionValide(v)) ancienne = v;
+  } catch {
+    // Manifeste illisible : la sauvegarde s'appellera « inconnue ».
+  }
 
+  const octets = readFileSync(zip);
+  if (octets.length > TAILLE_MAX_ARCHIVE) {
+    return rendre({ ok: false, message: `Archive refusée : ${octets.length} octets, au-delà du plafond.` }, 1);
+  }
   let entrees;
   try {
-    entrees = lireArchive(readFileSync(zip));
+    entrees = lireArchive(octets);
   } catch (e) {
     return rendre({ ok: false, message: `Archive inexploitable : ${e.message}` }, 1);
   }
+
+  // Même règle qu'au téléchargement, sur le fichier qu'on s'apprête à poser : une
+  // archive venue d'ailleurs, ou remplacée entre les deux étapes, ne passe pas.
+  let annoncee = null;
+  try {
+    const m = entrees.find((e) => e.nom === "hyperbd/.claude-plugin/plugin.json");
+    annoncee = m ? JSON.parse(m.contenu.toString("utf8"))?.version ?? null : null;
+  } catch {
+    annoncee = null;
+  }
+  if (!versionValide(annoncee)) {
+    return rendre({ ok: false, message: "L'archive ne contient pas de plugin HyperBD sous un numéro de version lisible." }, 1);
+  }
+  const refus = await controlerEmpreinte(annoncee, createHash("sha256").update(octets).digest("hex"));
+  if (refus) return rendre(refus, 1);
 
   // On déballe et on contrôle AVANT de toucher au plugin en place : tant que la
   // nouvelle version n'est pas prouvée complète, l'installation actuelle ne bouge pas.
@@ -350,6 +463,7 @@ function cmdInstall() {
     extraire(entrees, temporaire);
     const racine = path.join(temporaire, "hyperbd");
     nouvelle = lireJson(path.join(racine, ".claude-plugin", "plugin.json")).version;
+    if (nouvelle !== annoncee) throw new Error("numéro de version incohérent dans l'archive");
     // Les trois piliers du plugin : les skills portent les commandes, les scripts
     // parlent à l'atelier, les gabarits portent les juges. Une archive amputée est
     // refusée avant d'avoir touché à l'installation en place.
@@ -420,7 +534,7 @@ function cmdInstall() {
 try {
   if (commande === "check") await cmdCheck();
   else if (commande === "download") await cmdDownload();
-  else if (commande === "install") cmdInstall();
+  else if (commande === "install") await cmdInstall();
   else rendre({ ok: false, message: "Commande attendue : check | download | install" }, 1);
 } catch (e) {
   rendre({ ok: false, message: e?.message || String(e) }, 1);

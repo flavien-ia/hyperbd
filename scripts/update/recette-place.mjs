@@ -6,12 +6,17 @@
 // pas : promettre l'ancienne version « gardée de côté » y est faux. Tenu ici : une vraie
 // installation (le vrai script, une vraie archive, des dossiers jetables, un répertoire
 // personnel jetable) dit `backupKept` et `desktop`, et les textes suivent ces deux champs.
+// Tenu aussi : l'installation n'accepte qu'une archive dont l'empreinte est confirmée par
+// la release GitHub. Le réseau est remplacé par un faux `fetch` chargé avec `--require`
+// (fichier jetable), le script lui-même n'a aucune porte de contournement.
 //
 //   node scripts/update/recette-place.mjs
 //
 // Lancée aussi par scripts/verifier.mjs. Aucun réseau, rien d'écrit hors du dossier jetable.
 
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { crc32 } from "node:zlib";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -28,7 +33,7 @@ function ok(quoi, vrai, detail = "") {
 }
 const lire = (rel) => readFileSync(join(RACINE, rel), "utf8");
 
-/** Une archive sans compression : assez pour le lecteur du script (il ne relit pas le CRC). */
+/** Une archive sans compression, avec son CRC-32 (le lecteur du script le recalcule). */
 function archive(fichiers) {
   const locales = [];
   const centrales = [];
@@ -39,12 +44,14 @@ function archive(fichiers) {
     const h = Buffer.alloc(30);
     h.writeUInt32LE(0x04034b50, 0);
     h.writeUInt16LE(20, 4);
+    h.writeUInt32LE(crc32(data) >>> 0, 14);
     h.writeUInt32LE(data.length, 18);
     h.writeUInt32LE(data.length, 22);
     h.writeUInt16LE(n.length, 26);
     locales.push(h, n, data);
     const c = Buffer.alloc(46);
     c.writeUInt32LE(0x02014b50, 0);
+    c.writeUInt32LE(crc32(data) >>> 0, 16);
     c.writeUInt32LE(data.length, 20);
     c.writeUInt32LE(data.length, 24);
     c.writeUInt16LE(n.length, 28);
@@ -86,11 +93,30 @@ try {
   }
   const zip = join(boite, "neuve.zip");
   writeFileSync(zip, archive(neuve));
+  const sha = createHash("sha256").update(readFileSync(zip)).digest("hex");
 
-  const installer = (dossier) => {
+  // Le faux réseau : ce que l'atelier et GitHub publieraient pour la 9.9.9.
+  const fauxReseau = (atelier, github) => {
+    const p = join(boite, `reseau-${Math.random().toString(36).slice(2)}.cjs`);
+    writeFileSync(
+      p,
+      `const rep = (corps) => ({ ok: corps !== null, status: corps === null ? 404 : 200, json: async () => corps });
+globalThis.fetch = async (url) => {
+  url = String(url);
+  if (url.includes("app.studio-entremondes.fr")) return rep(${JSON.stringify(atelier)});
+  if (url.includes("api.github.com")) { if (${JSON.stringify(github)} === "panne") throw new Error("réseau coupé"); return rep(${JSON.stringify(github)}); }
+  throw new Error("adresse inattendue : " + url);
+};\n`,
+    );
+    return p;
+  };
+  const githubBon = { tag_name: "v9.9.9", body: `SHA-256 : \`${sha}\``, assets: [{ name: `${NOM}-v9.9.9.zip`, digest: `sha256:${sha}` }] };
+  const reseauBon = fauxReseau({ version: "9.9.9", sha256: sha }, githubBon);
+
+  const installer = (dossier, reseau = reseauBon) => {
     mkdirSync(join(dossier, ".claude-plugin"), { recursive: true });
     writeFileSync(join(dossier, ".claude-plugin", "plugin.json"), manifeste("1.0.0"));
-    const r = spawnSync(process.execPath, [join(RACINE, "scripts", "update", `update-${NOM}.mjs`), "install", "--zip", zip, "--plugin-dir", dossier], {
+    const r = spawnSync(process.execPath, ["--require", reseau, join(RACINE, "scripts", "update", `update-${NOM}.mjs`), "install", "--zip", zip, "--plugin-dir", dossier], {
       encoding: "utf8",
       env: { ...process.env, HOME: maison, USERPROFILE: maison },
     });
@@ -113,6 +139,46 @@ try {
   const ailleurs = join(boite, "ailleurs", NOM);
   r = installer(ailleurs);
   ok("ailleurs : installée, aucune sauvegarde promise", r.ok === true && version(ailleurs) === "9.9.9" && r.backupKept === false && r.desktop === false, JSON.stringify(r));
+
+  console.log("\nL'empreinte, avant de rien poser");
+  const refusee = (quoi, reseau, raison) => {
+    const d = join(boite, `refus-${Math.random().toString(36).slice(2)}`, NOM);
+    const res = installer(d, reseau);
+    ok(quoi, res.ok === false && res.reason === raison && version(d) === "1.0.0", JSON.stringify(res));
+  };
+  const autre = "0".repeat(64);
+  refusee("GitHub injoignable : refus, rien d'installé", fauxReseau({ version: "9.9.9", sha256: sha }, "panne"), "sha256-unverifiable");
+  refusee("aucune empreinte sur GitHub : refus, même si l'atelier confirme", fauxReseau({ version: "9.9.9", sha256: sha }, { tag_name: "v9.9.9", body: "", assets: [] }), "sha256-unverifiable");
+  refusee("GitHub donne une autre empreinte : refus", fauxReseau(null, { ...githubBon, body: "", assets: [{ name: `${NOM}-v9.9.9.zip`, digest: `sha256:${autre}` }] }), "sha256-mismatch");
+  refusee("l'atelier et GitHub divergent : refus", fauxReseau({ version: "9.9.9", sha256: autre }, githubBon), "sha256-mismatch");
+  {
+    const d = join(boite, "github-seul", NOM);
+    const res = installer(d, fauxReseau(null, githubBon));
+    ok("l'atelier muet, GitHub confirme : installée", res.ok === true && version(d) === "9.9.9", JSON.stringify(res));
+  }
+  {
+    const abimee = Buffer.from(readFileSync(zip));
+    const i = abimee.indexOf(Buffer.from("fichier 0\n"));
+    abimee[i] = 0x46; // « Fichier » : même taille, CRC faux.
+    const zipAbime = join(boite, "abimee.zip");
+    writeFileSync(zipAbime, abimee);
+    const shaAbime = createHash("sha256").update(abimee).digest("hex");
+    const reseau = fauxReseau(null, { tag_name: "v9.9.9", body: "", assets: [{ name: `${NOM}-v9.9.9.zip`, digest: `sha256:${shaAbime}` }] });
+    const d = join(boite, "abimee", NOM);
+    mkdirSync(join(d, ".claude-plugin"), { recursive: true });
+    writeFileSync(join(d, ".claude-plugin", "plugin.json"), manifeste("1.0.0"));
+    const brut = spawnSync(process.execPath, ["--require", reseau, join(RACINE, "scripts", "update", `update-${NOM}.mjs`), "install", "--zip", zipAbime, "--plugin-dir", d], {
+      encoding: "utf8",
+      env: { ...process.env, HOME: maison, USERPROFILE: maison },
+    });
+    let res;
+    try {
+      res = JSON.parse(brut.stdout);
+    } catch {
+      res = { brut: brut.stdout + brut.stderr };
+    }
+    ok("une entrée au CRC-32 faux : refusée, rien d'installé", res.ok === false && /CRC/.test(res.message || "") && version(d) === "1.0.0", JSON.stringify(res));
+  }
 } finally {
   rmSync(boite, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
 }

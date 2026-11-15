@@ -41,9 +41,10 @@ node "$PLUGIN_DIR/scripts/update/update-hyperbd.mjs" download
 
 Le JSON donne `file` (l'archive, dans `~/.hyperbd/updates/`), `version`, `files`, `sha256` et `sha256Verified`.
 
-**Le téléchargement se vérifie tout seul.** Le script compare l'empreinte de ce qu'il a reçu à celle que l'atelier publie pour cette version, et rend `ok: false, reason: "sha256-mismatch"` plutôt que de te tendre une archive à installer. Dans ce cas, **arrête-toi** : dis que le téléchargement ne correspond pas à ce qui a été publié, que rien n'a été installé, et que la même empreinte figure sur la release GitHub si la personne veut vérifier elle-même. Pas de nouvel essai à l'aveugle, pas d'installation quand même.
+**Le téléchargement se vérifie tout seul.** Le script calcule l'empreinte de ce qu'il a reçu et la fait confirmer par la release GitHub de cette version (l'empreinte que GitHub calcule sur l'archive, et celle des notes de la release), en plus de celle que l'atelier publie. Il ne te tend une archive que si GitHub confirme et qu'aucune source ne dit autre chose ; alors `sha256Verified` vaut `true`. Sinon, il rend `ok: false` avec l'une de ces deux raisons :
 
-`sha256Verified: false` veut dire qu'aucune empreinte n'était publiée pour cette version (ou que l'atelier n'a pas répondu à cette seconde question). Ce n'est pas une erreur : continue, sans en parler.
+- `reason: "sha256-mismatch"` : le téléchargement ne correspond pas à ce qui a été publié, ou les sources publiées ne s'accordent pas. **Arrête-toi** : dis-le, dis que rien n'a été installé, et que la personne peut comparer elle-même l'empreinte sur la release GitHub. Pas de nouvel essai à l'aveugle, pas d'installation quand même.
+- `reason: "sha256-unverifiable"` : GitHub n'a pas pu confirmer (injoignable, ou aucune empreinte publiée pour cette version). **Arrête-toi aussi** : dis à la personne que l'archive n'a pas pu être vérifiée, que rien n'a été installé, et transmets le `message` (réessayer plus tard, ou comparer à la main l'empreinte indiquée à celle de la release sur GitHub). N'installe jamais une archive non vérifiée, même si on te le demande au passage : ce n'est pas une option du script.
 
 ⚠️ **Compare `version` avec la `publishedVersion` de l'étape 1.** Si elles diffèrent (une release entre les deux appels, un cache en retard), dis-le et propose de réessayer plus tard plutôt que d'installer une version que la personne n'a pas acceptée. **STOP** sur tout échec, en transmettant le `message`.
 
@@ -53,7 +54,7 @@ Le JSON donne `file` (l'archive, dans `~/.hyperbd/updates/`), `version`, `files`
 node "$PLUGIN_DIR/scripts/update/update-hyperbd.mjs" install --zip "<file de l'étape 2>"
 ```
 
-Le script déballe l'archive dans un dossier temporaire et vérifie qu'elle contient un plugin complet **avant** de toucher à l'installation en place. Alors seulement il écarte le dossier actuel le temps de l'échange et met le nouveau à sa place. Si quoi que ce soit échoue, la version précédente est remise d'elle-même.
+Le script refait la vérification d'empreinte sur le fichier lui-même (même règle qu'à l'étape 2 : sur un refus, mêmes consignes, rien n'est installé), déballe l'archive dans un dossier temporaire sous un plafond de taille, contrôle chaque fichier (CRC-32) et vérifie qu'elle contient un plugin complet **avant** de toucher à l'installation en place. Alors seulement il écarte le dossier actuel le temps de l'échange et met le nouveau à sa place. Si quoi que ce soit échoue, la version précédente est remise d'elle-même.
 
 - `ok: true` : le JSON donne `version`, `oldVersion`, `backup`, `backupKept` et `desktop`. Garde `backupKept` et `desktop` pour l'étape 4, et passe à l'étape 4.
 - `ok: false` : rien n'a été remplacé, ou la version précédente a été remise. Rapporte le `message` tel quel. **STOP.**
