@@ -1,6 +1,6 @@
 ---
 name: start-hyperbd
-description: Prépare tout, une seule fois, pour travailler avec HyperBD : installe Node.js s'il manque (winget sur Windows, Homebrew sur macOS), relie Claude Code à l'atelier avec un jeton d'accès, puis fait le tour des clés d'API (OpenAI et Cloudflare R2, indispensables ; Topaz et Bria, pour l'impression) en expliquant pour chacune à quoi elle sert, ce qu'elle coûte et comment l'obtenir. Utiliser quand la personne dit « /start-hyperbd », « installe HyperBD », « prépare tout », « on commence », ou juste après avoir installé le plugin.
+description: Prépare tout, une seule fois, pour travailler avec HyperBD : installe Node.js s'il manque, avec l'accord de la personne (winget sur Windows, Homebrew sur macOS), relie Claude Code à l'atelier avec un jeton d'accès, puis fait le tour des clés d'API (OpenAI et Cloudflare R2, indispensables ; Topaz et Bria, pour l'impression) en expliquant pour chacune à quoi elle sert, ce qu'elle coûte et comment l'obtenir. Utiliser quand la personne dit « /start-hyperbd », « installe HyperBD », « prépare tout », « on commence », ou juste après avoir installé le plugin.
 compatibility: "Agent Skills standard (Claude Code ou Codex). Installe Node.js si nécessaire, rien d'autre."
 ---
 
@@ -23,15 +23,19 @@ Les commandes du harnais parlent à l'atelier par des scripts Node. Vérifie :
 node --version 2>/dev/null
 ```
 
-Une version 18 ou plus : c'est bon, passe à l'étape 2. Sinon, **installe-le directement, sans demander, avec les commandes ci-dessous** (pas de script à créer pour ça).
+Une version 18 ou plus : c'est bon, passe à l'étape 2. Sinon, Node.js s'installe avec les commandes ci-dessous (pas de script à créer pour ça), **mais rien ne s'installe sans l'accord de la personne** :
 
-**Windows.** Il faut winget :
+1. **Teste d'abord** ce qui est déjà là (le gestionnaire de paquets : winget ou Homebrew). Tester ne change rien à la machine.
+2. **Montre la commande exacte** que tu vas lancer, telle quelle dans un bloc de code, et dis en une phrase ce qu'elle fait et d'où elle télécharge.
+3. **Attends un oui explicite.** Une installation par commande montrée : si le gestionnaire de paquets lui-même manque, son installation se demande à part, avant celle de Node.js. Sans oui, n'installe rien : donne la commande pour que la personne la lance elle-même si elle préfère, et arrête-toi là.
+
+**Windows.** Il faut winget. Teste sa présence :
 
 ```bash
 winget --version 2>/dev/null
 ```
 
-S'il manque, installe-le par PowerShell :
+S'il répond, passe directement à Node.js. S'il manque, propose de l'installer depuis les releases officielles de `microsoft/winget-cli`, en montrant cette commande et en attendant le oui :
 
 ```bash
 powershell.exe -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -OutFile \"$env:TEMP\\winget.msixbundle\"; Add-AppxPackage -Path \"$env:TEMP\\winget.msixbundle\""
@@ -39,7 +43,7 @@ powershell.exe -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https:/
 
 Revérifie. S'il manque toujours, dis-le : « L'installation automatique de winget a échoué. Installe-le à la main depuis https://aka.ms/getwinget (App Installer, dans le Microsoft Store), puis relance `/start-hyperbd`. » Et arrête-toi là.
 
-Puis Node.js :
+Puis Node.js. Montre la commande, attends le oui :
 
 ```bash
 winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements 2>&1
@@ -47,13 +51,19 @@ export PATH="/c/Program Files/nodejs:$PATH"
 node --version
 ```
 
-**macOS.** Il faut Homebrew :
+**macOS.** Il faut Homebrew. Teste sa présence (il peut être installé sans être encore dans le PATH) :
+
+```bash
+brew --version 2>/dev/null || /opt/homebrew/bin/brew --version 2>/dev/null || /usr/local/bin/brew --version 2>/dev/null
+```
+
+S'il répond, passe directement au bloc `brew install node` ci-dessous (toujours après avoir montré la commande et reçu le oui). S'il manque, propose d'exécuter le script d'installation officiel de Homebrew : montre cette commande, dis qu'elle télécharge et exécute le script publié par Homebrew sur GitHub, qu'elle demandera le mot de passe de la session macOS (à taper par la personne, jamais par toi), et attends le oui :
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-⚠️ Juste après l'installation, `brew` n'est pas encore dans le PATH (Apple Silicon : `/opt/homebrew`, Intel : `/usr/local`). Dans le même bloc :
+Puis Node.js. Montre ce bloc, dis qu'il ajoute une ligne à `~/.zprofile` pour que `brew` soit trouvable ensuite (seulement si elle n'y est pas déjà), attends le oui. ⚠️ Juste après l'installation, `brew` n'est pas encore dans le PATH (Apple Silicon : `/opt/homebrew`, Intel : `/usr/local`). Dans le même bloc :
 
 ```bash
 BREW=$([ -x /opt/homebrew/bin/brew ] && echo /opt/homebrew/bin/brew || echo /usr/local/bin/brew)

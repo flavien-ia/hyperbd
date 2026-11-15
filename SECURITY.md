@@ -22,19 +22,22 @@ que vous avez installé est bien ce qui a été publié.
   gestionnaire de paquets du système, et c'est là qu'il faut être précis,
   parce que ce gestionnaire peut manquer :
   - **Windows** : `winget install OpenJS.NodeJS.LTS`. Si winget est absent, la
-    skill le télécharge depuis les releases officielles de
-    `microsoft/winget-cli` et l'installe (PowerShell, `Add-AppxPackage`).
-  - **macOS** : `brew install node`. Si Homebrew est absent, la skill exécute
-    son script d'installation officiel (`curl` puis `bash`, la commande
-    publiée par Homebrew), puis ajoute une ligne à votre `~/.zprofile` pour
-    que `brew` soit trouvable ensuite.
+    skill propose de le télécharger depuis les releases officielles de
+    `microsoft/winget-cli` et de l'installer (PowerShell, `Add-AppxPackage`).
+  - **macOS** : `brew install node`. Si Homebrew est absent, la skill propose
+    d'exécuter son script d'installation officiel (`curl` puis `bash`, la
+    commande publiée par Homebrew), puis d'ajouter une ligne à votre
+    `~/.zprofile` pour que `brew` soit trouvable ensuite.
   - **Linux** : rien d'automatique, la skill vous renvoie vers le gestionnaire
     de paquets de votre distribution.
 
-  Autrement dit : sur une machine où winget ou Homebrew existent déjà, rien
-  n'est téléchargé en dehors de Node.js lui-même. Sur une machine où ils
-  manquent, un installeur tiers l'est, depuis sa source officielle, et la
-  skill vous montre la commande avant de la lancer.
+  La skill teste d'abord ce qui est déjà installé (`node --version`,
+  `winget --version`, `brew --version`), ce qui ne change rien à la machine.
+  Ensuite, **chaque installation se demande** : la skill vous montre la
+  commande exacte et attend votre oui avant de la lancer ; celle du
+  gestionnaire de paquets, quand il manque, se demande à part. Sans votre
+  accord, rien n'est installé. Sur une machine où winget ou Homebrew existent
+  déjà, rien n'est téléchargé en dehors de Node.js lui-même.
 
 ## Ce qu'il touche sur votre machine
 
@@ -43,7 +46,7 @@ que vous avez installé est bien ce qui a été publié.
   votre compte (mode 0600, réappliqué à chaque écriture). Sous Windows, ce mode
   ne protège rien : le fichier est protégé seulement par les droits de votre
   profil utilisateur (`C:\Users\<vous>`), comme le reste de vos documents.
-  Le plugin ne l'écrit nulle part ailleurs (ni dans un dépôt, ni dans un
+  Le plugin n'écrit le jeton nulle part ailleurs (ni dans un dépôt, ni dans un
   fichier du projet) et ne le passe jamais en argument d'une commande : il le
   lit sur l'entrée standard (`connect --token -`), ce qui le tient hors de la
   liste des processus. Dites-vous en revanche ceci : **si vous collez le jeton
