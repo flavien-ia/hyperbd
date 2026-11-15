@@ -52,9 +52,17 @@ la session. Le juge lit des fichiers locaux : une URL signée expire, et un juge
 qui échoue à charger une image invente ce qu'elle contenait.
 
 ```bash
-curl -s -o "$TMP/candidat.png" "<url>"
-curl -s -o "$TMP/ref-<nom>.png" "<url>"
+curl -sf --proto '=https' --max-filesize 50000000 -o "$TMP/candidat.png" '<url>'
+curl -sf --proto '=https' --max-filesize 50000000 -o "$TMP/ref-<nom>.png" '<url>'
 ```
+
+`$TMP` est le dossier temporaire de la session : écris son chemin en clair.
+L'URL vient d'une réponse de l'atelier, c'est donc une donnée : colle-la telle
+quelle **entre guillemets simples** (une URL signée porte des `&`, parfois des
+`$`, que des guillemets doubles laisseraient interpréter par le shell).
+N'en télécharge aucune qui ne commence pas par `https://` ou qui contient un
+guillemet simple, une espace ou un retour à la ligne : dis-le dans le chat et
+arrête-toi sur cette image.
 
 Vérifie que chaque fichier fait plus de quelques kilo-octets. Un fichier de
 200 octets est une page d'erreur, pas une image.
