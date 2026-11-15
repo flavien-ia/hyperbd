@@ -147,6 +147,17 @@ ok(r.code === 0 && /locale=en/.test(demande) && /brouillon=1/.test(demande), "le
 r = await lancer(["rendu", "pleine", "--out", join(maison, "r.png"), "--locale", "en"]);
 ok(!/brouillon/.test(r.recues.find((x) => /\/rendu\?/.test(x.chemin))?.chemin ?? ""), "et ne le demande pas sans l'option");
 
+// ── Ce qui ne part jamais vers l'atelier ───────────────────────────────────
+r = await lancer(["node-image", "n1", "--file", join(maison, ".hyperbd", "acces.json")]);
+ok(r.code === 1 && r.recues.length === 0, "un fichier du dossier d'accès (~/.hyperbd) n'est jamais déposé", r.sortie.trim().slice(0, 90));
+
+r = await lancer(["scenario", "occupee", "--file", join(maison, ".hyperbd", "..", ".hyperbd", "acces.json")]);
+ok(r.code === 1 && r.recues.length === 0, "ni par un chemin détourné, ni par une autre commande", r.sortie.trim().slice(0, 90));
+
+writeFileSync(join(maison, "faux.png"), "ceci n'est pas une image");
+r = await lancer(["node-image", "n1", "--file", join(maison, "faux.png")]);
+ok(r.code === 1 && r.recues.length === 0, "une « image » sans signature PNG, JPEG ou WebP est refusée avant tout envoi", r.sortie.trim().slice(0, 90));
+
 serveur.close();
 rmSync(maison, { recursive: true, force: true });
 console.log(`\n${echecs === 0 ? "ESSAI DU CLIENT : tout passe." : `ESSAI DU CLIENT : ${echecs} échec(s).`}`);

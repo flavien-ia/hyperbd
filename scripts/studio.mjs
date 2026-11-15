@@ -204,9 +204,9 @@
 // de génération ou d'essai y ajoute `raison`, `conduite` et, pour un refus de
 // sécurité, ses `motifs` : c'est sur eux qu'une reformulation doit porter.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, realpathSync } from "node:fs";
 import { homedir } from "node:os";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve, sep } from "node:path";
 
 /** Le fichier d'accès vit hors du projet : un jeton n'a rien à faire dans un dépôt. */
 const FICHIER_ACCES = join(homedir(), ".hyperbd", "acces.json");
@@ -362,7 +362,49 @@ const [, , commande, ...reste] = process.argv;
  * chariot, qui fausseraient toute comparaison de texte côté atelier.
  */
 function lireTexte(chemin) {
-  return readFileSync(chemin, "utf8").replace(/\r\n?/g, "\n");
+  return readFileSync(deposable(chemin), "utf8").replace(/\r\n?/g, "\n");
+}
+
+/**
+ * Un fichier qu'on accepte d'envoyer à l'atelier.
+ *
+ * Tout ce que lit une option `--file` (ou `--prompt-file`, `--snippet-file`...)
+ * part sur le réseau. Le dossier `~/.hyperbd` porte le jeton et les mises à
+ * jour : rien de ce qu'il contient ne doit pouvoir être déposé, même par un
+ * chemin détourné (lien symbolique, `..`), d'où la comparaison des chemins
+ * résolus.
+ */
+function deposable(chemin) {
+  const reel = (p) => {
+    try {
+      return realpathSync.native(p);
+    } catch {
+      return resolve(p);
+    }
+  };
+  const norme = (p) => (process.platform === "win32" ? p.toLowerCase() : p);
+  const fichier = norme(reel(String(chemin)));
+  const interdit = norme(reel(join(homedir(), ".hyperbd")));
+  if (fichier === interdit || fichier.startsWith(interdit.endsWith(sep) ? interdit : interdit + sep)) {
+    throw new Error("Refusé : ce fichier est dans le dossier d'accès de HyperBD (~/.hyperbd), qui ne s'envoie jamais à l'atelier.");
+  }
+  return chemin;
+}
+
+/**
+ * Le type d'une image, lu dans ses premiers octets et pas dans son extension :
+ * seul un vrai PNG, JPEG ou WebP part vers le stockage.
+ */
+function typeImage(octets, permis = ["png", "jpeg", "webp"]) {
+  const debut = (...b) => b.every((x, i) => octets[i] === x);
+  let type = null;
+  if (octets.length > 8 && debut(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) type = "png";
+  else if (octets.length > 3 && debut(0xff, 0xd8, 0xff)) type = "jpeg";
+  else if (octets.length > 12 && octets.toString("latin1", 0, 4) === "RIFF" && octets.toString("latin1", 8, 12) === "WEBP") type = "webp";
+  if (!type || !permis.includes(type)) {
+    throw new Error(`Refusé : ce fichier n'est pas une image ${permis.map((p) => ({ png: "PNG", jpeg: "JPEG", webp: "WebP" })[p]).join(", ")} (signature lue dans le fichier, pas dans son nom).`);
+  }
+  return { type: `image/${type}`, ext: type === "jpeg" ? "jpg" : type };
 }
 
 /** Un texte depuis un fichier, ou depuis l'option elle-même. */
@@ -669,7 +711,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
     return appel(`/planches/${arg(0)}`, {
       method: "PATCH",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -899,7 +941,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
     return appel(`/projects/${arg(0)}/nodes`, {
       method: "POST",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -918,7 +960,7 @@ const commandes = {
     }
     // Le lot part tel quel : c'est l'atelier qui place (le fil range les
     // scènes à leur rang, l'établi pose les blocs libres sous les cartes).
-    const lot = JSON.parse(readFileSync(o.file, "utf8"));
+    const lot = JSON.parse(readFileSync(deposable(o.file), "utf8"));
     return appel(`/projects/${arg(0)}/scenario`, { method: "POST", body: lot });
   },
 
@@ -926,7 +968,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
     return appel(`/nodes/${arg(0)}`, {
       method: "PATCH",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -955,18 +997,12 @@ const commandes = {
    */
   async "node-image"() {
     if (!o.file) throw new Error("Il faut --file <chemin d'une image>.");
-    const ext = (o.file.split(".").pop() ?? "png").toLowerCase();
-    const type =
-      ext === "jpg" || ext === "jpeg"
-        ? "image/jpeg"
-        : ext === "webp"
-          ? "image/webp"
-          : "image/png";
+    const octets = readFileSync(deposable(o.file));
+    const { type, ext } = typeImage(octets);
     const { key, uploadUrl } = await appel(`/nodes/${arg(0)}/image`, {
       method: "POST",
       body: { contentType: type, ext },
     });
-    const octets = readFileSync(o.file);
     const envoi = await fetch(uploadUrl, {
       method: "PUT",
       headers: { "content-type": type },
@@ -983,7 +1019,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <JSON : { orderedIds: [] }>.");
     return appel(`/projects/${arg(0)}/nodes/reorder`, {
       method: "POST",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -1017,7 +1053,7 @@ const commandes = {
     if (o.file) {
       return appel(`/projects/${arg(0)}/docs`, {
         method: "POST",
-        body: JSON.parse(readFileSync(o.file, "utf8")),
+        body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
       });
     }
     if (typeof o["body-file"] !== "string" || typeof o.kind !== "string") {
@@ -1037,7 +1073,7 @@ const commandes = {
     if (o.file) {
       return appel(`/docs/${arg(0)}`, {
         method: "PATCH",
-        body: JSON.parse(readFileSync(o.file, "utf8")),
+        body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
       });
     }
     if (typeof o["body-file"] !== "string" && typeof o.title !== "string") {
@@ -1063,7 +1099,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
     return appel(`/projects/${arg(0)}/journal`, {
       method: "POST",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -1164,7 +1200,7 @@ const commandes = {
 
   "etabli-add"() {
     const cartes = o.file
-      ? JSON.parse(readFileSync(o.file, "utf8")).cartes
+      ? JSON.parse(readFileSync(deposable(o.file), "utf8")).cartes
       : [
           {
             texte: texteDe("texte", "texte-file"),
@@ -1277,7 +1313,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
     return appel(`/projects/${arg(0)}/universe/entries/${arg(1)}`, {
       method: "PATCH",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -1293,13 +1329,12 @@ const commandes = {
    */
   async "entry-image"() {
     if (!o.file) throw new Error("Il faut --file <chemin d'une image>.");
-    const ext = (o.file.split(".").pop() ?? "png").toLowerCase();
-    const type = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : "image/png";
+    const octets = readFileSync(deposable(o.file));
+    const { type, ext } = typeImage(octets, ["png", "jpeg"]);
     const { key, uploadUrl } = await appel(
       `/projects/${arg(0)}/universe/entries/${arg(1)}/upload`,
       { method: "POST", body: { contentType: type, ext } },
     );
-    const octets = readFileSync(o.file);
     const envoi = await fetch(uploadUrl, {
       method: "PUT",
       headers: { "content-type": type },
@@ -1336,7 +1371,7 @@ const commandes = {
         ...(o["text-file"]
           ? { text: lireTexte(o["text-file"]) }
           : {}),
-        ...(o.file ? JSON.parse(readFileSync(o.file, "utf8")) : {}),
+        ...(o.file ? JSON.parse(readFileSync(deposable(o.file), "utf8")) : {}),
         ...(typeof o.locale === "string" ? { locale: o.locale } : {}),
         ...(o.valider ? { validated: true } : {}),
         ...(o.devalider ? { validated: false } : {}),
@@ -1392,7 +1427,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
     return appel(`/projects/${arg(0)}/sources`, {
       method: "POST",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -1400,7 +1435,7 @@ const commandes = {
     if (!o.file) throw new Error("Il faut --file <chemin d'un JSON>.");
     return appel(`/sources/${arg(0)}`, {
       method: "PATCH",
-      body: JSON.parse(readFileSync(o.file, "utf8")),
+      body: JSON.parse(readFileSync(deposable(o.file), "utf8")),
     });
   },
 
@@ -1424,7 +1459,7 @@ const commandes = {
     return appel(`/projects/${arg(0)}/prompt-template`, {
       method: "PUT",
       body: {
-        content: readFileSync(o.file, "utf8"),
+        content: readFileSync(deposable(o.file), "utf8"),
         ...(typeof o["double-page"] === "string"
           ? { doublePage: o["double-page"] }
           : {}),
