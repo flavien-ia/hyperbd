@@ -63,7 +63,7 @@ const serveur = http.createServer((req, res) => {
 await new Promise((r) => serveur.listen(0, "127.0.0.1", r));
 writeFileSync(
   join(maison, ".hyperbd", "acces.json"),
-  JSON.stringify({ url: `http://127.0.0.1:${serveur.address().port}`, token: "sek_faux" }),
+  JSON.stringify({ url: `http://127.0.0.1:${serveur.address().port}`, token: "sek_faux", autreHote: true }),
 );
 
 function lancer(args) {
@@ -146,6 +146,14 @@ ok(r.code === 0 && /locale=en/.test(demande) && /brouillon=1/.test(demande), "le
 
 r = await lancer(["rendu", "pleine", "--out", join(maison, "r.png"), "--locale", "en"]);
 ok(!/brouillon/.test(r.recues.find((x) => /\/rendu\?/.test(x.chemin))?.chemin ?? ""), "et ne le demande pas sans l'option");
+
+// ── L'adresse à qui l'on confie le jeton ───────────────────────────────────
+r = await lancer(["connect", "--url", "http://atelier.exemple.fr", "--token", "sek_faux", "--autre-hote"]);
+ok(r.code === 1 && /https/.test(r.sortie), "connect refuse une adresse en http hors de la machine", r.sortie.trim().slice(0, 90));
+r = await lancer(["connect", "--url", "https://atelier.exemple.fr", "--token", "sek_faux"]);
+ok(r.code === 1 && /autre-hote/.test(r.sortie), "connect refuse un autre hôte sans --autre-hote", r.sortie.trim().slice(0, 90));
+r = await lancer(["connect", "--url", `http://127.0.0.1:${serveur.address().port}`, "--token", "sek_faux"]);
+ok(r.code === 1 && r.recues.length === 0, "même la machine elle-même demande --autre-hote", r.sortie.trim().slice(0, 90));
 
 // ── Ce qui ne part jamais vers l'atelier ───────────────────────────────────
 r = await lancer(["node-image", "n1", "--file", join(maison, ".hyperbd", "acces.json")]);

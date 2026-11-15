@@ -9,7 +9,9 @@
 // Usage :
 //   node studio.mjs <commande> [options]
 //
-//   connect --url <url> --token <jeton>   enregistre l'accès et le vérifie
+//   connect [--url <url>] --token <jeton> [--autre-hote]   enregistre l'accès et le vérifie
+//            (https obligatoire ; un hôte autre que app.studio-entremondes.fr
+//            exige --autre-hote, à ne passer que sur demande de la personne)
 //   me                                     qui suis-je, quelles clés j'ai, le tuto
 //   parcours [--activer [--projet ID]] [--arreter] [--vu <etape>]   le tuto, étape par étape
 //   projects                               mes projets
@@ -261,9 +263,39 @@ function echec(quoi, cle, id, erreur, messageBrut) {
   });
 }
 
+/** L'atelier officiel. Toute autre adresse se demande explicitement. */
+const ATELIER_OFFICIEL = "app.studio-entremondes.fr";
+
+/**
+ * L'adresse à qui l'on confie le jeton. HTTPS obligatoire (sauf la machine
+ * elle-même, pour un atelier de développement) ; un autre hôte que l'atelier
+ * officiel n'est accepté que s'il a été demandé explicitement à la connexion
+ * (`connect --autre-hote`, noté dans le fichier d'accès).
+ */
+function adresseAtelier(url, autreHote) {
+  let u;
+  try {
+    u = new URL(String(url));
+  } catch {
+    throw new Error(`Adresse de l'atelier illisible : ${url}`);
+  }
+  const locale = ["localhost", "127.0.0.1", "[::1]"].includes(u.hostname);
+  if (u.protocol !== "https:" && !(u.protocol === "http:" && locale)) {
+    throw new Error("Refusé : l'atelier se joint en https (seule la machine elle-même, localhost, peut être en http).");
+  }
+  if (u.username || u.password) throw new Error("Refusé : pas d'identifiants dans l'adresse de l'atelier.");
+  if (u.hostname !== ATELIER_OFFICIEL && !autreHote) {
+    throw new Error(
+      `Refusé : ${u.hostname} n'est pas l'atelier officiel (${ATELIER_OFFICIEL}). Un autre atelier ne se relie que sur demande expresse de la personne (\`connect --autre-hote\`).`,
+    );
+  }
+  return u.href.replace(/\/$/, "");
+}
+
 async function appel(chemin, options = {}) {
-  const { url, token } = options.acces ?? lireAcces();
-  const reponse = await fetch(`${url.replace(/\/$/, "")}/api/v1${chemin}`, {
+  const { url, token, autreHote } = options.acces ?? lireAcces();
+  const base = adresseAtelier(url, autreHote === true);
+  const reponse = await fetch(`${base}/api/v1${chemin}`, {
     method: options.method ?? "GET",
     headers: {
       authorization: `Bearer ${token}`,
@@ -468,10 +500,12 @@ async function attendreJob(jobId, maxMs = 900000) {
 
 const commandes = {
   async connect() {
-    if (!o.url || !o.token) {
-      throw new Error("Il faut --url et --token.");
+    const url = typeof o.url === "string" ? o.url : `https://${ATELIER_OFFICIEL}`;
+    if (typeof o.token !== "string") {
+      throw new Error("Il faut --token.");
     }
-    const acces = { url: o.url, token: o.token };
+    const autreHote = o["autre-hote"] === true;
+    const acces = { url: adresseAtelier(url, autreHote), token: o.token, ...(autreHote ? { autreHote: true } : {}) };
     // On vérifie AVANT d'enregistrer : un accès sauvegardé doit être un accès
     // qui marche, sinon l'erreur ressortirait plus tard, loin de sa cause.
     const moi = await appel("/me", { acces });

@@ -179,11 +179,42 @@ function simuler([r, g, b], type) {
   ];
 }
 
+// Même règle que scripts/studio.mjs : le jeton ne part qu'en https, et vers
+// l'atelier officiel sauf si la connexion a demandé expressément un autre hôte.
+/** L'atelier officiel. Toute autre adresse se demande explicitement. */
+const ATELIER_OFFICIEL = "app.studio-entremondes.fr";
+
+/**
+ * L'adresse à qui l'on confie le jeton. HTTPS obligatoire (sauf la machine
+ * elle-même, pour un atelier de développement) ; un autre hôte que l'atelier
+ * officiel n'est accepté que s'il a été demandé explicitement à la connexion
+ * (`connect --autre-hote`, noté dans le fichier d'accès).
+ */
+function adresseAtelier(url, autreHote) {
+  let u;
+  try {
+    u = new URL(String(url));
+  } catch {
+    throw new Error(`Adresse de l'atelier illisible : ${url}`);
+  }
+  const locale = ["localhost", "127.0.0.1", "[::1]"].includes(u.hostname);
+  if (u.protocol !== "https:" && !(u.protocol === "http:" && locale)) {
+    throw new Error("Refusé : l'atelier se joint en https (seule la machine elle-même, localhost, peut être en http).");
+  }
+  if (u.username || u.password) throw new Error("Refusé : pas d'identifiants dans l'adresse de l'atelier.");
+  if (u.hostname !== ATELIER_OFFICIEL && !autreHote) {
+    throw new Error(
+      `Refusé : ${u.hostname} n'est pas l'atelier officiel (${ATELIER_OFFICIEL}). Un autre atelier ne se relie que sur demande expresse de la personne (\`connect --autre-hote\`).`,
+    );
+  }
+  return u.href.replace(/\/$/, "");
+}
+
 async function appel(chemin) {
   const f = join(homedir(), ".hyperbd", "acces.json");
   if (!existsSync(f)) throw new Error("Aucun accès enregistré (`/bd-connect`).");
-  const { url, token } = JSON.parse(readFileSync(f, "utf8"));
-  const r = await fetch(`${url.replace(/\/$/, "")}/api/v1${chemin}`, {
+  const { url, token, autreHote } = JSON.parse(readFileSync(f, "utf8"));
+  const r = await fetch(`${adresseAtelier(url, autreHote === true)}/api/v1${chemin}`, {
     headers: { authorization: `Bearer ${token}` },
   });
   const d = JSON.parse((await r.text()) || "{}");
