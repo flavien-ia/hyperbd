@@ -167,13 +167,21 @@ Le prompt : **pars de celui que l'atelier assemble** pour la variante. Il met
 déjà, dans l'ordre, le cadre de la DA (le style coché par défaut), la
 description du personnage et celle de la variante, et la consigne du geste ;
 il donne aussi les références, étoilées de la variante d'abord, style ensuite.
-C'est le même prompt que l'auteur voit dans l'onglet Générer de la fiche :
+C'est le même prompt que l'auteur voit dans l'écran de l'étape (« Voir le prompt envoyé ») :
 ce que tu lances, il peut le relancer pareil.
 
 ```bash
-node "$S" prompt-element <projet> <variante> --geste references
-node "$S" prompt-element <projet> <variante> --geste portrait
+node "$S" prompt-element <projet> <variante> --geste en-pied      # la première image
+node "$S" prompt-element <projet> <variante> --geste references   # la planche, une fois la première validée
 ```
+
+L'atelier suit le même parcours que l'auteur : **d'abord la première image**
+(en pied, en hauteur), que l'auteur valide, **puis la planche** (character
+sheet : le visage en plan poitrine, puis en pied de face, de trois quarts, de
+profil et de dos), tirée de l'image validée. Une planche lancée avant qu'une
+première image soit validée n'a pas de référence à suivre : ne la lance pas.
+Le prompt ne porte jamais le nom du personnage (le modèle l'écrirait dans
+l'image) : la description et l'image jointe suffisent.
 
 Complète-le si besoin, sans changer son ordre (le style d'abord, le sujet
 ensuite). **Ne fais jamais porter à la planche de style l'identité d'un
@@ -185,13 +193,14 @@ travail usée, col montant à patte boutonnée, tissu froissé et mat », pas
 corrige la description (`set-entry`) plutôt que le seul prompt : elle repart
 avec chaque génération.
 
-Lance les essais **sur la variante** (`--entree`) : leurs images vont à la
-rubrique « À juger » de la fiche, sous la variante, pas à la planche contact.
-Les références sont celles que `prompt-element` a rendues, dans cet ordre.
+Lance les essais **sur la variante** (`--entree`) avec **le geste de l'étape**
+(`--geste`) : leurs images arrivent dans l'écran de cette étape, sous les yeux
+de l'auteur, pas à la planche contact. Les références sont celles que
+`prompt-element` a rendues, dans cet ordre.
 
 ```bash
-node "$S" essai <projet> --entree <variante> --kind personnage --label "<variante> : références"   --prompt-file ref-<variante>.txt --size paysage --refs <id,id> --wait
-node "$S" essai <projet> --entree <variante> --kind personnage --label "<variante> : portrait"   --prompt-file portrait-<variante>.txt --size portrait --refs <id,id> --wait
+node "$S" essai <projet> --entree <variante> --geste en-pied --kind personnage --label "Première image"   --prompt-file premiere-<variante>.txt --size portrait --n 4 --refs <id,id> --wait
+node "$S" essai <projet> --entree <variante> --geste references --kind personnage --label "Planche de références"   --prompt-file planche-<variante>.txt --size paysage --n 1 --refs <id,id> --wait
 ```
 
 Puis :
@@ -208,9 +217,10 @@ node "$S" ecarter <imageId>
 ```
 
 2. **La sélection** : la personne juge dans **l'atelier de création** de
-   l'élément : la fiche du personnage dans l'univers, rubrique « À juger »
-   sous la variante (Garder en fait une référence, Écarter la retire). Dis-lui
-   où regarder. Relis ensuite ce qu'elle a décidé (`candidates <projet>
+   l'élément : la fiche du personnage dans l'univers ouvre l'étape en cours,
+   où elle valide l'image qui devient la référence (puis la planche), ou
+   écarte ; les propositions non choisies se rouvrent depuis les pastilles de
+   la variante. Dis-lui où regarder. Relis ensuite ce qu'elle a décidé (`candidates <projet>
    <entrée>` : ce qui reste à juger ; `universe` : ce qui est devenu
    référence). Le juge choisit en `--auto`.
 3. **La promotion** vers la variante, quand c'est toi qui gardes (en `--auto`,

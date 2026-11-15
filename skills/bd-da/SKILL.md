@@ -1,6 +1,6 @@
 ---
 name: bd-da
-description: Pose la direction artistique de l'album. Compose 3 à 5 pistes graphiques franchement contrastées, les fait générer en vrai sur une même scène étalon (ou, avant le récit, sur une image clé composée depuis la prémisse), les montre dans la planche contact de l'atelier, les fait juger sur leur lisibilité en petit et leur robustesse sur soixante planches, puis verrouille le cadre, la palette, la police et la bible graphique. Deuxième étape de la phase univers (que /bd-univers enchaîne), après la bible et avant les personnages. Utiliser quand la personne dit « la direction artistique », « à quoi ça ressemble », « /bd-da », « le style de l'album ».
+description: Pose la direction artistique de l'univers avec l'atelier. Part d'un profil de la galerie (ligne claire, roman graphique, gouache…) ou la construit avec la personne (des pistes taillées pour l'univers, ou ses consignes et ses images), génère les pistes sur une même image clé, les fait juger sur leur robustesse sur soixante planches, laisse la personne essayer le style et garder ses images de référence, puis verrouille le texte du style, le style des cases, la police et la bible graphique. Deuxième étape de la phase univers (que /bd-univers enchaîne), après la bible et avant les personnages. Utiliser quand la personne dit « la direction artistique », « à quoi ça ressemble », « /bd-da », « le style de l'album ».
 argument-hint: "[projet] [--auto] [--budget 5]"
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et curl."
 ---
@@ -60,132 +60,128 @@ n'y a donc pas encore de scène validée. Deux cas :
 En `--auto` : la scène validée la plus dense en casting, sinon l'image clé ;
 dis laquelle.
 
-## Étape 2 : composer les pistes
+## Étape 2 : le point de départ
 
-Lis `${CLAUDE_SKILL_DIR}/../../templates/profils-graphiques.md`.
+La direction artistique se pose dans **l'atelier**, onglet « Direction
+artistique » de l'univers (`app.studio-entremondes.fr/univers/<id>?vue=atelier&onglet=style`).
+Ce qui fait le style, ce sont ses **images de référence** : deux ou trois
+images gardées, jointes à chaque génération. Le texte du style les
+accompagne.
 
-Compose **3 à 5 pistes franchement contrastées**. Trois nuances de roman
-graphique ne posent aucun choix : il faut que la personne puisse dire « celle-là
-n'est pas du tout mon album » et que cela ait du sens.
-
-Pour chaque piste :
-
-1. **Un bloc de style** : les neuf dimensions en prose, tel qu'il partira dans
-   chaque prompt de planche. C'est le futur cadre du projet.
-2. **Une justification d'ingénierie** : pourquoi ce style survivra aux
-   variations du modèle. Si tu ne sais pas répondre, la piste n'est pas prête.
-
-Déforme les profils plutôt que de les recopier : prends-en un et change deux
-dimensions. Un album qui ressemble exactement à un profil du catalogue est un
-album qui n'a pas cherché.
-
-## Étape 3 : générer, pour de vrai
-
-**C'est souvent la première génération du projet : la qualité s'annonce
-maintenant.** Applique `${CLAUDE_SKILL_DIR}/../../templates/qualite.md` :
-dis les réglages (les pistes en basse qualité, pour comparer des intentions ;
-plus tard les cases en moyenne et la planche finale en haute définition), ce
-que ça coûte, que la personne peut en changer à tout moment (en te le
-demandant, ou dans l'atelier), demande si ça lui convient, et consigne sa
-réponse au journal.
-
-Par piste, **deux images** de la scène étalon. Deux, parce qu'une seule ne dit
-rien de la stabilité du style, et c'est justement ce qu'on veut mesurer.
-
-Écris le prompt de chaque piste dans un fichier (`piste-<nom>.txt` : le bloc
-de style, puis la scène étalon) : un bloc de style fait des paragraphes, avec
-des accents et des guillemets que la ligne de commande abîme.
+Trouve d'abord l'entrée de la direction artistique : dans `universe`, le style
+coché par défaut (`styleDefault`). S'il n'y en a pas, crée-la :
 
 ```bash
-node "$S" essai <projet> --kind da-piste --label "<nom de la piste>" \
-  --prompt-file piste-<nom>.txt --quality low --n 2 --wait
+node "$S" new-entry <projet> --kind style --name "Direction artistique"
+node "$S" set-entry <projet> <id> --file da.json      # {"styleDefault": true}
 ```
 
-Qualité basse par défaut : on juge un style, pas un rendu final. On monte en
-qualité seulement sur la piste retenue, s'il faut trancher entre deux
-finalistes.
+Puis propose à la personne **deux chemins**, et laisse-la choisir :
 
-Si un essai revient en échec, la réponse dit sa `conduite` (reformuler,
-s'arrêter, attendre) et, pour un refus de sécurité, ses `motifs` : suis
-`${CLAUDE_SKILL_DIR}/../../templates/refus.md`.
+1. **Partir d'un profil.** L'atelier en montre dix (ligne claire, roman
+   graphique, comics, manga, jeunesse, carnet, aquarelle, gouache mate,
+   gravure, minimaliste), chacun sur la même scène. Lis
+   `${CLAUDE_SKILL_DIR}/../../templates/profils-graphiques.md`, conseille-en
+   deux ou trois selon le récit et dis pourquoi, puis envoie-la choisir dans
+   la galerie (« Point de départ »).
+2. **Construire avec toi, de toutes pièces.** Deux façons :
+   - **Tu proposes des pistes** taillées pour l'univers : 3 à 5, franchement
+     contrastées (il faut pouvoir dire « celle-là n'est pas du tout mon
+     album »). Déforme les profils plutôt que de les recopier : prends-en un
+     et change deux dimensions. Pour chacune, une **justification
+     d'ingénierie** : pourquoi elle survivra aux variations du modèle.
+   - **Elle te donne des consignes ou des images qu'elle aime.** Les images,
+     elle les importe elle-même dans l'atelier (« Partir de zéro ») : elles
+     partent comme inspirations, l'esprit et pas la copie. Tu en tires tes
+     pistes, et tu ne nommes jamais un auteur à imiter.
 
-**Avant de lancer** : annonce le nombre d'images, le coût estimé, et le total.
-En guidé, attends le feu vert. Si un budget est passé, ne le dépasse pas, même
-d'une image.
+## Étape 3 : générer les pistes (si tu en proposes)
 
-## Étape 4 : montrer et faire juger
+**C'est souvent la première génération du projet : la qualité s'annonce
+maintenant** (`${CLAUDE_SKILL_DIR}/../../templates/qualite.md`) : les pistes en
+brouillon, deux images chacune ; dis le coût, et en guidé attends le feu vert.
+Si un budget est passé, ne le dépasse pas, même d'une image.
 
-1. Fais juger **chaque piste** par le juge des pistes DA : ses deux images plus
-   son bloc de style. Passe par `_vision-qa` pour le téléchargement des images
-   et le lancement du subagent, en lui indiquant la grille `da`.
+Chaque piste se génère **sur l'entrée de la direction artistique**, sur
+l'image clé de l'étape 1, et son prompt suit **exactement** ce format, que
+l'atelier relit pour en faire une carte de la galerie (les apostrophes sont
+typographiques) :
 
-   Les pistes se jugent **en parallèle** : elles sont indépendantes.
+```text
+Direction artistique à essayer (le style de l’image) :
+Trait : <...>
+Couleur : <la manière de colorier, jamais une liste de teintes>
+Lumière : <...>
+Matière : <...>
+Réalisme : <...>
 
-2. Envoie la personne dans la **planche contact** de l'atelier, filtrée sur
-   la direction artistique :
-   `app.studio-entremondes.fr/projet/<projet>?m=essais&genre=da-piste`.
-   Chaque piste y est une rangée : son nom, son prompt, ses images ; la case
-   « taille vignette » les montre en petit, comme une piste doit se juger.
-   La personne regarde les pistes là, en vrai, pas dans le chat. Chaque essai
-   porte le nom de sa piste (`--label`) : c'est ce qui permet de s'y
-   retrouver.
+L’image :
+<l'image clé>
 
-   Pose aussi sur l'établi, en un groupe nommé « Pistes graphiques », une
-   carte par piste : son nom en première ligne, son bloc de style, puis le
-   verdict du juge (`etabli-add`, voir `_recit`). C'est là que la personne
-   lit côte à côte ce que chaque piste promet et où elle cassera.
+Sans texte, sans bulle, sans signature ni logo.
+```
 
-3. Restitue en clair : pour chaque piste, ce que le juge a vu, à quoi ça
-   ressemble, **où ça cassera**, et son verdict.
+```bash
+node "$S" essai <projet> --entree <id de la DA> --geste piste --kind da-piste \
+  --label "<nom de la piste>" --prompt-file piste-<nom>.txt --quality low --n 2 --wait
+```
 
-## Étape 5 : choisir
+Chaque piste apparaît dans la galerie du point de départ, en violet,
+« Proposée par Claude », avec sa première image. Si un essai revient en
+échec, la réponse dit sa `conduite` et, pour un refus de sécurité, ses
+`motifs` : suis `${CLAUDE_SKILL_DIR}/../../templates/refus.md`.
 
-En guidé : montre les grappes, les verdicts, et laisse trancher. Rappelle,
-sans insister, que le critère qui coûte le plus cher plus tard est la
-robustesse, pas la beauté.
+## Étape 4 : juger, puis laisser choisir
 
-En `--auto`, suis le verdict du juge, pas une seconde règle de ton cru :
+1. Fais juger **chaque piste** par le juge des pistes DA (ses deux images et
+   son bloc) : `_vision-qa`, grille `da`, en parallèle. Écris son verdict sur
+   l'essai (`verdict <essaiId> --texte "..."`) : la personne le lit sur la
+   carte.
+2. Restitue en clair : pour chaque piste, à quoi ça ressemble, **où ça
+   cassera**, et son verdict. Rappelle, sans insister, que le critère qui
+   coûte le plus cher plus tard est la robustesse, pas la beauté.
+3. **La personne choisit dans l'atelier** : un clic sur une carte (profil ou
+   piste) écrit le style et l'emmène à « Essayer et garder ». En `--auto`,
+   suis le verdict du juge (une seule `PORTEUSE` : elle ; plusieurs : la
+   meilleure robustesse ; aucune : refais un tour avec le bloc corrigé) et
+   écris toi-même le style (`set-entry`, `promptSnippet` aux lignes
+   étiquetées ci-dessus, sans la scène).
 
-1. **Une seule piste `PORTEUSE`** : c'est elle. Applique ses trois ajustements
-   de bloc avant de verrouiller : « porteuse » veut dire « porteuse une fois
-   corrigée », jamais « bonne telle quelle ».
-2. **Plusieurs `PORTEUSE`** : la meilleure `robustesse` l'emporte, puis la
-   meilleure `lisibilite`.
-3. **Aucune `PORTEUSE`** : ne choisis pas. Prends la meilleure `robustesse`,
-   applique ses ajustements, **et refais un tour d'images** avec le bloc
-   corrigé. Verrouiller une DA qu'aucun juge n'a trouvée porteuse, c'est
-   installer pour soixante planches un problème que deux images auraient
-   suffi à voir.
+## Étape 5 : essayer et garder
 
-Consigne le choix et sa raison au journal.
+C'est là que la direction artistique se fait : on essaie le style sur
+l'image clé, un visage, un lieu, un objet (varier les sujets, c'est vérifier
+qu'il tient), on **garde** ce qui plaît, et les essais suivants s'appuient sur
+les images gardées. On s'arrête à deux ou trois images de référence.
 
-Deux garde-fous appris en conditions réelles :
+La personne le fait dans l'atelier. Tu peux lancer des essais pour elle, sur
+l'entrée de la DA, avec les images déjà gardées en références :
 
-- **Une note faible sur une dimension ne disqualifie pas une piste porteuse.**
-  Une lisibilité moyenne est un défaut du BLOC (contraste, hiérarchie des
-  valeurs), pas du style : elle se corrige en une phrase. Une robustesse
-  faible, elle, est une propriété du style, et rien ne la corrige.
-- **Ne double jamais la règle du juge par un seuil à toi.** Si tu ajoutes un
-  filtre que la grille ignore, tu peux écarter la seule piste que le juge a
-  déclarée porteuse, et personne ne saura pourquoi.
+```bash
+node "$S" essai <projet> --entree <id de la DA> --geste epreuve --kind libre \
+  --label "Un visage" --prompt-file essai.txt --quality medium --n 2 --refs <id,id> --wait
+```
 
-Une piste peut être choisie **contre** l'avis du juge : c'est légitime, et cela
-se consigne comme tel. Le juge écarte ce qui est faux, l'humain choisit ce qui
-est bon.
+(`essai.txt` : « Style à respecter (la direction artistique de l’univers) : »
+puis les lignes du style, la phrase sur les images jointes, « Sujet : » et le
+sujet, puis « Sans texte, sans bulle, sans signature ni logo. »)
+
+Elle garde ou écarte dans l'atelier ; c'est elle qui décide quelles images
+deviennent les références. Pas de palette ni de liste d'interdits : une BD a
+besoin de toutes les couleurs, et c'est la manière de colorier qui tient un
+style.
 
 ## Étape 6 : verrouiller
 
 C'est l'étape qui transforme un choix en règle. Ne la saute pas : une DA
 choisie mais pas écrite se dissout en trois séances.
 
-1. **Le cadre, dans la planche de style.** L'atelier n'envoie plus le modèle
-   de prompt du projet : le texte de style qui part avec chaque case et
-   chaque planche est la **description de la planche de style** de
-   l'univers. Une fois l'image de la piste promue en style (point 4), écris
-   le bloc de style dans sa description :
+1. **Le texte du style, dans la direction artistique.** Le choix d'une carte
+   l'a écrit ; s'il faut l'ajuster, garde ses lignes étiquetées (Trait,
+   Couleur, Lumière, Matière, Réalisme), que l'atelier relit champ par champ :
 
 ```bash
-node "$S" set-entry <projet> <id de l'entrée style> --file style.json   # {"promptSnippet": "<le bloc de style>"}
+node "$S" set-entry <projet> <id de la DA> --file style.json   # {"promptSnippet": "Trait : …\nCouleur : …"}
 ```
 
    Un bloc écrit ailleurs (`set-template`) n'arrive jamais au modèle.
@@ -218,22 +214,12 @@ node "$S" new-doc <projet> --kind bible-graphique --title "Bible graphique" \
    Si une bible graphique existe déjà (on la revoit), réécris-la plutôt que
    d'en créer une seconde : `write-doc <id> --body-file bible-graphique.md`.
 
-4. **Les images de la piste retenue** promues en entrées `style` de l'univers.
-
-   **Avant de promouvoir, relis chaque image contre les négatifs que tu viens
-   d'écrire.** Une planche de style est ce que le modèle imitera soixante fois :
-   si elle contient précisément ce que la bible interdit, elle enseigne le
-   contraire de la consigne, et aucun prompt ne rattrapera cela. Le cas s'est
-   produit à CP2 : la planche retenue portait une grande masse blanche flottant
-   au milieu du décor, que les négatifs du même document venaient d'interdire.
-
-   Une image qui contredit un négatif se recadre, ou se remplace. Ne la promeus
-   pas en te disant que le prompt corrigera : le prompt dit, l'image montre, et
-   c'est l'image qui gagne.
-
-```bash
-node "$S" promote-image <imageId> --style "<nom de la piste>"
-```
+4. **Les images de référence** sont celles que la personne a gardées à
+   « Essayer et garder » (étoilées, trois au plus). **Relis chacune contre les
+   négatifs de la bible graphique** : une image de référence est ce que le
+   modèle imitera soixante fois ; si elle montre ce que la bible interdit, elle
+   enseigne le contraire de la consigne. Dis-le à la personne, qui la retire
+   dans la fiche de la DA ; ne la retire pas sans elle.
 
 5. **La police du lettrage** : le catalogue de l'atelier en propose une
    vingtaine, libres de droits, avec un aperçu (`police <projet>` les
@@ -246,15 +232,15 @@ node "$S" promote-image <imageId> --style "<nom de la piste>"
    Un tome neuf hérite de la police du tome précédent de l'univers.
 
 6. **Les pistes perdantes** écartées avec leur raison, au journal et sur
-   l'établi : leur carte passe en `ecartee` ; la carte de la piste gagnante
-   quitte l'établi (elle vit désormais dans la bible graphique). Dans la
-   planche contact, les images de la piste retenue se gardent (Retenir) ;
-   les autres seront purgées après trente jours.
+   l'établi s'il y en a : leur carte passe en `ecartee` ; la carte de la
+   piste gagnante quitte l'établi (elle vit désormais dans la bible
+   graphique). Les images non gardées des pistes seront purgées après trente
+   jours ; celles que la personne a gardées vivent dans la direction
+   artistique.
 
 ```bash
 node "$S" etabli-set <carte> --statut ecartee
 node "$S" drop-etabli <carte de la piste retenue>
-node "$S" keep <imageId>
 ```
 
 ## Étape 7 : livrer
@@ -263,9 +249,8 @@ Récapitule : la piste retenue et pourquoi, ce qu'elle porte, où elle cassera
 et ce qu'on surveillera, la police, et le coût réel dépensé
 (`node "$S" costs <projet>`).
 
-Dis où tout se voit : le style dans l'univers (onglet Style), la bible
-graphique dans le **Dossier** (`?m=dossier&doc=bible-graphique`), les essais
-dans la planche contact.
+Dis où tout se voit : la direction artistique dans l'univers (onglet Direction artistique), la bible
+graphique dans le **Dossier** (`?m=dossier&doc=bible-graphique`).
 
 Annonce la suite : les personnages (`/bd-perso`), ou laisse `/bd-univers`
 enchaîner s'il t'a appelé.
@@ -278,10 +263,11 @@ Termine par `🎉 DIRECTION ARTISTIQUE POSÉE`.
   entre les deux qui dit si le style absorbe les variations.
 - **Ne jamais monter en qualité pour départager des pistes de principe.** La
   qualité change le rendu, pas la robustesse.
-- **La lisibilité se juge en petit.** Si tu ne montres que des images en grand,
-  tu fais choisir sur un critère qui ne sera jamais celui du lecteur.
-- **Le cadre de la planche de style, le style des cases et la bible graphique
-  disent la même chose.** Si l'un change, les autres changent dans la même
+- **La lisibilité se juge aussi en petit.** Ton regard regarde chaque piste à la
+  taille d'une case : un style qui ne se lit plus en petit ne tiendra pas
+  dans un album.
+- **Le texte de la direction artistique, le style des cases et la bible
+  graphique disent la même chose.** Si l'un change, les autres changent dans la même
   séance.
 - N'invente pas un style « inspiré de » un auteur vivant nommément. Décris des
   qualités graphiques, pas une signature à imiter.

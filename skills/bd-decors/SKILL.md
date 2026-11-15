@@ -79,29 +79,36 @@ nombre d'images et le coût estimé ; en guidé, fais-la valider.
 
 Le prompt : **pars de celui que l'atelier assemble** (le cadre de la DA, la
 description du lieu, la consigne du geste, et les références), le même que
-l'auteur voit dans l'onglet Générer de la fiche. Complète-le sans changer son
+l'auteur voit dans l'écran de l'étape. Complète-le sans changer son
 ordre : le style d'abord, le lieu ensuite.
 
 ```bash
-node "$S" prompt-element <projet> <entrée> --geste angle
-node "$S" prompt-element <projet> <entrée> --geste motif
+node "$S" prompt-element <projet> <entrée> --geste angle    # un lieu : la première vue
+node "$S" prompt-element <projet> <entrée> --geste angles   # un lieu : les angles, une fois la vue validée
+node "$S" prompt-element <projet> <entrée> --geste motif    # un objet : une seule image suffit
 ```
 
-Lance les essais **sur l'élément** (`--entree`, sa variante s'il en a) : leurs
-images vont à la rubrique « À juger » de sa fiche, pas à la planche contact.
+L'atelier suit le parcours de l'auteur : pour un lieu, **la première vue**,
+que l'auteur valide, **puis la planche de repérage** (plan large, contrechamp,
+détail de matière) tirée de cette vue ; pour un objet, **une seule image**
+validée, sans planche. Le prompt ne porte jamais le nom du lieu ni de l'objet.
+
+Lance les essais **sur l'élément** (`--entree`, sa variante s'il en a) avec **le
+geste de l'étape** : leurs images arrivent dans l'écran de cette étape, pas à
+la planche contact.
 
 ```bash
-node "$S" essai <projet> --entree <entrée> --kind decor --label "<lieu> : plan large" --prompt-file decor-<lieu>-large.txt --size paysage --refs <id,id> --wait
-node "$S" essai <projet> --entree <entrée> --kind decor --label "<lieu> : contrechamp" --prompt-file decor-<lieu>-contre.txt --size paysage --refs <id,id> --wait
-node "$S" essai <projet> --entree <entrée> --kind motif --label "<motif>" --prompt-file motif-<motif>.txt --size carre --wait
+node "$S" essai <projet> --entree <entrée> --geste angle --kind decor --label "Première vue" --prompt-file decor-<lieu>.txt --size paysage --n 2 --refs <id,id> --wait
+node "$S" essai <projet> --entree <entrée> --geste angles --kind decor --label "Angles du lieu" --prompt-file decor-<lieu>-angles.txt --size paysage --n 1 --refs <id,id> --wait
+node "$S" essai <projet> --entree <entrée> --geste motif --kind motif --label "Première image" --prompt-file motif-<motif>.txt --size carre --n 2 --wait
 ```
 
 Puis le regard (`_vision-qa`), dont tu écris le verdict sur l'essai
 (`verdict <essaiId> --texte "..."`, et `ecarter <imageId>` pour une image que
 le regard refuse franchement). La personne juge dans **l'atelier de
-création** : la fiche du lieu (ou de l'objet) dans l'univers, rubrique « À
-juger » (Garder, Écarter) ; relis ses décisions avec `candidates <projet>
-<entrée>`. Quand c'est toi qui gardes (en `--auto`, ou sur sa demande) : la
+création** : la fiche du lieu (ou de l'objet) dans l'univers ouvre l'étape en
+cours, où elle valide ou écarte ; relis ses décisions avec `candidates
+<projet> <entrée>` et `entry`. Quand c'est toi qui gardes (en `--auto`, ou sur sa demande) : la
 promotion et l'étoile (trois au plus). Puis le texte de rappel :
 
 ```bash

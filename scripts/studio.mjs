@@ -121,11 +121,13 @@
 //   -- le laboratoire (images sans planche) --
 //   essai <projet> --prompt-file F [--kind K] [--label L] [--n 1]
 //         [--quality low] [--size WxH|paysage|portrait|carre]
-//         [--refs id,id] [--essais id,id] [--entree <variante>] [--wait]
+//         [--refs id,id] [--essais id,id] [--entree <variante>] [--geste G] [--wait]
 //         (--prompt "..." pour un prompt court ; --prompt-file dès qu'il a
 //          des paragraphes, des guillemets ou des accents ; --entree vise un
-//          élément de l'univers : ses images vont à « À juger » dans son
-//          atelier de création, pas à la planche contact)
+//          élément de l'univers : ses images vont à son atelier de création,
+//          pas à la planche contact ; --geste dit l'étape qu'elles servent :
+//          en-pied puis references (personnage), angle puis angles (lieu),
+//          motif (objet), piste et epreuve (direction artistique))
 //   essais <projet> [--kind K]             ce que le laboratoire a produit
 //   essai-detail <id>                      un essai et ses images
 //   keep <imageId> [--off]                 retenir une image (survit à la purge)
@@ -136,8 +138,8 @@
 //   -- l'atelier de création (les éléments de l'univers) --
 //   prompt-element <projet> <entrée> [--geste G]
 //                                          le prompt assemblé par l'atelier (style, description,
-//                                          consigne) et ses références : references, portrait,
-//                                          angle, motif, libre
+//                                          consigne) et ses références : en-pied, references,
+//                                          portrait, angle, angles, motif, libre
 //   candidates <projet> <entrée>           les images d'essai à juger pour cet élément
 //   verdict <essaiId> --texte "..."        écrire son verdict sur un essai (l'auteur le lit)
 //   ecarter <imageId> [--reprendre]        écarter une candidate (ou la reprendre)
@@ -1099,6 +1101,7 @@ const commandes = {
           ? { essaiImageIds: o.essais.split(",") }
           : {}),
         ...(typeof o.entree === "string" ? { entryId: o.entree } : {}),
+        ...(typeof o.geste === "string" ? { geste: o.geste } : {}),
       },
     });
     if (!o.wait) return lancement;
