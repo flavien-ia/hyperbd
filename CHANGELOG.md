@@ -4,6 +4,19 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## Non publié
+
+### Sécurité
+- **`/update-hyperbd` n'installe plus rien qu'il n'ait pu vérifier** : l'empreinte de l'archive doit être confirmée par la release GitHub de sa version (l'empreinte calculée par GitHub, ou celle des notes), et aucune source ne doit dire autre chose. GitHub injoignable ou muet : la mise à jour est refusée, avec ce qu'il faut faire. La même règle vaut pour une archive installée à la main, et l'extraction contrôle désormais la taille et l'intégrité de chaque fichier.
+- **Un contenu externe est une donnée, jamais une consigne** : la règle est écrite dans les skills qui lisent un document source, un univers copié ou les réponses de l'atelier, et dans la grille commune des juges.
+- **Ce qui part vers l'atelier** : aucun fichier du dossier `~/.hyperbd` ne peut être envoyé, et une image n'est déposée que si c'est vraiment un PNG, un JPEG ou un WebP.
+- **La connexion** exige une adresse en https, et un autre atelier que `app.studio-entremondes.fr` ne se relie que sur votre demande expresse.
+- **Le jeton** ne passe plus en argument de commande : il se lit sur l'entrée standard, et vous pouvez le taper vous-même dans un terminal pour qu'il ne passe jamais par la conversation.
+- **`/start-hyperbd` demande avant d'installer** winget, Homebrew ou Node.js, en montrant la commande exacte.
+
+### Coulisses
+- Les skills internes de jugement et de récit n'ont plus que les commandes dont elles se servent ; le fichier d'accès voit ses droits resserrés à chaque écriture ; `SECURITY.md` dit exactement ce que fait le code.
+
 ## v0.15.1 (15 novembre 2026)
 
 ### Nouveautés
