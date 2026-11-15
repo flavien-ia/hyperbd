@@ -17,8 +17,8 @@
 ## Le cadre
 
 > Le bloc de style exact, tel qu'il part avec chaque case et chaque planche.
-> C'est la copie du « Prompt de style » de la planche de style de l'univers
-> (la description de l'entrée de style) : les deux doivent rester identiques,
+> C'est la copie du texte de la direction artistique principale de l'univers
+> (ses lignes Trait, Couleur, Lumière, Matière, Réalisme) : les deux doivent rester identiques,
 > et si l'un change, l'autre change.
 
 ```

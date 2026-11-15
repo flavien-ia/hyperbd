@@ -14,7 +14,14 @@ n'avaient pas de journal : l'historique git en tient lieu.
 - **Le jeton** ne passe plus en argument de commande : il se lit sur l'entrée standard, et vous pouvez le taper vous-même dans un terminal pour qu'il ne passe jamais par la conversation.
 - **`/start-hyperbd` demande avant d'installer** winget, Homebrew ou Node.js, en montrant la commande exacte.
 
+### Améliorations
+- **Claude valide une étape comme vous** : quand il garde une image, il lui donne son rôle (la première image, ou la planche) et l'étoile suit d'elle-même, comme dans l'atelier. Il ne retire plus par erreur l'étoile qu'il croyait poser.
+- **La direction artistique remplace la « planche de style »** partout : dans les cases et les planches, c'est l'id de votre direction artistique principale qui part, avec ses images de référence. Une seule DA est principale à la fois.
+- **Les images écartées se reprennent** : Claude ne supprime plus une image, il l'écarte ; on la supprime pour de bon seulement depuis la corbeille.
+- **Les liens vers l'univers ouvrent la vue atelier**, avec ses étapes, et le catalogue des profils compte les onze de la galerie (dont la gouache, la gravure et l'eau-forte rehaussée).
+
 ### Coulisses
+- Nouvelles commandes de l'outil : `promote-image --role` et `--etoile`, `image-role`, `star --on|--off`, `drop-essai-image` ; `universe` et `entry` rendent le rôle des images et les directions artistiques entières. Le banc de vérification repère désormais ces anciennes tournures, jusque dans le README et l'aide de l'outil.
 - Les skills internes de jugement et de récit n'ont plus que les commandes dont elles se servent ; le fichier d'accès voit ses droits resserrés à chaque écriture ; `SECURITY.md` dit exactement ce que fait le code.
 
 ## v0.15.1 (15 novembre 2026)

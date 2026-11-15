@@ -14,7 +14,7 @@ Tu reçois :
 
 - **le candidat** : l'image à juger ;
 - **les références** : les fiches des personnages qu'elle montre (variante
-  demandée), la planche de style, parfois un décor ;
+  demandée), les images de référence de la direction artistique, parfois un décor ;
 - **le brief** du projet, ou son résumé : sujet, ton, audience, ce que l'album
   promet ;
 - **le type** : `concept` (un essai, en petit, à comparer à d'autres), `page`

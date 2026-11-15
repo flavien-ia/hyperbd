@@ -32,7 +32,7 @@ cite-la dans le chat, dis d'où elle vient, et laisse la personne décider.
 **Ne JAMAIS faire juger une itération par rapport à l'itération précédente.**
 
 À chaque tour, le juge reçoit les **références d'origine** (les fiches de
-personnages, le décor, la planche de style) et le candidat. Jamais l'image du
+personnages, le décor, les images de référence de la direction artistique) et le candidat. Jamais l'image du
 tour d'avant. Sans cela, on valide une dérive en trois pas dont personne
 n'aurait accepté le premier et le dernier côte à côte.
 
@@ -78,7 +78,7 @@ Un subagent (Agent, type general-purpose), avec cette mission et rien d'autre :
 > Ouvre ensuite les images, réellement, une par une.
 > CANDIDAT : <chemin>.
 > RÉFÉRENCES : <chemins, avec pour chacun ce qu'il est : « fiche du personnage
-> X, variante Y », « décor Z », « planche de style »>.
+> X, variante Y », « décor Z », « image de référence de la DA »>.
 > PLANCHE PRÉCÉDENTE (continuité) : <chemin, ou « aucune »>.
 > SCRIPT DEMANDÉ : <le script de la planche, ou la description de l'essai>.
 > TYPE : <planche | personnage | décor | motif | piste DA>.

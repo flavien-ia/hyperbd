@@ -26,7 +26,7 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 | `/bd-brief` | le point de départ : source, message, format, distance de transposition, devis |
 | `/bd-univers` | le pilote de la phase univers : fait le point, puis enchaîne la bible, la direction artistique, les personnages et les lieux, en s'arrêtant à chaque décision |
 | `/bd-bible` | la prémisse (par pistes contrastées, posées sur l'établi), la bible du monde et le prompt d'univers ; aucune image |
-| `/bd-da` | la direction artistique : pistes contrastées générées sur une scène étalon ou une image clé, jugées dans la planche contact, verrouillées |
+| `/bd-da` | la direction artistique : un profil de la galerie de l'atelier, ou des pistes construites avec Claude sur une image clé ; puis les images de référence que l'auteur garde |
 | `/bd-perso` | les personnages de bout en bout : le casting comme graphe de forces, proposé dans l'univers (l'auteur retient ou écarte), puis le dessin des seuls retenus |
 | `/bd-decors` | les lieux : ceux du monde avant le récit, ceux que les scènes ont fait naître après ; proposés dans l'univers, puis dessinés |
 | `/bd-scenario` | le récit dans la vue Scénario : chapitres et scènes dans le fil, alternatives sur l'établi, rappels, budget face au format visé, audit, pitch, et le relevé des personnages et des lieux qui manquent |

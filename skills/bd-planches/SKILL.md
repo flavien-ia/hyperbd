@@ -118,12 +118,12 @@ juge :
 - **les fiches des variantes CASTÉES sur cette planche** (pas le personnage en
   général) ;
 - **le décor** de la scène ;
-- **la planche de style** ;
+- **la direction artistique principale** (son id en `plateIds`) ;
 - **la planche précédente VALIDÉE de la même scène**, pour la continuité.
 
 Deux pièges appris à la production, qui coûtent cher si on les ignore :
 
-- **La planche de style ne porte pas l'identité d'un personnage.** Si elle
+- **Les images de référence de la DA ne portent pas l'identité d'un personnage.** Si l'une
   montre quelqu'un, détoure-le ou dis explicitement au juge de ne pas s'y fier
   pour un visage : sinon il compare un personnage à un autre.
 - **Une image de référence peut contredire la bible qu'elle est censée

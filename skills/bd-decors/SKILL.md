@@ -108,12 +108,13 @@ Puis le regard (`_vision-qa`), dont tu écris le verdict sur l'essai
 le regard refuse franchement). La personne juge dans **l'atelier de
 création** : la fiche du lieu (ou de l'objet) dans l'univers ouvre l'étape en
 cours, où elle valide ou écarte ; relis ses décisions avec `candidates
-<projet> <entrée>` et `entry`. Quand c'est toi qui gardes (en `--auto`, ou sur sa demande) : la
-promotion et l'étoile (trois au plus). Puis le texte de rappel :
+<projet> <entrée>` et `entry` (chaque image avec son `role`). Quand c'est toi
+qui valides (en `--auto`, ou sur sa demande) : le rôle de l'étape, l'étoile
+suit d'elle-même. Puis le texte de rappel :
 
 ```bash
-node "$S" promote-image <imageId> --entry <entrée>
-node "$S" star <projet> <imageId>
+node "$S" promote-image <imageId> --entry <entrée> --role reference   # la première vue (ou l'image d'un objet)
+node "$S" promote-image <imageId> --entry <entrée> --role planche     # les angles d'un lieu
 node "$S" set-entry <projet> <entrée> --file patch.json
 ```
 

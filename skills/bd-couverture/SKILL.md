@@ -130,12 +130,13 @@ consignes, toujours :
 > d'essentiel n'y figure. Aucun texte, aucune lettre, aucun logo.
 
 Génère chaque concept dans le laboratoire, en petit, avec les références de
-la figure et la planche de style :
+la figure et les images de référence de la direction artistique (dans
+`universe`, `styles`, la DA `styleDefault`, ses images `isDefault`) :
 
 ```bash
 node "$S" essai <projet> --kind couverture --label "<nom du concept>" \
   --prompt-file concept-1.txt --size portrait --quality low --n 1 \
-  --refs <imageIds étoilées de la variante>,<imageId de la planche de style> --wait
+  --refs <imageIds étoilées de la variante>,<imageIds de référence de la DA> --wait
 ```
 
 Qualité basse : on juge une intention, pas un rendu. **Avant de lancer** :
@@ -150,7 +151,8 @@ protocole de `_vision-qa` (images téléchargées, subagent en aveugle, un juge
 frais à chaque passe), avec la grille
 `${CLAUDE_SKILL_DIR}/../../templates/juges/couverture.md` à la place de la
 grille du regard, et `TYPE : concept`. Donne-lui la promesse de l'étape 1
-comme brief, les fiches de la figure et la planche de style comme références.
+comme brief, les fiches de la figure et les images de référence de la direction
+artistique comme références.
 
 Les concepts se jugent **en parallèle**.
 
@@ -194,7 +196,7 @@ node "$S" dos <plancheId> --mm <largeur du dos donnée par l'imprimeur>
 
 3. **L'écrire** : la description du concept retenu (telle qu'elle a servi au
    laboratoire, corrigée du delta s'il y en a eu) dans le gabarit de la page,
-   et le casting dans `draft` (la variante de la figure, la planche de style,
+   et le casting dans `draft` (la variante de la figure, la direction artistique principale,
    un décor si le concept en montre un) :
 
 ```bash
@@ -213,7 +215,7 @@ node "$S" write <plancheId> --file couverture.json
   "draft": {
     "characterIds": ["<id de la variante>"],
     "decorIds": [],
-    "plateIds": ["<id de la planche de style>"]
+    "plateIds": ["<id de la DA principale : universe.styles, styleDefault>"]
   }
 }
 ```
@@ -247,7 +249,7 @@ node "$S" generate <plancheId> --quality high --mode planche --wait
 ```
 
 5. **Regarder** : le juge des couvertures, `TYPE : page`, contre les fiches
-   de la figure et la planche de style. `RETENIR` : valide la variante.
+   de la figure et les images de référence de la DA. `RETENIR` : valide la variante.
    `ITERER` : si le delta ne vise qu'une zone (un visage, une main), retouche
    cette zone (`retouch <variante> --rect x,y,w,h --consigne "<delta>"`) ;
    sinon repasse le delta en `--extra`. Trois tours au maximum, le coût

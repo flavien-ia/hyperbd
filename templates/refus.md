@@ -67,7 +67,7 @@ l'image la montre. **Commence par les motifs nommés** : un refus pour
 5. **Aucune marque, aucun logo, aucun symbole de haine**, aucun drapeau ou
    uniforme réel détourné.
 6. **Vérifier les références.** Une image de référence (fiche, décor,
-   planche de style) peut déclencher le refus à elle seule : retirer celles
+   image de la direction artistique) peut déclencher le refus à elle seule : retirer celles
    qui montrent une arme, du sang, un corps dénudé, et relancer.
 
 Après trois tours, on **fait l'image autrement** : une case au lieu d'une

@@ -179,11 +179,21 @@ const PERIMES = [
   [/sur 11\b/, "le tuto en onze étapes (il en a quatre)"],
   [/--dialogue-mode/, "l'option --dialogue-mode (retirée : l'atelier impose le lettrage posé)"],
   [/--sans-pages-de-garde|pages de garde/, "les pages de garde du master (retirées de l'atelier)"],
-  [/prompt_template/, "l'ancien cadre de génération (la DA vit dans le Prompt de style)"],
+  [/prompt_template/, "l'ancien cadre de génération (la DA vit dans son entrée de style)"],
   [/app\.studio-entremondes\.fr\/compte(?!\?onglet=)/, "Mon compte sans son onglet (jetons et clés : ?onglet=cles)"],
   [/`_toile`/, "la skill _toile (devenue _recit : le fil et l'établi)"],
   [/sur\s+(la|une)\s+Toile|la Corbeille du rail/, "la Toile comme lieu de travail (c'est le fil du récit, ou l'établi)"],
   [/"ancre"\s*:/, "une ancre de lot (l'atelier place tout, un agent ne donne jamais de positions)"],
+  // L'atelier de création et la direction artistique (15/11/2026).
+  [/jugée?s? dans la planche contact/, "des pistes ou des personnages jugés dans la planche contact (ils vivent dans l'atelier de création)"],
+  [/À juger/, "le bloc « À juger » (l'élément s'ouvre sur son étape, les propositions par les pastilles)"],
+  [/planche de style/i, "la planche de style (c'est la direction artistique principale et ses images de référence)"],
+  [/Prompt de style/, "le Prompt de style (le texte de la direction artistique)"],
+  [/promote-image[^\n]*--style/, "promote-image --style (crée une DA de plus ; garder une image : --entry <DA> --etoile)"],
+  [/\?onglet=(character|decor|objet|style)\b/, "un lien d'univers sans ?vue=atelier (l'ancienne vue, sans les étapes)"],
+  [/onglets?[^.\n]*\bStyle\b/, "l'onglet Style (devenu Direction artistique)"],
+  [/promote-image[^\n]*\n(?:[^\n]*\n)?[^\n]*"\$S" star /, "promote-image suivi de star (l'étoile est déjà posée : star la retirerait)"],
+  [/montre dix\b/, "dix profils (la galerie en montre onze)"],
 ];
 // Les skills-relais gardent les anciens noms le temps d'une version : elles ne
 // font que renvoyer vers les nouvelles commandes.
@@ -193,7 +203,16 @@ const ANCIENNES = [
   [/\/bd-design\b/, "/bd-design (devenu /bd-perso, /bd-decors, /bd-planche-test)"],
 ];
 let perimes = 0;
-for (const [nom, texte] of textesDuMetier()) {
+// Le README et l'aide du CLI se lisent aussi : on y renvoie les gens.
+const aideCli = readFileSync(join(RACINE, "scripts/studio.mjs"), "utf8")
+  .split(/\r?\n/)
+  .filter((l) => l.startsWith("//"))
+  .join("\n");
+for (const [nom, texte] of [
+  ...textesDuMetier(),
+  ["README.md", readFileSync(join(RACINE, "README.md"), "utf8")],
+  ["scripts/studio.mjs (aide)", aideCli],
+]) {
   for (const [motif, quoi] of PERIMES) {
     if (motif.test(texte)) {
       perimes++;

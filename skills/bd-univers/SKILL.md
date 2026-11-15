@@ -68,7 +68,8 @@ suis-la** pour ce projet. Chacune s'arrête aux décisions qui reviennent à
 l'auteur :
 
 1. `/bd-bible` : le choix de la prémisse parmi les pistes posées sur l'établi.
-2. `/bd-da` : le choix d'une piste graphique, jugée dans la planche contact.
+2. `/bd-da` : le point de départ de la direction artistique (un profil, ou des
+   pistes construites avec toi), puis les images de référence gardées.
 3. `/bd-perso` : le casting (retenir ou écarter chaque proposition), puis les
    références de chaque personnage retenu.
 4. `/bd-decors` : les lieux à dessiner, puis leurs références.
@@ -83,10 +84,9 @@ les lieux) : annonce le partage avant la première génération.
 
 Quand les quatre étapes sont faites, récapitule : le monde en trois phrases,
 la piste graphique retenue, le casting, les lieux. Dis où tout se voit dans
-l'atelier : l'univers (onglets Personnages, Décors, Style ; chaque fiche est
-l'atelier de création de l'élément, avec ses images à juger), le Dossier pour
-la bible et la bible graphique, la planche contact pour les pistes de la
-direction artistique.
+l'atelier : l'univers, vue atelier (onglets Direction artistique, Personnages,
+Décors, Objets ; chaque élément s'ouvre sur son étape en cours, la première
+image puis la planche), le Dossier pour la bible et la bible graphique.
 
 Annonce la suite : le récit, avec `/bd-scenario`.
 

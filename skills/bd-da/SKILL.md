@@ -63,8 +63,10 @@ n'y a donc pas encore de scène validée. Deux cas :
   le plus emblématique de l'histoire telle qu'on la devine, avec ses figures
   (décrites par leur rôle, pas encore par un visage arrêté), son lieu, sa
   lumière, un plan large et un visage. Écris-la en un paragraphe, fais-la
-  valider en guidé, et consigne-la au journal : c'est elle que la planche test
-  rappellera plus tard.
+  valider en guidé, consigne-la au journal (c'est elle que la planche test
+  rappellera plus tard) et range-la dans la direction artistique, où
+  l'atelier la relit comme image clé :
+  `set-entry <projet> <id de la DA> --file cle.json` avec `{"fiche": "<l'image clé>"}`.
 
 En `--auto` : la scène validée la plus dense en casting, sinon l'image clé ;
 dis laquelle.
@@ -77,19 +79,23 @@ Ce qui fait le style, ce sont ses **images de référence** : deux ou trois
 images gardées, jointes à chaque génération. Le texte du style les
 accompagne.
 
-Trouve d'abord l'entrée de la direction artistique : dans `universe`, le style
-coché par défaut (`styleDefault`). S'il n'y en a pas, crée-la :
+Trouve d'abord l'entrée de la direction artistique : dans `universe`, champ
+`styles`, celle qui est `styleDefault` (son texte, son image clé, ses images ;
+une DA vide y figure aussi). S'il n'y en a pas, crée-la et garde son id :
 
 ```bash
 node "$S" new-entry <projet> --kind style --name "Direction artistique"
 node "$S" set-entry <projet> <id> --file da.json      # {"styleDefault": true}
 ```
 
+Une seule DA est principale : en cocher une décoche les autres. Les autres
+(un flashback, un rêve) se créent de même, sans `styleDefault`.
+
 Puis propose à la personne **deux chemins**, et laisse-la choisir :
 
-1. **Partir d'un profil.** L'atelier en montre dix (ligne claire, roman
+1. **Partir d'un profil.** L'atelier en montre onze (ligne claire, roman
    graphique, comics, manga, jeunesse, carnet, aquarelle, gouache mate,
-   gravure, minimaliste), chacun sur la même scène. Lis
+   gravure, eau-forte rehaussée, minimaliste), chacun sur la même scène. Lis
    `${CLAUDE_SKILL_DIR}/../../templates/profils-graphiques.md`, conseille-en
    deux ou trois selon le récit et dis pourquoi, puis envoie-la choisir dans
    la galerie (« Point de départ »).
@@ -152,9 +158,15 @@ Chaque piste apparaît dans la galerie du point de départ, en violet,
 3. **La personne choisit dans l'atelier** : un clic sur une carte (profil ou
    piste) écrit le style et l'emmène à « Essayer et garder ». En `--auto`,
    suis le verdict du juge (une seule `PORTEUSE` : elle ; plusieurs : la
-   meilleure robustesse ; aucune : refais un tour avec le bloc corrigé) et
-   écris toi-même le style (`set-entry`, `promptSnippet` aux lignes
-   étiquetées ci-dessus, sans la scène).
+   meilleure robustesse ; aucune : refais un tour avec le bloc corrigé), puis
+   fais ce que fait le clic : garde l'image de la piste comme image de
+   référence, et écris le style (`promptSnippet` aux lignes étiquetées
+   ci-dessus, sans la scène) :
+
+```bash
+node "$S" promote-image <imageId> --entry <id de la DA> --etoile
+node "$S" set-entry <projet> <id de la DA> --file style.json
+```
 
 ## Étape 5 : essayer et garder
 

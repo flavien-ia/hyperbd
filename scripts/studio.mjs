@@ -134,15 +134,20 @@
 //   essais <projet> [--kind K]             ce que le laboratoire a produit
 //   essai-detail <id>                      un essai et ses images
 //   keep <imageId> [--off]                 retenir une image (survit à la purge)
-//   promote-image <imageId> --entry <id>   la verser dans la bibliothèque
-//   promote-image <imageId> --style "N"    en faire une planche de style
+//   promote-image <imageId> --entry <id> [--role reference|planche] [--etoile]
+//                                          la verser dans l'univers : --role valide l'étape
+//                                          (la première image, la planche ; l'étoile suit
+//                                          d'elle-même), --etoile la garde comme image de
+//                                          référence (une direction artistique)
 //   drop-essai <id>
+//   drop-essai-image <imageId>             supprimer pour de bon une image ÉCARTÉE
+//                                          (comme depuis la corbeille du tableau de bord)
 //
 //   -- l'atelier de création (les éléments de l'univers) --
 //   prompt-element <projet> <entrée> [--geste G]
 //                                          le prompt assemblé par l'atelier (style, description,
 //                                          consigne) et ses références : en-pied, references,
-//                                          portrait, angle, angles, motif, libre
+//                                          portrait, angle, angles, motif, faces, libre
 //   candidates <projet> <entrée>           les images d'essai à juger pour cet élément
 //   verdict <essaiId> --texte "..."        écrire son verdict sur un essai (l'auteur le lit)
 //   ecarter <imageId> [--reprendre]        écarter une candidate (ou la reprendre)
@@ -165,7 +170,11 @@
 //   set-entry <projet> <entryId> --file patch.json
 //   drop-entry <projet> <entryId>
 //   entry-image <projet> <entryId> --file image.png    dépose et inscrit
-//   star <projet> <imageId>                            bascule l'étoile (max 3)
+//   star <projet> <imageId> [--on|--off]               l'étoile (max 3) : --on ou --off pose
+//                                                      l'état voulu, sans rien ne bascule
+//   image-role <projet> <imageId> --role reference|planche|aucun
+//                                                      le rôle d'une image déjà dans l'univers
+//                                                      (valider une image importée à une étape)
 //   drop-image <projet> <imageId>
 //
 //   -- les sources (ce à quoi les affirmations de l'album renvoient) --
@@ -178,9 +187,9 @@
 //   sources-public <projet> --etat         est-elle ouverte ?
 //
 //   -- l'ancien cadre de génération (hérité : la direction artistique n'y vit plus) --
-//       (La direction artistique vit dans le « Prompt de style » de la
-//        planche de style, par set-entry, et dans le style des cases, par
-//        style-cases.)
+//       (La direction artistique vit dans l'entrée de style principale de
+//        l'univers : son texte par set-entry, ses images de référence étoilées ;
+//        et dans le style des cases, par style-cases.)
 //   get-template <projet>                  l'ancien cadre, s'il en reste un
 //   set-template <projet> --file cadre.txt [--label "DA v2"] [--double-page "..."]
 //
@@ -1242,11 +1251,17 @@ const commandes = {
       method: "POST",
       body:
         typeof o.style === "string"
-          ? { styleEntry: { name: o.style } }
-          : { entryId: o.entry },
+          ? // Hérité : crée une direction artistique de plus. Préférer --entry.
+            { styleEntry: { name: o.style } }
+          : {
+              entryId: o.entry,
+              ...(o.role === "reference" || o.role === "planche" ? { role: o.role } : {}),
+              ...(o.etoile ? { etoile: true } : {}),
+            },
     }),
 
   "drop-essai": () => appel(`/essais/${arg(0)}`, { method: "DELETE" }),
+  "drop-essai-image": () => appel(`/essai-images/${arg(0)}`, { method: "DELETE" }),
 
   // ── L'atelier de création ───────────────────────────────────────────────
   "prompt-element": () =>
@@ -1431,7 +1446,20 @@ const commandes = {
   star: () =>
     appel(`/projects/${arg(0)}/universe/images/${arg(1)}/default`, {
       method: "POST",
+      // --on / --off : l'état voulu ; sans eux, une bascule.
+      ...(o.on ? { body: { etoile: true } } : o.off ? { body: { etoile: false } } : {}),
     }),
+
+  "image-role": () => {
+    const role = o.role === "aucun" ? null : o.role;
+    if (role !== null && role !== "reference" && role !== "planche") {
+      throw new Error("--role reference, planche ou aucun.");
+    }
+    return appel(`/projects/${arg(0)}/universe/images/${arg(1)}/role`, {
+      method: "POST",
+      body: { role },
+    });
+  },
 
   "drop-image": () =>
     appel(`/projects/${arg(0)}/universe/images/${arg(1)}`, {

@@ -136,7 +136,7 @@ description ET ses répliques, au format `Nom : texte`, une par ligne.
         "ambiance": "<facultatif : la lumière et les couleurs de CETTE case>",
         "characterIds": ["<variante>"],
         "decorIds": ["<décor>"],
-        "plateIds": ["<la planche de style>"]
+        "plateIds": ["<la DA principale>"]
       }
     ],
     "footer": ""
@@ -144,15 +144,16 @@ description ET ses répliques, au format `Nom : texte`, une par ligne.
   "draft": {
     "characterIds": ["<toutes les variantes de la planche>"],
     "decorIds": ["<les décors>"],
-    "plateIds": ["<la planche de style>"]
+    "plateIds": ["<la DA principale>"]
   }
 }
 ```
 
 Quatre choses à tenir, toutes vérifiées dans l'atelier :
 
-- **`plateIds` dans CHAQUE case.** C'est la planche de style qui porte l'image
-  et le texte de la direction artistique. Une case qui ne la nomme pas se
+- **`plateIds` dans CHAQUE case.** C'est l'id de la direction artistique
+  principale (`universe`, `styles`, celle qui est `styleDefault`) : elle porte
+  le texte et l'image de référence du style. Une case qui ne la nomme pas se
   dessine sans style ; celle de `draft` ne sert qu'à la planche entière.
 - **`header` et `footer` restent vides** (les deux champs sont obligatoires,
   mais l'atelier n'envoie plus l'en-tête d'une planche, et présente son

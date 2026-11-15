@@ -250,6 +250,68 @@ géométrie stricte pardonne mal.
 
 ---
 
+## 10. Gouache mate
+
+- **Trait** : peu de contour, les formes se découpent par la couleur.
+- **Couleur** : gouache opaque et mate, teintes rompues, sans brillance.
+- **Réalisme** : formes simplifiées, volumes francs.
+- **Lumière** : diffuse, ombres colorées plutôt que noires.
+- **Blanc** : rare ; la touche du pinceau se voit, le papier grené affleure.
+
+**Ce qu'il porte** : la chaleur d'un objet peint à la main, une matière qui
+se reconnaît d'une planche à l'autre.
+
+**Ce qu'il coûte** : peu de détail fin ; les visages doivent tenir en peu de
+taches.
+
+**Robustesse : 4.** La matière absorbe les écarts, mais un modèle qui glisse
+vers le lisse numérique se voit tout de suite.
+
+---
+
+## 11. Gravure
+
+- **Trait** : taille-douce, hachures croisées serrées, noirs profonds.
+- **Couleur** : noir et blanc, ou une seule couleur d'encre.
+- **Réalisme** : haut, minutieux, un peu figé.
+- **Lumière** : construite par la densité des hachures.
+- **Blanc** : papier crème, encre légèrement irrégulière.
+
+**Ce qu'il porte** : le poids du temps, l'archive, le conte noir.
+
+**Ce qu'il coûte** : la densité fatigue l'œil sur soixante planches ; à
+réserver à un album court ou à un fil (un flashback).
+
+**Robustesse : 3.** Le modèle simplifie les hachures dès qu'il dérive.
+
+---
+
+## 12. Eau-forte rehaussée
+
+- **Trait** : fin, gravé, hachures croisées serrées pour le volume et les ombres.
+- **Couleur** : couleurs douces et désaturées posées en lavis sur le trait.
+- **Réalisme** : haut, visages et architecture précis.
+- **Lumière** : construite par les hachures, contre-jour doux.
+- **Blanc** : papier crème, grain de la gravure.
+
+**Ce qu'il porte** : la précision de la gravure avec la douceur de la
+couleur ; un monde ancien et habité.
+
+**Ce qu'il coûte** : le même risque de simplification que la gravure, et une
+couleur à tenir sobre.
+
+**Robustesse : 3.**
+
+---
+
+## Ce que montre l'atelier
+
+La galerie du point de départ (onglet Direction artistique) en montre onze,
+chacun sur la même scène : ligne claire (1), roman graphique (2), comics (3),
+manga (4), jeunesse (5), carnet de reportage (7), aquarelle (8), gouache mate
+(10), gravure (11), eau-forte rehaussée (12), minimaliste (9). L'humour de
+presse (6) n'y est pas : il reste un point de départ pour composer une piste.
+
 ## Composer une piste
 
 1. Choisis **trois profils éloignés**, pas trois voisins. Une piste ligne

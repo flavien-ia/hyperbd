@@ -66,7 +66,7 @@ reconnaît, pas à quinze qu'on confond.
 
 Une fiche par personnage principal, en Markdown, dans un fichier. C'est elle
 que le scénario lira ; elle vit dans l'univers, sur la page du personnage
-(section « Fiche »).
+(le bouton « Fiche », à côté de son nom).
 
 1. **Statut** dans le récit (protagoniste, force adverse, témoin).
 2. **Nom** complet, et le prénom d'usage qui servira dans les bulles.
@@ -113,7 +113,7 @@ node "$S" new-entry <projet> --kind character --name "<Nom complet>" \
   lecteur qui distingue mal les couleurs : vérifie les contrastes.
 
 Puis dis à la personne où regarder : l'univers, onglet Personnages
-(`app.studio-entremondes.fr/univers/<univers>?onglet=character`), où ses
+(`app.studio-entremondes.fr/univers/<univers>?vue=atelier&onglet=character`), où ses
 propositions l'attendent, et demande-lui de trancher : en te répondant, ou
 d'un clic (Retenir, Écarter). Une proposition ne sert nulle part tant qu'elle
 n'est pas retenue (ni dans les castings, ni à la génération).
@@ -156,12 +156,15 @@ estimé (voir `${CLAUDE_SKILL_DIR}/../../templates/qualite.md` : la qualité
 s'annonce et se demande à la première génération du projet). En guidé, fais-la
 valider : c'est là qu'on coupe, pas après.
 
-Par variante, **deux images** :
+Par variante, **deux étapes**, comme dans l'atelier :
 
-- **la planche de références** (multi-vues, format paysage) : face, profil,
-  trois-quarts, de dos, plus un détail si le personnage en a un ;
-- **le portrait** (format portrait) : le visage, en gros, dans la lumière de
-  la DA.
+- **la première image** (en pied, format portrait), que l'auteur valide ;
+- **la planche de références** (format paysage), tirée de l'image validée :
+  le visage en plan poitrine, puis en pied de face, de trois quarts, de
+  profil et de dos.
+
+Un portrait ou une pose de plus se font ensuite en image libre (`--geste
+libre`), à la demande.
 
 Le prompt : **pars de celui que l'atelier assemble** pour la variante. Il met
 déjà, dans l'ordre, le cadre de la DA (le style coché par défaut), la
@@ -184,8 +187,9 @@ Le prompt ne porte jamais le nom du personnage (le modèle l'écrirait dans
 l'image) : la description et l'image jointe suffisent.
 
 Complète-le si besoin, sans changer son ordre (le style d'abord, le sujet
-ensuite). **Ne fais jamais porter à la planche de style l'identité d'un
-personnage** : elle dit à quoi ressemble l'ALBUM. Si tu en détoures une
+ensuite). **Ne fais jamais porter aux images de référence de la direction
+artistique l'identité d'un personnage** : elles disent à quoi ressemble
+l'ALBUM. Si tu en détoures une
 figure, donne-la comme référence SÉPARÉE de costume et de visage. **Décris le
 costume en matière et en coupe, pas en nom** (« long manteau de toile de
 travail usée, col montant à patte boutonnée, tissu froissé et mat », pas
@@ -220,15 +224,20 @@ node "$S" ecarter <imageId>
    l'élément : la fiche du personnage dans l'univers ouvre l'étape en cours,
    où elle valide l'image qui devient la référence (puis la planche), ou
    écarte ; les propositions non choisies se rouvrent depuis les pastilles de
-   la variante. Dis-lui où regarder. Relis ensuite ce qu'elle a décidé (`candidates <projet>
-   <entrée>` : ce qui reste à juger ; `universe` : ce qui est devenu
-   référence). Le juge choisit en `--auto`.
-3. **La promotion** vers la variante, quand c'est toi qui gardes (en `--auto`,
-   ou sur sa demande dans la conversation), images étoilées (trois au plus) :
+   la variante. Dis-lui où regarder
+   (`…/univers/<univers>?vue=atelier&onglet=character&e=<personnage>`). Relis
+   ensuite ce qu'elle a décidé : `candidates <projet> <entrée>` (ce qui reste
+   à juger), `entry <projet> <personnage>` (chaque image avec son `role` :
+   `reference`, `planche`). Le juge choisit en `--auto`.
+3. **La validation**, quand c'est toi qui valides (en `--auto`, ou sur sa
+   demande dans la conversation) : le rôle de l'étape, et l'étoile suit
+   d'elle-même (la planche, sinon la première image). Ne bascule pas l'étoile
+   ensuite : elle est déjà posée.
 
 ```bash
-node "$S" promote-image <imageId> --entry <variante>
-node "$S" star <projet> <imageId>
+node "$S" promote-image <imageId> --entry <variante> --role reference   # la première image
+node "$S" promote-image <imageId> --entry <variante> --role planche     # la planche
+node "$S" image-role <projet> <imageId> --role reference                # une image déjà là (importée)
 ```
 
 4. **Le texte de rappel** de la variante : sa description, cinq à dix mots
