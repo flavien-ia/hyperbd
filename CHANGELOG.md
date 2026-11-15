@@ -4,6 +4,17 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.15.1 (15 novembre 2026)
+
+### Nouveautés
+- **La direction artistique avec l'atelier** : `/bd-da` vous propose deux chemins. Partir d'un profil de la galerie de l'atelier (ligne claire, roman graphique, gouache…), que Claude vous conseille selon votre récit, ou construire le style avec lui : il compose des pistes taillées pour votre univers, ou part de vos consignes et des images que vous aimez. Ses pistes apparaissent dans la galerie, à côté des profils, avec leur image et son avis.
+- **Essayer et garder** : une fois le point de départ choisi, vous essayez le style sur votre univers, un visage, un lieu, un objet, et vous gardez les deux ou trois images qui deviennent la référence de toutes les générations. Claude peut lancer des essais pour vous.
+
+### Améliorations
+- **Personnages, décors et objets suivent les étapes de l'atelier** : `/bd-perso` cherche d'abord la première image, puis tire la planche de références de celle que vous avez validée ; `/bd-decors` fait de même pour un lieu (une vue, puis ses angles), et une seule image pour un objet. Les images de Claude arrivent dans l'étape que vous avez ouverte.
+- **Ni palette ni liste d'interdits** dans la direction artistique : c'est la manière de colorier qui tient un style, pas des teintes figées.
+- **Plus jamais le nom d'un personnage dans le prompt d'une image** : le modèle l'écrivait parfois dans l'image.
+
 ## v0.15.0 (11 novembre 2026)
 
 ### Nouveautés
