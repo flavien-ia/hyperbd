@@ -124,6 +124,10 @@ Apache 2.0.
 commit, poussé sur le dépôt public depuis la version 0.5.0 est signé avec une
 clé SSH dédiée (signatures SSH, prises en charge par git 2.34 et plus, affichées
 « Verified » sur GitHub). Les versions antérieures à la 0.5.0 n'ont pas de tag.
+Une exception depuis : **la 0.12.0 n'a ni tag ni release GitHub** (elle figure
+dans le CHANGELOG, sans tag signé ni release pour en attester). Une archive
+qui se présente comme la 0.12.0 n'a donc pas d'empreinte vérifiable, et
+`/update-hyperbd` la refuse.
 La clé publique :
 
 ```
