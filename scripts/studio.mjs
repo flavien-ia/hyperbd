@@ -10,6 +10,7 @@
 //   node studio.mjs <commande> [options]
 //
 //   connect [--url <url>] --token <jeton> [--autre-hote]   enregistre l'accès et le vérifie
+//            (--token - : le jeton se lit sur l'entrée standard, masqué dans un terminal)
 //            (https obligatoire ; un hôte autre que app.studio-entremondes.fr
 //            exige --autre-hote, à ne passer que sur demande de la personne)
 //   me                                     qui suis-je, quelles clés j'ai, le tuto
@@ -220,6 +221,42 @@ function lireAcces() {
     );
   }
   return JSON.parse(readFileSync(FICHIER_ACCES, "utf8"));
+}
+
+/**
+ * Le jeton lu sur l'entrée standard (`--token -`) : il n'apparaît alors ni dans
+ * la ligne de commande ni dans la liste des processus. Dans un terminal, il se
+ * tape (ou se colle) sans s'afficher ; sinon, il se lit d'un tuyau.
+ */
+async function lireJetonEntree() {
+  const entree = process.stdin;
+  if (entree.isTTY) {
+    process.stderr.write("Colle ton jeton d'accès (il ne s'affiche pas), puis Entrée : ");
+    entree.setRawMode(true);
+    entree.resume();
+    entree.setEncoding("utf8");
+    const jeton = await new Promise((resoudre, rejeter) => {
+      let tape = "";
+      entree.on("data", (morceau) => {
+        for (const c of morceau) {
+          if (c === "\r" || c === "\n") return resoudre(tape);
+          const code = c.charCodeAt(0);
+          if (code === 3) return rejeter(new Error("Saisie du jeton annulée."));
+          if (code === 127 || code === 8) tape = tape.slice(0, -1);
+          else tape += c;
+        }
+      });
+    }).finally(() => {
+      entree.setRawMode(false);
+      entree.pause();
+      process.stderr.write("\n");
+    });
+    return jeton.trim();
+  }
+  let tout = "";
+  entree.setEncoding("utf8");
+  for await (const morceau of entree) tout += morceau;
+  return tout.trim();
 }
 
 function ecrireAcces(acces) {
@@ -502,10 +539,12 @@ const commandes = {
   async connect() {
     const url = typeof o.url === "string" ? o.url : `https://${ATELIER_OFFICIEL}`;
     if (typeof o.token !== "string") {
-      throw new Error("Il faut --token.");
+      throw new Error("Il faut --token <jeton>, ou --token - pour le lire sur l'entrée standard.");
     }
+    const token = o.token === "-" ? await lireJetonEntree() : o.token;
+    if (!token) throw new Error("Jeton vide.");
     const autreHote = o["autre-hote"] === true;
-    const acces = { url: adresseAtelier(url, autreHote), token: o.token, ...(autreHote ? { autreHote: true } : {}) };
+    const acces = { url: adresseAtelier(url, autreHote), token, ...(autreHote ? { autreHote: true } : {}) };
     // On vérifie AVANT d'enregistrer : un accès sauvegardé doit être un accès
     // qui marche, sinon l'erreur ressortirait plus tard, loin de sa cause.
     const moi = await appel("/me", { acces });

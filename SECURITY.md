@@ -40,8 +40,15 @@ que vous avez installé est bien ce qui a été publié.
 
 - `~/.hyperbd/acces.json` : l'adresse de l'atelier et le jeton d'accès que vous
   avez donné à `/bd-connect`, en lecture réservée à votre compte (mode 0600).
-  Ce jeton n'est jamais écrit ailleurs, ni dans un dépôt, ni dans une
-  conversation après coup.
+  Le plugin ne l'écrit nulle part ailleurs (ni dans un dépôt, ni dans un
+  fichier du projet) et ne le passe jamais en argument d'une commande : il le
+  lit sur l'entrée standard (`connect --token -`), ce qui le tient hors de la
+  liste des processus. Dites-vous en revanche ceci : **si vous collez le jeton
+  dans la conversation, il reste dans l'historique de cette conversation**,
+  comme tout ce qui s'y écrit. Pour l'éviter, `/bd-connect` vous donne une
+  commande à lancer vous-même dans un terminal, qui demande le jeton sans
+  l'afficher. Dans les deux cas, créez un **jeton dédié** à Claude Code, que
+  vous révoquez d'un clic dans Mon compte s'il le faut.
 - `~/.hyperbd/updates/` : les archives téléchargées par `/update-hyperbd`, et
   la sauvegarde de la version précédente à côté du plugin (sous Claude Desktop,
   qui efface les dossiers qu'il ne connaît pas, elle ne dure que quelques minutes).

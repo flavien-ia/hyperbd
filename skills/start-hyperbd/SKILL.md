@@ -81,15 +81,21 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" me
 > 3. Copie-le et colle-le ici : il ne sera plus affiché ensuite
 
 C'est le seul moment où quelque chose se colle ici : dis-le, pour que la
-personne ne croie pas que les clés suivront le même chemin.
+personne ne croie pas que les clés suivront le même chemin. Dis aussi,
+franchement, que le jeton restera dans l'historique de la conversation : c'est
+pour cela qu'on en crée un exprès pour Claude Code, révocable d'un clic. Si la
+personne préfère qu'il ne passe jamais par la conversation, suis l'étape 1 de
+la skill `bd-connect` (elle le tape elle-même dans un terminal).
 
 Attends le jeton (il commence par `sek_`), puis :
 
 ```bash
-node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" connect --url "https://app.studio-entremondes.fr" --token "<jeton>"
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" connect --url "https://app.studio-entremondes.fr" --token - <<'FIN'
+<jeton>
+FIN
 ```
 
-Le jeton est vérifié avant d'être enregistré, dans le dossier personnel de la personne et nulle part ailleurs. En cas de refus, le plus souvent le jeton a été tronqué à la copie : propose de recommencer.
+Le jeton passe par l'entrée standard, jamais en argument de la commande. Il est vérifié avant d'être enregistré, dans le dossier personnel de la personne. En cas de refus, le plus souvent le jeton a été tronqué à la copie : propose de recommencer.
 
 ## Étape 3 : les clés, une par une, dans Mon compte
 

@@ -4,7 +4,7 @@
 // lots sur la Toile, les options retirées. Lancé par `verifier.mjs`.
 import http from "node:http";
 import { spawn } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,12 +38,13 @@ const serveur = http.createServer((req, res) => {
   req.on("data", (d) => (corps += d));
   req.on("end", () => {
     const chemin = req.url.replace("/api/v1", "");
-    recues.push({ methode: req.method, chemin, corps: corps ? JSON.parse(corps) : null });
+    recues.push({ methode: req.method, chemin, corps: corps ? JSON.parse(corps) : null, jeton: req.headers.authorization ?? null });
     const rendre = (objet, code = 200) => {
       res.writeHead(code, { "content-type": "application/json" });
       res.end(JSON.stringify(objet));
     };
     let m;
+    if (req.method === "GET" && chemin === "/me") return rendre({ user: { email: "essai@exemple.fr" } });
     if (req.method === "GET" && (m = /^\/planches\/(\w+)$/.exec(chemin))) return rendre({ planche: planches[m[1]] });
     if (req.method === "GET" && (m = /^\/projects\/(\w+)\/nodes/.exec(chemin))) return rendre({ nodes: toiles[m[1]], edges: [] });
     if (req.method === "POST" && /\/generations$/.test(chemin)) return rendre({ generationId: "g1", status: "running" }, 202);
@@ -66,12 +67,13 @@ writeFileSync(
   JSON.stringify({ url: `http://127.0.0.1:${serveur.address().port}`, token: "sek_faux", autreHote: true }),
 );
 
-function lancer(args) {
+function lancer(args, entree = null) {
   recues = [];
   return new Promise((resolve) => {
     const p = spawn(process.execPath, [STUDIO, ...args], {
       env: { ...process.env, USERPROFILE: maison, HOME: maison },
     });
+    if (entree !== null) p.stdin.end(entree);
     let sortie = "";
     p.stdout.on("data", (d) => (sortie += d));
     p.stderr.on("data", (d) => (sortie += d));
@@ -165,6 +167,15 @@ ok(r.code === 1 && r.recues.length === 0, "ni par un chemin détourné, ni par u
 writeFileSync(join(maison, "faux.png"), "ceci n'est pas une image");
 r = await lancer(["node-image", "n1", "--file", join(maison, "faux.png")]);
 ok(r.code === 1 && r.recues.length === 0, "une « image » sans signature PNG, JPEG ou WebP est refusée avant tout envoi", r.sortie.trim().slice(0, 90));
+
+// ── Le jeton sur l'entrée standard (en dernier : la connexion réécrit l'accès) ─
+r = await lancer(["connect", "--url", `http://127.0.0.1:${serveur.address().port}`, "--token", "-", "--autre-hote"], "sek_par_l_entree\n");
+const ecrit = JSON.parse(readFileSync(join(maison, ".hyperbd", "acces.json"), "utf8"));
+ok(
+  r.code === 0 && r.recues[0]?.jeton === "Bearer sek_par_l_entree" && ecrit.token === "sek_par_l_entree" && ecrit.autreHote === true,
+  "connect --token - lit le jeton sur l'entrée standard, le vérifie et l'enregistre",
+  r.sortie.trim().slice(0, 90),
+);
 
 serveur.close();
 rmSync(maison, { recursive: true, force: true });
