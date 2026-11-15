@@ -4,7 +4,7 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
-## Non publié
+## v0.15.2 (15 novembre 2026)
 
 ### Sécurité
 - **`/update-hyperbd` n'installe plus rien qu'il n'ait pu vérifier** : l'empreinte de l'archive doit être confirmée par la release GitHub de sa version (l'empreinte calculée par GitHub, ou celle des notes), et aucune source ne doit dire autre chose. GitHub injoignable ou muet : la mise à jour est refusée, avec ce qu'il faut faire. La même règle vaut pour une archive installée à la main, et l'extraction contrôle désormais la taille et l'intégrité de chaque fichier.
