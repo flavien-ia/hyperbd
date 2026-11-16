@@ -187,10 +187,11 @@ const PERIMES = [
   // L'atelier de création et la direction artistique (15/11/2026).
   [/jugée?s? dans la planche contact/, "des pistes ou des personnages jugés dans la planche contact (ils vivent dans l'atelier de création)"],
   [/À juger/, "le bloc « À juger » (l'élément s'ouvre sur son étape, les propositions par les pastilles)"],
-  [/planche de style/i, "la planche de style (c'est la direction artistique principale et ses images de référence)"],
+  [/planches? de style/i, "la planche de style (c'est la direction artistique principale et ses images de référence)"],
   [/Prompt de style/, "le Prompt de style (le texte de la direction artistique)"],
   [/promote-image[^\n]*--style/, "promote-image --style (crée une DA de plus ; garder une image : --entry <DA> --etoile)"],
-  [/\?onglet=(character|decor|objet|style)\b/, "un lien d'univers sans ?vue=atelier (l'ancienne vue, sans les étapes)"],
+  [/vue=atelier|vue atelier/, "?vue=atelier (sans effet : l'atelier de création est la seule vue de l'univers)"],
+  [/quatre temps/, "les quatre temps (le métier en compte cinq : fondation, univers, scénario, dialogues, production)"],
   [/onglets?[^.\n]*\bStyle\b/, "l'onglet Style (devenu Direction artistique)"],
   [/promote-image[^\n]*\n(?:[^\n]*\n)?[^\n]*"\$S" star /, "promote-image suivi de star (l'étoile est déjà posée : star la retirerait)"],
   [/montre dix\b/, "dix profils (la galerie en montre onze)"],

@@ -203,3 +203,7 @@ se traduit. Jamais un fichier local.
   (un texte dessiné dans l'image, un panneau), c'est que le texte s'est cuit
   dans les pixels : signale-le, la solution est une retouche de la case, pas
   une traduction.
+
+## La suite
+
+Annonce la suite : relire la langue dans la vue Aperçu de l'atelier, puis l'export ou le master (`/bd-album`).

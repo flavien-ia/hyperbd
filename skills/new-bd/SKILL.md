@@ -11,7 +11,7 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français).
 - Parle un langage simple et concret. N'expose jamais de nom de script ni de jargon technique.
-- Montre l'avancement sous forme d'une courte liste à cocher, et dis où l'on va : le projet, puis le brief, puis les quatre temps.
+- Montre l'avancement sous forme d'une courte liste à cocher, et dis où l'on va : le projet, puis le brief, puis les temps du métier (l'univers, le scénario, les dialogues, les planches).
 
 Une phrase suffit pour commencer. À la fin de cette skill, le projet existe dans l'atelier, ouvert dans le navigateur si la personne le veut, et le brief a commencé.
 
@@ -41,7 +41,7 @@ Si la réponse dit qu'OpenAI ou R2 manquent, continue quand même (le scénario 
 
 ## Étape 2 : l'univers
 
-Un univers, c'est la bibliothèque du projet : personnages, décors, images de référence, planches de style. Il se réutilise d'un projet à l'autre (un tome 2 partage l'univers du tome 1, et prend la police de son lettrage, qu'il pourra changer sans toucher au tome 1).
+Un univers, c'est la bibliothèque du projet : la direction artistique et ses images de référence, les personnages, les décors, les objets. Il se réutilise d'un projet à l'autre (un tome 2 partage l'univers du tome 1, et prend la police de son lettrage, qu'il pourra changer sans toucher au tome 1).
 
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects

@@ -188,8 +188,9 @@ et lui envoyer un placement grossier gâche un tour.
 **Les numéros de page ne se posent pas ici.** Ce sont les folios, un réglage
 d'album que `/bd-album` règle à la fin (`folios`) : l'atelier les calcule à
 chaque rendu. N'écris jamais un numéro de page dans le lettrage. Quand
-l'album en a, ils apparaissent dans le rendu : laisse leur coin libre (en
-bas, côté extérieur, par défaut).
+l'album en a, ils se voient dans l'atelier et dans les exports (pas dans le
+`rendu` que tu télécharges) : laisse leur coin libre (en bas, côté extérieur,
+par défaut).
 
 ## Étape 5 : les QR codes vers les sources
 
@@ -204,8 +205,8 @@ node "$S" qr <plancheId> --source <sourceId> --x 0.85 --y 0.9 --info
 
 L'atelier fait le reste, comme le bouton de la vue Lettrage : l'adresse
 absolue de la fiche (un QR imprimé est scanné par un téléphone qui n'a aucun
-contexte), le côté que l'album a retenu (180 px de référence par défaut,
-environ 3,7 cm sur une page A4), rapporté au format de la planche. `x` et `y`
+contexte), le côté que l'album a retenu (153 px de référence par défaut,
+environ 3,2 cm sur une page A4), rapporté au format de la planche. `x` et `y`
 sont le centre du QR, en fractions de l'image.
 
 - **Un QR se pose dans une zone calme** : un mur, un ciel, une marge de case.
@@ -302,3 +303,7 @@ Termine par `🎉 LETTRAGE POSÉ (n planches)`.
   attribue la réplique au mauvais personnage.
 - **On ne re-dérive pas un lettrage vivant.** Le script a pu bouger depuis :
   c'est le lettrage qui fait foi, et c'est lui qu'on corrige.
+
+## La suite
+
+Annonce la suite : la scène suivante (`/bd-dialogues`), ou, toutes les scènes faites, la couverture (`/bd-couverture`) ; `/bd-album` enchaîne s'il t'a appelé.

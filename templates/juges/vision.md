@@ -13,7 +13,7 @@ Tu reçois :
 
 - **le candidat** : l'image à juger ;
 - **les références** : ce à quoi elle doit ressembler (fiches de personnages,
-  décors, planches de style) ;
+  décors, images de référence de la direction artistique) ;
 - parfois **la planche validée précédente**, pour la continuité ;
 - **le script demandé** : ce que cette image devait montrer.
 

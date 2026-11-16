@@ -74,7 +74,7 @@ dis laquelle.
 ## Étape 2 : le point de départ
 
 La direction artistique se pose dans **l'atelier**, onglet « Direction
-artistique » de l'univers (`app.studio-entremondes.fr/univers/<id>?vue=atelier&onglet=style`).
+artistique » de l'univers (`app.studio-entremondes.fr/univers/<id>?onglet=style`).
 Ce qui fait le style, ce sont ses **images de référence** : deux ou trois
 images gardées, jointes à chaque génération. Le texte du style les
 accompagne.
@@ -142,7 +142,7 @@ node "$S" essai <projet> --entree <id de la DA> --geste piste --kind da-piste \
 ```
 
 Chaque piste apparaît dans la galerie du point de départ, en violet,
-« Proposée par Claude », avec sa première image. Si un essai revient en
+sous « Proposées par Claude », avec sa première image. Si un essai revient en
 échec, la réponse dit sa `conduite` et, pour un refus de sécurité, ses
 `motifs` : suis `${CLAUDE_SKILL_DIR}/../../templates/refus.md`.
 

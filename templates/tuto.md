@@ -63,7 +63,8 @@ n'applique pas ce protocole.
 `parcours --arreter` suspend le tuto (le Guide de l'atelier reste dans son
 en-tête) ; `parcours --activer` le reprend là où les données en sont. Il se
 termine de lui-même quand les quatre étapes sont faites (un projet créé sans
-les clés ne le termine pas : il reste l'étape des clés). Ensuite, `/bd-brief`,
-et la documentation du processus prend le relais. Une fois terminé, le Guide
-quitte l'en-tête de l'atelier ; il se rappelle depuis Mon compte, onglet
-« Général », bouton « Relancer le Guide ».
+les clés ne le termine pas : il reste l'étape des clés). Ensuite, `/bd-brief`
+s'il manque, puis `/bd-univers`, et la documentation du processus prend le
+relais. Une fois terminé, le Guide reste dans l'en-tête de l'atelier, où il
+rappelle la commande suivante, jusqu'à ce que la personne le masque ; il se
+rappelle depuis Mon compte, onglet « Général », bouton « Relancer le Guide ».

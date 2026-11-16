@@ -66,22 +66,18 @@ emplacement.
 
 5. Passe au regard (`_vision-qa`), en donnant **le script demandé** comme
    référence : c'est la dimension `script` qui se joue ici.
-6. Dérive le lettrage, pour voir les bulles se poser :
+6. Présente l'image. **Si la personne l'accepte, valide d'abord l'image**,
+   puis seulement le lettrage : le rendu d'une planche n'existe pas tant que
+   son image n'est pas validée, et c'est ce que le pilote d'album
+   (`/bd-album`) vérifie avant de commencer. Dans cet ordre :
 
 ```bash
-node "$S" derive-lettrage <plancheId>
+node "$S" validate <varianteId>                # 1. l'image de la planche entière (une bascule : une seule fois)
+node "$S" derive-lettrage <plancheId>          # 2. le lettrage naît du script
+node "$S" set-lettrage <plancheId> --valider   # 3. une fois les bulles à leur place
 ```
 
-7. Présente le résultat. **Si la personne l'accepte, valide la planche et son
-   lettrage** : c'est ce que le pilote d'album (`/bd-album`) vérifie avant de
-   commencer.
-
-```bash
-node "$S" validate <varianteId>                # l'image de la planche entière
-node "$S" set-lettrage <plancheId> --valider   # son lettrage, une fois les bulles à leur place
-```
-
-Les bulles se posent d'abord comme le dit `/bd-lettrage` (rendu avec
+Entre 2 et 3, les bulles se posent comme le dit `/bd-lettrage` (rendu avec
 repères, contrôle, juge). En `--auto`, valide si le regard a rendu VALIDER,
 et dis-le.
 

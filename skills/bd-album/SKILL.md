@@ -222,7 +222,8 @@ fais les deux premiers et chiffre les autres, sans rien dépenser de plus.
    d'albums n'en impriment pas ; c'est un choix d'édition, que la bible
    graphique ou la personne tranche. Si oui : les activer dans le style de la
    bible, et masquer les pages qui n'en portent pas (pleine page, ouverture
-   de chapitre), puis regarder deux rendus. En `--full-auto`, ne les active
+   de chapitre), puis demander à la personne de regarder deux pages dans
+   l'atelier (les folios ne sont pas dans le `rendu` téléchargé). En `--full-auto`, ne les active
    que si la bible graphique le dit.
 
 ```bash

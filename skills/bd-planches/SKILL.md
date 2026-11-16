@@ -136,6 +136,9 @@ Deux pièges appris à la production, qui coûtent cher si on les ignore :
   ```bash
   node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" validate <varianteId>
   ```
+  `validate` est une **bascule** : le rappeler sur une variante déjà retenue
+  la dévalide. Lis `validee` dans la réponse (ou `finalOutputId` dans
+  `planche <id>`), et ne le relance jamais « pour être sûr ».
 - **ITÉRER** : un défaut localisé. Repasse le delta du juge en `--extra`, sans
   toucher au reste du prompt. **Trois tours par planche au maximum**, et le
   coût cumulé s'affiche à chaque tour.
@@ -244,3 +247,7 @@ rien reconstituer.
   planche sans que rien ne la signale.
 - Si une planche demande trois tours, c'est presque toujours le script qui est
   en cause, pas le modèle. Dis-le au lieu de payer un quatrième tour.
+
+## La suite
+
+Annonce la suite : le lettrage des planches validées (`/bd-lettrage`), ou laisse `/bd-album` enchaîner s'il t'a appelé.

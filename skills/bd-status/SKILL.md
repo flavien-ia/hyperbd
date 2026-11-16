@@ -33,6 +33,20 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" projects
 
 ## Étape 2 : lire l'album et les coûts
 
+Avant la première planche, l'album n'a rien à montrer : c'est l'état du
+parcours qu'il faut dire. Lis aussi le début :
+
+```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" docs <projet>        # un brief ? une bible ? une bible graphique ?
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" universe <projet>    # une direction artistique principale, des personnages retenus ?
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" nodes <projet>       # des scènes, et combien de validées ?
+```
+
+et nomme **l'étape suivante**, une seule : pas de brief, `/bd-brief` ; pas
+de bible, de direction artistique, de personnages ou de lieux, `/bd-univers`
+(il reprend à l'étape qui manque) ; pas de scène validée, `/bd-scenario` ;
+des scènes validées sans planche, `/bd-planche-test` puis `/bd-album`.
+
 ```bash
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" planches <projet>
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" costs <projet>

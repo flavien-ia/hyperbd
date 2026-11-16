@@ -263,6 +263,10 @@ Une décision structurante va au journal, avec ce qu'on a écarté et pourquoi :
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" journal-add <projet> --file <entree.json>
 ```
 
+Le fichier a deux champs, pas davantage (un champ en trop est refusé) :
+`{ "kind": "decision", "body": "Ce qu'on a choisi, ce qu'on a écarté, pourquoi." }`
+(`kind` : `decision` ou `note`).
+
 Le corps liste, quand c'est utile, ce que la décision a touché (une ligne
 « Propagé : ... »). Les textes du projet se lisent dans le **Dossier** de
 l'atelier (`app.studio-entremondes.fr/projet/<projet>?m=dossier&doc=<genre>`),

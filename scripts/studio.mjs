@@ -56,7 +56,7 @@
 //   set-lettrage <planche> [--text-file F] [--file bulles.json] [--locale xx]
 //                          [--valider|--devalider]
 //                  (--text-file seul : les bulles suivent le texte, comme à la frappe)
-//   qr <planche> (--source ID | --url U) [--x 0.5 --y 0.5] [--px 180]
+//   qr <planche> (--source ID | --url U) [--x 0.5 --y 0.5] [--px 153]
 //                [--style etoiles|ronds] [--info] [--locale xx]
 //                                          poser un QR (et son icône « i »)
 //   folios <projet> [--actif|--off] [--style S] [--position P] [--taille s|m|l]

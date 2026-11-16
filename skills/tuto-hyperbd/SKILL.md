@@ -43,7 +43,7 @@ actif, écarté, ou terminé.
 ## Étape 2 : selon l'argument
 
 - **`--stop`** : `parcours --arreter`. Dis que le Guide de l'atelier reste
-  dans son menu, et que `/tuto-hyperbd --activer` reprend.
+  dans l'en-tête, et que `/tuto-hyperbd --activer` reprend.
 - **`--activer`** (ou le tuto n'est pas actif et la personne veut être
   guidée) : `parcours --activer`. Puis présente comme ci-dessous.
 - **Sans argument** : présente.

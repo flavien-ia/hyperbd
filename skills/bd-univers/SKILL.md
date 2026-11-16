@@ -50,7 +50,7 @@ Ce que tu en tires, étape par étape :
 |---|---|---|
 | 1. La bible | un document `bible` existe, et le prompt d'univers n'est pas vide | `/bd-bible` |
 | 2. La direction artistique | un style est coché par défaut dans l'univers (`styles`, `styleDefault: true`) et le document `bible-graphique` existe | `/bd-da` |
-| 3. Les personnages | les personnages que la bible fait agir sont retenus dans l'univers, avec une fiche (`aFiche`) et des références (`nbImages` > 0 sur leurs variantes), et aucune proposition n'attend (`propositions`) | `/bd-perso` |
+| 3. Les personnages | les personnages que la bible fait agir sont retenus dans l'univers, avec une fiche (`aFiche`) et des références (`nbImages` > 0 sur leurs variantes), et aucune proposition n'attend (aucune entrée de `propositions` en `statut: "propose"` ; les `ecarte` sont tranchées) | `/bd-perso` |
 | 4. Les lieux | les lieux que la bible nomme ont leur décor, avec des références | `/bd-decors` |
 
 **Sur un univers déjà fourni** (HELO, la copie d'un univers ouvert), une
@@ -84,7 +84,7 @@ les lieux) : annonce le partage avant la première génération.
 
 Quand les quatre étapes sont faites, récapitule : le monde en trois phrases,
 la piste graphique retenue, le casting, les lieux. Dis où tout se voit dans
-l'atelier : l'univers, vue atelier (onglets Direction artistique, Personnages,
+l'atelier : l'univers (onglets Direction artistique, Personnages,
 Décors, Objets ; chaque élément s'ouvre sur son étape en cours, la première
 image puis la planche), le Dossier pour la bible et la bible graphique.
 

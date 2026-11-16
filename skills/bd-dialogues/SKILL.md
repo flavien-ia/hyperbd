@@ -310,3 +310,7 @@ Termine par `🎉 DIALOGUES POSÉS (scène X/Y)`.
   scène n'y tient pas, dis-le et propose : couper, ou rouvrir le budget.
 - Une scène purement contemplative qui fonctionne est une réussite. Une scène
   contemplative qui traîne est un problème, même si elle respecte tout.
+
+## La suite
+
+Annonce la suite : les planches de la scène (`/bd-planches`), ou laisse `/bd-album` enchaîner s'il t'a appelé.

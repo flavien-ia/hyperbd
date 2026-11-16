@@ -2,9 +2,10 @@
 
 > Transformer un message en bande dessinée aboutie, avec Claude Code.
 
-HyperBD est un harnais pour Claude Code. Il guide (ou mène seul) les quatre
-temps de la création d'une bande dessinée : le scénario, la direction
-artistique, les dialogues et le découpage, puis la production des planches. Il
+HyperBD est un harnais pour Claude Code. Il guide (ou mène seul) les cinq
+temps de la création d'une bande dessinée : la fondation (le brief), l'univers
+(le monde, la direction artistique, les personnages, les lieux), le scénario,
+la voix et les dialogues, puis la production des planches. Il
 travaille avec l'atelier du Studio Entremondes, où vivent les univers, les
 scénarios, les planches et les images.
 
@@ -14,7 +15,7 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 
 ## État
 
-**Version 0.15.2.** Les quatre temps du métier sont là, du message de départ à
+**Version 0.15.2.** Les cinq temps du métier sont là, du message de départ à
 l'album exporté. Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |
@@ -42,7 +43,8 @@ l'album exporté. Ce qui fonctionne aujourd'hui :
 | `/tuto-hyperbd` | le mode tuto, en miroir du Guide de l'atelier : les quatre étapes d'accueil (le harnais, les clés, le premier univers, le premier projet), l'étape courante, le geste des deux côtés |
 | `/update-hyperbd` | met le plugin à jour quand il a été téléversé dans Claude Desktop : vérifie, télécharge, contrôle l'empreinte, remplace |
 
-Le plan complet vit dans `Plan du harnais HyperBD.md`.
+Le détail de chaque temps est dans la documentation de l'atelier :
+<https://app.studio-entremondes.fr/documentation/hyperbd/processus>.
 
 ## Comment il travaille
 

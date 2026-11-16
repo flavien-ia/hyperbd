@@ -210,7 +210,8 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" set-status <id du chapitre o
 Ce n'est pas une formalité : `/bd-dialogues` ne découpe que des scènes
 validées, et le pilote d'album ne produit que celles-là. Un récit resté en
 proposition arrête tout ce qui suit. Une scène que la personne veut encore
-discuter reste en `discute`, et tu le dis. Consigne la validation au journal
+discuter reste en `discute`, et tu le dis. Chaque `set-status` s'inscrit de
+lui-même au journal : n'ajoute qu'UNE entrée, pour la signature du pitch
 (le pitch se lit dans le **Dossier**, `?m=dossier&doc=pitch`), puis **range
 l'établi** comme le demande `_recit` : ce qui a été retenu est passé dans le
 fil, le reste est écarté ou répondu. Dis ce qui y reste, s'il y reste

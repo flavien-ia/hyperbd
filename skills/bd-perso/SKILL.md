@@ -48,8 +48,9 @@ node "$S" costs <projet>
 - **Si l'univers a déjà des personnages** (une suite, un univers copié), ils
   existent : ne les recrée pas. Lis leur fiche (`entry <projet> <id>`) et pars
   d'eux. Ne propose que ceux qui manquent.
-- **Si des propositions attendent** (`propositions` dans `universe`), commence
-  par les faire arbitrer.
+- **Si des propositions attendent** (dans `universe`, les entrées de
+  `propositions` dont le `statut` est `propose` ; celles en `ecarte` ont déjà
+  été tranchées), commence par les faire arbitrer.
 
 ## Étape 1 : les forces d'abord, les gens ensuite
 
@@ -113,7 +114,7 @@ node "$S" new-entry <projet> --kind character --name "<Nom complet>" \
   lecteur qui distingue mal les couleurs : vérifie les contrastes.
 
 Puis dis à la personne où regarder : l'univers, onglet Personnages
-(`app.studio-entremondes.fr/univers/<univers>?vue=atelier&onglet=character`), où ses
+(`app.studio-entremondes.fr/univers/<univers>?onglet=character`), où ses
 propositions l'attendent, et demande-lui de trancher : en te répondant, ou
 d'un clic (Retenir, Écarter). Une proposition ne sert nulle part tant qu'elle
 n'est pas retenue (ni dans les castings, ni à la génération).
@@ -225,7 +226,7 @@ node "$S" ecarter <imageId>
    où elle valide l'image qui devient la référence (puis la planche), ou
    écarte ; les propositions non choisies se rouvrent depuis les pastilles de
    la variante. Dis-lui où regarder
-   (`…/univers/<univers>?vue=atelier&onglet=character&e=<personnage>`). Relis
+   (`…/univers/<univers>?onglet=character&e=<personnage>`). Relis
    ensuite ce qu'elle a décidé : `candidates <projet> <entrée>` (ce qui reste
    à juger), `entry <projet> <personnage>` (chaque image avec son `role` :
    `reference`, `planche`). Le juge choisit en `--auto`.

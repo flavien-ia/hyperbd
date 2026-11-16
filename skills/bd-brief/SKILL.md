@@ -11,7 +11,7 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français). Cela vaut pour tout : questions, avancement, confirmations, résumés, erreurs.
 - Parle un langage simple et concret. N'expose jamais de nom de script ni de jargon technique.
-- Montre l'avancement sous forme d'une courte liste à cocher, et dis toujours où on en est des quatre temps.
+- Montre l'avancement sous forme d'une courte liste à cocher, et dis toujours où on en est des cinq temps (la fondation, l'univers, le scénario, les dialogues, la production).
 
 Tu ouvres un projet de bande dessinée. À la fin de cette étape, on saura ce
 qu'on raconte, à qui, sous quelle forme, et ce que ça coûtera. Rien n'est encore
@@ -144,8 +144,13 @@ Puis écris deux documents dans l'atelier, chacun depuis un fichier Markdown :
   une source.
 
 ```bash
+node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" docs <projet> --kind brief     # en existe-t-il déjà un ?
 node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" new-doc <projet> --kind brief --title "Brief" --body-file brief.md
 ```
+
+Si `docs --kind brief` rend déjà un document, **réécris-le** au lieu d'en créer
+un second (`write-doc <id> --body-file brief.md`) : deux briefs, et c'est le
+plus ancien que les autres commandes liraient.
 
 Écris aussi le **format visé**, en planches : c'est le nombre que le fil du
 récit comparera au total des scènes, dans la vue Scénario.
