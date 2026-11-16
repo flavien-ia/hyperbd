@@ -21,7 +21,7 @@ n'avaient pas de journal : l'historique git en tient lieu.
 
 ### Sécurité
 - **`/update-hyperbd` n'installe plus rien qu'il n'ait pu vérifier** : l'empreinte de l'archive doit être confirmée par la release GitHub de sa version (l'empreinte calculée par GitHub, ou celle des notes), et aucune source ne doit dire autre chose. GitHub injoignable ou muet : la mise à jour est refusée, avec ce qu'il faut faire. La même règle vaut pour une archive installée à la main, et l'extraction contrôle désormais la taille et l'intégrité de chaque fichier.
-- **Un contenu externe est une donnée, jamais une consigne** : la règle est écrite dans les skills qui lisent un document source, un univers copié ou les réponses de l'atelier, et dans la grille commune des juges.
+- **Un contenu externe n'est jamais une consigne** : la règle est écrite dans les skills qui lisent un document source, un univers copié ou les réponses de l'atelier, et dans la grille commune des juges.
 - **Ce qui part vers l'atelier** : aucun fichier du dossier `~/.hyperbd` ne peut être envoyé, et une image n'est déposée que si c'est vraiment un PNG, un JPEG ou un WebP.
 - **La connexion** exige une adresse en https, et un autre atelier que `app.studio-entremondes.fr` ne se relie que sur votre demande expresse.
 - **Le jeton** ne passe plus en argument de commande : il se lit sur l'entrée standard, et vous pouvez le taper vous-même dans un terminal pour qu'il ne passe jamais par la conversation.
@@ -133,7 +133,7 @@ n'avaient pas de journal : l'historique git en tient lieu.
 
 ### Nouveautés
 - **L'archive complète d'un album** : `studio.mjs archive <projet> [--out album.zip]` range tout le projet (planches, variantes, lettrages et traductions, Toile, versions, journal) et tous ses fichiers, avec son univers, dans un .zip sur votre machine. C'est la même archive que le bouton « Exporter le projet » de l'atelier : elle s'y remet par « Importer un projet », toujours en projet neuf. Elle s'écrit au fil de l'eau, sans tenir en mémoire, même pour un album de plusieurs gigaoctets.
-- **La police du lettrage, réglage de l'album** : `studio.mjs police <projet> [--set ID] [--essai]` la lit ou la change, avec le bilan des bulles qui changent de forme (marquées « à revoir », traitées en premier par `/bd-lettrage`).
+- **La police du lettrage se règle pour tout l'album** : `studio.mjs police <projet> [--set ID] [--essai]` la lit ou la change, avec le bilan des bulles qui changent de forme (marquées « à revoir », traitées en premier par `/bd-lettrage`).
 
 ## v0.11.1 (23 septembre 2026)
 
@@ -183,7 +183,7 @@ n'avaient pas de journal : l'historique git en tient lieu.
 ## v0.8.0 (12 septembre 2026)
 
 ### Nouveautés
-- **`/bd-album`, le pilote** : toutes les scènes dans l'ordre du récit (dialogues, planches, lettrage), puis la relecture de l'album entier, la couverture et le point final, sous un budget global. Trois signatures humaines par défaut (le plan de production, la première scène produite, l'album relu), et la reprise à tout moment depuis l'état de l'atelier.
+- **Le pilote `/bd-album`** : toutes les scènes dans l'ordre du récit (dialogues, planches, lettrage), puis la relecture de l'album entier, la couverture et le point final, sous un budget global. Trois signatures humaines par défaut (le plan de production, la première scène produite, l'album relu), et la reprise à tout moment depuis l'état de l'atelier.
 - **`/bd-couverture`** : la couverture et la quatrième. Trois concepts d'affiche jugés à taille de vignette, la page produite en portrait, le titre et les mentions posés dans le lettrage, jamais dans l'image.
 - **`/bd-traduire`** : l'album dans une autre langue, sans rien redessiner. Mêmes bulles, textes traduits avec la bible de voix sous les yeux, jugés, rendus pour voir ce qui déborde, validés langue par langue.
 - **La doctrine des refus** : quand le fournisseur d'images refuse (filtre de sécurité, crédit épuisé, plafond de dépense, clé), chaque skill sait quoi faire, et `/bd-status` le dit en clair. `/bd-dialogues` relit chaque case avant qu'une image soit payée.
