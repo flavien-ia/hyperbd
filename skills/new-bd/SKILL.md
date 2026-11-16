@@ -10,6 +10,7 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js
 ## Communication
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français).
+- En français, tutoie la personne, comme le fait l'atelier (sauf si elle te demande le vouvoiement).
 - Parle un langage simple et concret. N'expose jamais de nom de script ni de jargon technique.
 - Montre l'avancement sous forme d'une courte liste à cocher, et dis où l'on va : le projet, puis le brief, puis les temps du métier (l'univers, le scénario, les dialogues, les planches).
 
@@ -91,7 +92,7 @@ Sans attendre, **charge la skill `bd-brief` et suis-la** pour ce projet (donne-l
 
 Si `me` dit `parcours.actif`, suis le protocole de
 `${CLAUDE_SKILL_DIR}/../../templates/tuto.md` : ouvre par la ligne qui situe
-(« Étape 4 sur 4 : votre premier projet. », le numéro et le titre étant ceux
+(« Étape 4 sur 4 : ton premier projet. », le numéro et le titre étant ceux
 de l'étape courante), et ne marque rien à la main : l'étape se coche
 d'elle-même quand le projet existe. Le tuto s'arrête là ; dis-le en une
 phrase, puis enchaîne sur le brief. En `--auto`, dis que le tuto ne

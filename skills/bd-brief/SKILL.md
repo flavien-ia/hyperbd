@@ -10,6 +10,7 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js
 ## Communication
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français). Cela vaut pour tout : questions, avancement, confirmations, résumés, erreurs.
+- En français, tutoie la personne, comme le fait l'atelier (sauf si elle te demande le vouvoiement).
 - Parle un langage simple et concret. N'expose jamais de nom de script ni de jargon technique.
 - Montre l'avancement sous forme d'une courte liste à cocher, et dis toujours où on en est des cinq temps (la fondation, l'univers, le scénario, les dialogues, la production).
 

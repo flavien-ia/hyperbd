@@ -34,7 +34,7 @@ node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" parcours
 
 ## 2. Situer, puis une étape à la fois
 
-En tuto, la skill commence par une ligne qui situe : « Étape 4 sur 4 : votre
+En tuto, la skill commence par une ligne qui situe : « Étape 4 sur 4 : ton
 premier projet. » Le numéro est le RANG de l'étape courante dans la liste que
 rend `parcours` (celle qui porte `courante: true`), et le titre est le sien :
 c'est ce que le Guide de l'atelier affiche. Ne compte pas `faites + 1` : dès

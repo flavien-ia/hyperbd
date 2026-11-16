@@ -9,6 +9,7 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Installe Node.js s
 ## Communication
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français). Cela vaut pour tout : questions, avancement, confirmations, résumés, erreurs.
+- En français, tutoie la personne, comme le fait l'atelier (sauf si elle te demande le vouvoiement).
 - Parle un langage simple et concret. N'expose jamais de nom de script (`*.mjs`), de chemin interne ni de jargon : décris ce que tu fais en clair.
 - Montre l'avancement sous forme d'une courte liste à cocher : la machine, l'atelier, les clés, le premier album.
 - **Un seul secret se colle dans la conversation : le jeton d'accès de l'étape 2.** Les clés d'API (OpenAI, Cloudflare, Topaz, Bria) se collent dans **Mon compte**, sur l'atelier, et nulle part ailleurs. Ne demande jamais la valeur d'une clé, n'écris jamais « colle-la ici » à propos d'une clé, et n'essaie jamais d'en saisir une.

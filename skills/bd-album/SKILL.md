@@ -10,6 +10,7 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js
 ## Communication
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français).
+- En français, tutoie la personne, comme le fait l'atelier (sauf si elle te demande le vouvoiement).
 - Parle un langage simple et concret. N'expose jamais de nom de script ni de jargon technique.
 - Tiens une liste à cocher **par scène**, avec pour chacune : dialogues, planches, lettrage, et le coût cumulé de l'album à chaque ligne.
 - **Le budget est global** et s'affiche à chaque scène : dépensé, restant, estimé pour la suite.

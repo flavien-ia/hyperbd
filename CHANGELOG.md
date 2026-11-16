@@ -4,14 +4,18 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
-## Non publié
+## v0.16.0 (16 novembre 2026)
 
 ### Améliorations
-- **`/bd-status` sait où vous en êtes dès le début** : avant la première planche, il lit le brief, l'univers et le récit, et nomme l'étape suivante.
+- **Claude te tutoie**, comme l'atelier, sa documentation et son Guide (sauf si tu lui demandes le vouvoiement).
+- **`/bd-status` sait où tu en es dès le début** : avant la première planche, il lit le brief, l'univers et le récit, et nomme l'étape suivante.
 - **Une image validée ne se dévalide plus par erreur** : valider est une bascule dans l'atelier, et Claude ne la rappelle plus « pour être sûr ». La planche test se valide dans le bon ordre : l'image, puis le lettrage.
 - **Pas de document en double** : un brief ou une bible de voix déjà écrits sont réécrits, pas recréés.
 - **Chaque commande annonce la suite** : les dialogues, les planches, le lettrage et la traduction disent maintenant laquelle taper ensuite.
 - **Des textes plus justes** : les cinq temps du métier partout, les liens vers l'univers, les folios (visibles dans l'atelier et les exports), la taille par défaut d'un QR, le journal.
+
+### Retiré
+- **`/bd-personnages` et `/bd-design`**, les anciens noms gardés le temps d'une version : ce sont désormais `/bd-perso`, `/bd-decors` et `/bd-planche-test`.
 
 ## v0.15.2 (15 novembre 2026)
 

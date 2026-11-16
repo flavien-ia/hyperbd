@@ -32,7 +32,7 @@ ok(plugin.repository === "https://github.com/flavien-ia/hyperbd", "URL du dépô
 // ── 2. Chaque skill : dossier = frontmatter, description non vide ───────────
 const skillsDir = join(RACINE, "skills");
 const skills = readdirSync(skillsDir).filter((d) => statSync(join(skillsDir, d)).isDirectory());
-ok(skills.length === 27, "27 skills", String(skills.length));
+ok(skills.length === 25, "25 skills", String(skills.length));
 for (const s of skills) {
   const f = join(skillsDir, s, "SKILL.md");
   if (!existsSync(f)) { ok(false, `SKILL.md manquant`, s); continue; }
@@ -48,7 +48,7 @@ for (const s of skills) {
   // ne le signale.
   if (desc && /[<>]/.test(desc)) ok(false, `chevron dans la description (Claude Desktop refuse le zip)`, s);
 }
-console.log("  ok   frontmatters des 27 skills (nom = dossier, description, sans chevron)");
+console.log("  ok   frontmatters des 25 skills (nom = dossier, description, sans chevron)");
 
 // ── 3. Chaque chemin ${CLAUDE_SKILL_DIR}/../../<x> référencé EXISTE ─────────
 const refs = new Set();
@@ -196,9 +196,8 @@ const PERIMES = [
   [/promote-image[^\n]*\n(?:[^\n]*\n)?[^\n]*"\$S" star /, "promote-image suivi de star (l'étoile est déjà posée : star la retirerait)"],
   [/montre dix\b/, "dix profils (la galerie en montre onze)"],
 ];
-// Les skills-relais gardent les anciens noms le temps d'une version : elles ne
-// font que renvoyer vers les nouvelles commandes.
-const RELAIS = new Set(["bd-personnages", "bd-design"]);
+// Les anciens noms de commande (les skills-relais sont retirées depuis la
+// 0.16.0) : plus aucun texte ne doit y renvoyer.
 const ANCIENNES = [
   [/\/bd-personnages\b/, "/bd-personnages (devenu /bd-perso)"],
   [/\/bd-design\b/, "/bd-design (devenu /bd-perso, /bd-decors, /bd-planche-test)"],
@@ -220,7 +219,6 @@ for (const [nom, texte] of [
       ok(false, "passage périmé", `${nom} : ${quoi}`);
     }
   }
-  if ([...RELAIS].some((r) => nom.includes(r))) continue;
   for (const [motif, quoi] of ANCIENNES) {
     if (motif.test(texte)) {
       perimes++;

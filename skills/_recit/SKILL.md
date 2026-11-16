@@ -11,6 +11,7 @@ compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js
 ## Communication
 
 - Détecte la langue de la personne et réponds TOUJOURS dans cette langue (par défaut : français).
+- En français, tutoie la personne, comme le fait l'atelier (sauf si elle te demande le vouvoiement).
 - Parle de ce que tu poses en termes de récit (« j'ai mis trois prémisses sur l'établi »), jamais en termes de cartes, de blocs ou d'identifiants.
 
 La vue Scénario est un espace partagé. La personne y travaille avec sa souris

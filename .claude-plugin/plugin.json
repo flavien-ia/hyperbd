@@ -1,7 +1,7 @@
 {
   "name": "hyperbd",
   "description": "Turn a message into a finished comic book. HyperBD guides (or runs on its own) the five movements of the craft: brief, world (art direction, characters, places), scenario, dialogue and page production, working hand in hand with the Studio Entremondes workshop.",
-  "version": "0.15.2",
+  "version": "0.16.0",
   "author": {
     "name": "Flavien Chervet"
   },
