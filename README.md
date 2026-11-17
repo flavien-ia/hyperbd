@@ -15,7 +15,7 @@ prix Cyberdéfense du Forum InCyber 2026), et de son tome 2 en cours.
 
 ## État
 
-**Version 0.16.0.** Les cinq temps du métier sont là, du message de départ à
+**Version 0.16.1.** Les cinq temps du métier sont là, du message de départ à
 l'album exporté. Ce qui fonctionne aujourd'hui :
 
 | Skill | Ce qu'elle fait |

@@ -4,6 +4,12 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.16.1 (17 novembre 2026)
+
+### Améliorations
+- **La direction artistique s'ouvre depuis le projet** : dans un projet, le bouton de l'univers ouvre un menu (personnages, décors, direction artistique, accès à l'univers). Claude t'y envoie quand il parle de direction artistique ; la planche contact n'existe plus.
+- **Des notes de version plus lisibles** : les titres des entrées passées sont réécrits droit, en un seul mouvement.
+
 ## v0.16.0 (16 novembre 2026)
 
 ### Améliorations
