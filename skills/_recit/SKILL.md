@@ -271,5 +271,5 @@ Le fichier a deux champs, pas davantage (un champ en trop est refusé) :
 Le corps liste, quand c'est utile, ce que la décision a touché (une ligne
 « Propagé : ... »). Les textes du projet se lisent dans le **Dossier** de
 l'atelier (`app.studio-entremondes.fr/projet/<projet>?m=dossier&doc=<genre>`),
-la direction artistique par le bouton **Direction artistique** du projet
+la direction artistique par le menu de l'univers, en haut à gauche du projet
 (`?m=da`), les essais d'un élément dans sa fiche de l'univers.
