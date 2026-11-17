@@ -95,8 +95,7 @@ détail de matière) tirée de cette vue ; pour un objet, **une seule image**
 validée, sans planche. Le prompt ne porte jamais le nom du lieu ni de l'objet.
 
 Lance les essais **sur l'élément** (`--entree`, sa variante s'il en a) avec **le
-geste de l'étape** : leurs images arrivent dans l'écran de cette étape, pas à
-la planche contact.
+geste de l'étape** : leurs images arrivent dans l'écran de cette étape.
 
 ```bash
 node "$S" essai <projet> --entree <entrée> --geste angle --kind decor --label "Première vue" --prompt-file decor-<lieu>.txt --size paysage --n 2 --refs <id,id> --wait

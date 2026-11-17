@@ -201,7 +201,7 @@ avec chaque génération.
 
 Lance les essais **sur la variante** (`--entree`) avec **le geste de l'étape**
 (`--geste`) : leurs images arrivent dans l'écran de cette étape, sous les yeux
-de l'auteur, pas à la planche contact. Les références sont celles que
+de l'auteur. Les références sont celles que
 `prompt-element` a rendues, dans cet ordre.
 
 ```bash

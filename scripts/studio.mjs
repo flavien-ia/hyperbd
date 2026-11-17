@@ -127,8 +127,8 @@
 //         [--refs id,id] [--essais id,id] [--entree <variante>] [--geste G] [--wait]
 //         (--prompt "..." pour un prompt court ; --prompt-file dès qu'il a
 //          des paragraphes, des guillemets ou des accents ; --entree vise un
-//          élément de l'univers : ses images vont à son atelier de création,
-//          pas à la planche contact ; --geste dit l'étape qu'elles servent :
+//          élément de l'univers : ses images vont à son atelier de création ;
+//          --geste dit l'étape qu'elles servent :
 //          en-pied puis references (personnage), angle puis angles (lieu),
 //          motif (objet), piste et epreuve (direction artistique))
 //   essais <projet> [--kind K]             ce que le laboratoire a produit
