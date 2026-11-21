@@ -28,6 +28,7 @@
 //   create-planche <projet> [--title T] [--after ID] [--separator]
 //                  [--kind couverture|quatrieme]  (uniques, place fixe)
 //   drop-planche <plancheId>               retirer une planche de l'album
+//   telecharger <url> --out F           une image du stockage de l'atelier, pour un juge (https, R2 ou l'atelier, vraie image)
 //   rendu <plancheId> --out f.png          la planche lettrée, en image
 //         [--largeur 1536] [--locale en [--brouillon]] [--sans-texte] [--calque]
 //         (--brouillon : la traduction telle qu'elle est écrite, avant validation)
@@ -47,7 +48,8 @@
 //   generation <id>                        où en est une génération
 //   retouch <variante> --consigne "..." [--case ID | --rect x,y,w,h]
 //           [--quality medium] [--wait]    repeint une zone, garde le reste
-//   validate <variante> [--case ID]        retenir une variante
+//   validate <variante> [--case ID]        retenir une variante (relancer ne défait rien)
+//   unvalidate <variante> [--case ID]      retirer la validation
 //   upscale <variante> [--scale 2|4]       agrandir (Topaz)
 //   lettrage <planche>                     lire le lettrage
 //   derive-lettrage <planche> [--positional] [--remplacer] [--rederiver]
@@ -474,6 +476,18 @@ function deposable(chemin) {
   if (fichier === interdit || fichier.startsWith(interdit.endsWith(sep) ? interdit : interdit + sep)) {
     throw new Error("Refusé : ce fichier est dans le dossier d'accès de HyperBD (~/.hyperbd), qui ne s'envoie jamais à l'atelier.");
   }
+  // Les secrets ordinaires d'une machine : un .env, une clé SSH ou un
+  // certificat ne partent jamais, même si l'agent se trompe de chemin.
+  const morceaux = fichier.split(/[\\/]/).map((m) => m.toLowerCase());
+  const nom = morceaux[morceaux.length - 1] ?? "";
+  if (
+    /^\.env(\..*)?$/.test(nom) ||
+    /^id_[a-z0-9_-]+(\.pub)?$/.test(nom) ||
+    /\.(pem|key|p12|pfx|ppk|kdbx)$/.test(nom) ||
+    morceaux.some((m) => [".ssh", ".aws", ".gnupg", ".kube", ".docker"].includes(m))
+  ) {
+    throw new Error(`Refusé : ${nom} ressemble à un fichier secret (.env, clé SSH, certificat), qui ne s'envoie jamais à l'atelier.`);
+  }
   return chemin;
 }
 
@@ -740,9 +754,42 @@ const commandes = {
    * absente, un lettrage non validé) voyagent en en-tête et sont remontés
    * ici : un rendu approximatif qui ne s'annonce pas est pire qu'un échec.
    */
+  /**
+   * Télécharge une image que l'atelier a désignée (une adresse signée de son
+   * stockage), pour qu'un juge la regarde en local. À la place de curl : rien
+   * d'autre que du https vers le stockage R2 ou l'atelier lui-même, pas de
+   * redirection, 50 Mo au plus, et seulement une vraie image (PNG, JPEG,
+   * WebP, lue dans ses premiers octets).
+   */
+  async telecharger() {
+    if (!o.out) throw new Error("Il faut --out <fichier>.");
+    let u;
+    try {
+      u = new URL(String(arg(0)));
+    } catch {
+      throw new Error("Adresse illisible.");
+    }
+    const { url: atelier } = lireAcces();
+    const hoteAtelier = new URL(atelier).hostname;
+    const permis = u.hostname.endsWith(".r2.cloudflarestorage.com") || u.hostname === hoteAtelier;
+    if (u.protocol !== "https:" || !permis || u.username || u.password) {
+      throw new Error(`Refusé : ${u.hostname} n'est ni le stockage de l'atelier ni l'atelier (seules ces adresses, en https, se téléchargent).`);
+    }
+    const r = await fetch(u.href, { redirect: "error" });
+    if (!r.ok) throw new Error(`HTTP ${r.status} : l'adresse a peut-être expiré, redemande-la à l'atelier.`);
+    const taille = Number(r.headers.get("content-length") ?? 0);
+    if (taille > 50_000_000) throw new Error("Refusé : plus de 50 Mo.");
+    const octets = Buffer.from(await r.arrayBuffer());
+    if (octets.length > 50_000_000) throw new Error("Refusé : plus de 50 Mo.");
+    const { type } = typeImage(octets);
+    writeFileSync(deposable(o.out), octets);
+    return { ok: true, out: o.out, type, octets: octets.length };
+  },
+
   async rendu() {
     if (!o.out) throw new Error("Il faut --out <fichier.png>.");
-    const { url, token } = lireAcces();
+    const { url, token, autreHote } = lireAcces();
+    const base = adresseAtelier(url, autreHote === true);
     const q = new URLSearchParams();
     if (o.largeur) q.set("largeur", String(o.largeur));
     if (typeof o.locale === "string") q.set("locale", o.locale);
@@ -754,7 +801,7 @@ const commandes = {
     const qs = q.toString();
 
     const r = await fetch(
-      `${url.replace(/\/$/, "")}/api/v1/planches/${arg(0)}/rendu${qs ? `?${qs}` : ""}`,
+      `${base}/api/v1/planches/${arg(0)}/rendu${qs ? `?${qs}` : ""}`,
       { headers: { authorization: `Bearer ${token}` } },
     );
     if (!r.ok) {
@@ -930,10 +977,18 @@ const commandes = {
     return { ...lancement, ...fin };
   },
 
+  // Valider ne bascule plus : relancer `validate` laisse la variante validée.
+  // Retirer une validation, c'est `unvalidate`.
   validate: () =>
     appel(`/outputs/${arg(0)}/validate`, {
       method: "POST",
-      body: typeof o.case === "string" ? { caseId: o.case } : {},
+      body: { valider: true, ...(typeof o.case === "string" ? { caseId: o.case } : {}) },
+    }),
+
+  unvalidate: () =>
+    appel(`/outputs/${arg(0)}/validate`, {
+      method: "POST",
+      body: { valider: false, ...(typeof o.case === "string" ? { caseId: o.case } : {}) },
     }),
 
   upscale: () =>

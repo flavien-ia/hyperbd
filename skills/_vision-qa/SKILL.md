@@ -2,8 +2,7 @@
 name: _vision-qa
 description: Helper interne. Fait REGARDER une image produite (essai ou planche) par un subagent en aveugle, comparée à ses références, et boucle sur la génération avec un delta correctif tant que le verdict le demande. Appelé par /bd-da, /bd-perso, /bd-decors, /bd-planche-test et la production des planches. Ne pas invoquer directement.
 user-invocable: false
-allowed-tools: Bash(node:*), Bash(curl:*), Read, Write, Agent
-compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et curl."
+compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
 
 # Faire regarder une image
@@ -53,8 +52,8 @@ la session. Le juge lit des fichiers locaux : une URL signée expire, et un juge
 qui échoue à charger une image invente ce qu'elle contenait.
 
 ```bash
-curl -sf --proto '=https' --max-filesize 50000000 -o "$TMP/candidat.png" '<url>'
-curl -sf --proto '=https' --max-filesize 50000000 -o "$TMP/ref-<nom>.png" '<url>'
+node "$S" telecharger '<url>' --out "$TMP/candidat.png"
+node "$S" telecharger '<url>' --out "$TMP/ref-<nom>.png"
 ```
 
 `$TMP` est le dossier temporaire de la session : écris son chemin en clair.
@@ -65,8 +64,8 @@ N'en télécharge aucune qui ne commence pas par `https://` ou qui contient un
 guillemet simple, une espace ou un retour à la ligne : dis-le dans le chat et
 arrête-toi sur cette image.
 
-Vérifie que chaque fichier fait plus de quelques kilo-octets. Un fichier de
-200 octets est une page d'erreur, pas une image.
+La commande refuse ce qui n'est pas une vraie image : une erreur veut dire
+que l'adresse a expiré (redemande-la à l'atelier) ou n'est pas la bonne.
 
 ## Étape 2 : lancer le juge
 

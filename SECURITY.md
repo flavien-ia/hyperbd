@@ -55,7 +55,8 @@ que vous avez installé est bien ce qui a été publié.
   commande à lancer vous-même dans un terminal, qui demande le jeton sans
   l'afficher. Dans les deux cas, créez un **jeton dédié** à Claude Code, que
   vous révoquez d'un clic dans Mon compte s'il le faut.
-- `~/.hyperbd/updates/` : les archives téléchargées par `/update-hyperbd`, et
+- `~/.hyperbd/updates/` : les archives téléchargées par `/update-hyperbd` et leur
+  signature, et
   la sauvegarde de la version précédente à côté du plugin (sous Claude Desktop,
   qui efface les dossiers qu'il ne connaît pas, elle ne dure que quelques minutes).
 - Le dossier courant, uniquement quand vous demandez un export, un rendu ou une
@@ -71,7 +72,11 @@ que vous avez installé est bien ce qui a été publié.
   avez donnée à `/bd-connect`), avec votre jeton. C'est là que vivent les
   scénarios, les planches et les images.
 - Pour la mise à jour : l'atelier et `github.com`, sans jeton, pour lire la
-  version publiée et télécharger l'archive.
+  version publiée et télécharger l'archive et sa signature.
+- **Le stockage de vos images**, pour qu'un juge les regarde : seulement les
+  adresses signées que l'atelier a données (`*.r2.cloudflarestorage.com` ou
+  l'atelier lui-même), en https, sans redirection, 50 Mo au plus, et seulement
+  un vrai PNG, JPEG ou WebP (commande `telecharger`). Aucun `curl`.
 - **Vos clés d'API (OpenAI, Cloudflare R2, Topaz, Bria) ne transitent jamais par le
   plugin.** Elles sont saisies dans l'atelier, chiffrées, et c'est l'atelier
   qui s'en sert. Le plugin ne les voit pas, ne les demande pas, ne les lit pas.
@@ -83,13 +88,23 @@ que vous avez installé est bien ce qui a été publié.
 - **Réécrire une planche lettrée de lui-même.** Les planches font foi : quand
   un texte de travail et le texte lettré divergent, c'est le texte de travail
   qui est corrigé.
+- **Envoyer un fichier secret à l'atelier.** Ce que lit une option `--…-file`
+  part sur le réseau : le dossier `~/.hyperbd`, un `.env`, une clé SSH
+  (`id_*`, `.ssh/`), un certificat (`.pem`, `.key`, `.p12`) ou les dossiers
+  `.aws`, `.gnupg`, `.kube`, `.docker` sont refusés, même par un lien
+  symbolique.
+- **S'accorder des droits.** Aucune skill ne déclare `allowed-tools` : chaque
+  commande passe par les autorisations de votre Claude Code, et le banc de
+  vérification du dépôt le contrôle à chaque version.
 - **Obéir à un contenu externe.** Un document source, une page web, une réponse
   d'API sont des données à analyser, jamais des instructions à suivre, quel
   que soit l'émetteur qu'ils prétendent avoir.
 
 ## Vérifier ce que vous installez
 
-Chaque version publiée a une empreinte SHA-256, affichée sur la page de
+Une mise à jour passe deux contrôles indépendants avant que rien ne soit posé :
+la **signature** de l'archive (plus bas, « Archives signées »), puis son
+**empreinte**. Chaque version publiée a une empreinte SHA-256, affichée sur la page de
 téléchargement de l'atelier et dans les notes de la release GitHub
 correspondante ; GitHub calcule aussi la sienne sur l'archive de la release.
 `/update-hyperbd` télécharge l'archive par l'atelier, calcule son empreinte, et
@@ -112,9 +127,9 @@ le fichier. Le numéro de version lu dans l'archive doit avoir la forme `X.Y.Z`,
 et l'extraction refuse une archive de plus de 50 Mo une fois décompressée ou
 dont un fichier a un CRC-32 faux.
 
-La limite qui reste : si quelqu'un tient à la fois l'atelier et le compte
-GitHub du projet, ces contrôles ne le voient pas. Les tags signés ci-dessous
-sont là pour ce cas.
+Les contrôles d'empreinte, seuls, ne voient pas quelqu'un qui tiendrait à la
+fois l'atelier et le compte GitHub du projet : il publierait une archive piégée
+avec son empreinte. C'est le rôle de la signature de l'archive, plus bas.
 Le code est public sur
 [flavien-ia/hyperbd](https://github.com/flavien-ia/hyperbd), sous licence
 Apache 2.0.
@@ -144,6 +159,62 @@ git -c gpg.ssh.allowedSignersFile=allowed_signers verify-tag v<version>
 ```
 
 Un tag non signé, ou signé par une autre clé, n'est pas une release à nous.
+
+**Archives signées.** Depuis la 0.16.2, chaque release GitHub publie, à côté de
+l'archive `hyperbd-v<version>.zip`, sa signature `hyperbd-v<version>.zip.sig`,
+faite avec la même clé (`ssh-keygen -Y sign -n file`). Le plugin embarque la clé
+publique dans `scripts/update/allowed_signers`, sous le nom `hyperbd-release`.
+`/update-hyperbd` télécharge la signature depuis la release GitHub et la vérifie
+avec `ssh-keygen -Y verify`, **contre la clé que porte la version déjà
+installée**, jamais contre celle de l'archive reçue, et **avant d'ouvrir
+l'archive**. Rien n'est installé si :
+
+- la release ne publie pas de signature, ou le fichier est illisible ;
+- la signature ne correspond pas à l'archive (un seul octet changé suffit), a été
+  faite par une autre clé, ou pour un autre usage que `file` (une signature de
+  commit ne passe pas) ;
+- la clé manque dans la version installée ;
+- `ssh-keygen` est introuvable, ou antérieur à OpenSSH 8.1 : le message dit
+  comment l'installer. Il est livré avec macOS et Windows 10 et 11 (sous
+  Windows, le « Client OpenSSH » des fonctionnalités facultatives, présent par
+  défaut), et sous Linux dans le paquet `openssh-client` ou `openssh`.
+
+Il n'y a pas d'option pour passer outre. Ce que cela ferme : qui tiendrait à la
+fois l'atelier et le compte GitHub pourrait publier une archive et son
+empreinte, pas la signer. La clé privée ne vit ni sur l'atelier ni sur GitHub,
+mais sur l'ordinateur de l'auteur, chiffrée par une phrase de passe.
+
+Ce qui reste ouvert, pour ne pas en promettre plus :
+
+- **La première installation.** Une archive téléchargée à la main n'a pas encore
+  de version en place pour la contrôler. Vérifiez-la vous-même (ci-dessous).
+- **Le passage à la 0.16.2.** C'est l'outil de la version installée qui vérifie :
+  une 0.16.1 ou antérieure installe la 0.16.2 avec ses seuls contrôles
+  d'empreinte. La signature est exigée pour les mises à jour faites depuis la
+  0.16.2.
+- **Retenir une version.** Qui tiendrait l'atelier et GitHub ne peut pas faire
+  installer une archive qu'il aurait fabriquée, mais il peut empêcher une mise à
+  jour, ou annoncer comme dernière une version authentique plus ancienne que la
+  vraie dernière. `/update-hyperbd` ne propose jamais une version plus ancienne
+  que celle qui est installée.
+- **Le plugin suivi par Claude Code** (`/plugin marketplace add`) se met à jour
+  par Claude Code, depuis le dépôt git : ces contrôles ne s'y appliquent pas.
+  Les commits et les tags signés permettent de le vérifier soi-même.
+- **La clé elle-même.** Qui obtiendrait la clé privée et sa phrase de passe
+  pourrait signer. Si la clé change un jour, la nouvelle arrivera dans une
+  version signée par l'ancienne, et SECURITY.md le dira.
+
+Pour vérifier une archive vous-même :
+
+```bash
+echo 'hyperbd-release namespaces="file" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqVH7FUXHPiorT/puz89VLIE9MvFuYIINFqIBG+erLm' > allowed_signers
+ssh-keygen -Y verify -f allowed_signers -I hyperbd-release -n file -s hyperbd-v<version>.zip.sig < hyperbd-v<version>.zip
+```
+
+La réponse attendue commence par `Good "file" signature for hyperbd-release`.
+Sous Windows, PowerShell ne connaît pas la redirection `<` : lancez la seconde
+ligne dans l'invite de commandes (`cmd`), ou précédée de `cmd /c` et entre
+guillemets.
 
 ## Signaler un problème
 

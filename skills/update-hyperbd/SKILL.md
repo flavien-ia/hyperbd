@@ -1,6 +1,6 @@
 ---
 name: update-hyperbd
-description: Met le plugin HyperBD à jour vers la dernière version publiée. Lit d'abord comment il a été installé : suivi par Claude Code (marketplace), la mise à jour lui appartient et on indique la commande ; téléversé à la main dans Claude Desktop, on télécharge, on vérifie l'empreinte, on remplace. Utiliser quand la personne dit « /update-hyperbd », « mets à jour HyperBD », « y a-t-il une nouvelle version ? », ou demande si son plugin est à jour.
+description: Met le plugin HyperBD à jour vers la dernière version publiée. Lit d'abord comment il a été installé : suivi par Claude Code (marketplace), la mise à jour lui appartient et on indique la commande ; téléversé à la main dans Claude Desktop, on télécharge, on vérifie la signature et l'empreinte, on remplace. Utiliser quand la personne dit « /update-hyperbd », « mets à jour HyperBD », « y a-t-il une nouvelle version ? », ou demande si son plugin est à jour.
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js 18 ou plus. Ni compte ni clé : le plugin est open source, la version publiée se lit sur l'atelier et l'archive se télécharge sans jeton."
 ---
 
@@ -40,9 +40,20 @@ Lis le JSON :
 node "$PLUGIN_DIR/scripts/update/update-hyperbd.mjs" download
 ```
 
-Le JSON donne `file` (l'archive, dans `~/.hyperbd/updates/`), `version`, `files`, `sha256` et `sha256Verified`.
+Le JSON donne `file` (l'archive, dans `~/.hyperbd/updates/`), `signatureFile` (sa signature, rangée à côté), `version`, `files`, `sha256`, `sha256Verified` et `signatureVerified`.
 
-**Le téléchargement se vérifie tout seul.** Le script calcule l'empreinte de ce qu'il a reçu et la fait confirmer par la release GitHub de cette version (l'empreinte que GitHub calcule sur l'archive, et celle des notes de la release), en plus de celle que l'atelier publie. Il ne te tend une archive que si GitHub confirme et qu'aucune source ne dit autre chose ; alors `sha256Verified` vaut `true`. Sinon, il rend `ok: false` avec l'une de ces deux raisons :
+**Le téléchargement se vérifie tout seul, en deux temps.**
+
+D'abord la **signature** : le script télécharge celle que la release GitHub publie avec l'archive, et la vérifie avec l'outil `ssh-keygen` contre la clé de publication que porte la version d'HyperBD déjà installée, avant même d'ouvrir l'archive. Sur un refus, il rend `ok: false` avec l'une de ces raisons, et rien n'est gardé :
+
+- `reason: "signature-missing"` : la release ne publie pas de signature pour cette version (publication en cours, ou archive qui n'est pas la nôtre). **Arrête-toi** : dis que rien n'a été installé et transmets le `message` (réessayer plus tard).
+- `reason: "signature-invalid"` : la signature ne correspond pas à l'archive, ou n'a pas été faite par la clé de publication d'HyperBD. **Arrête-toi** : c'est le signe d'une archive qui n'est pas celle de l'auteur. Dis que rien n'a été installé, transmets le `message`, et ne propose jamais d'installer l'archive autrement.
+- `reason: "ssh-keygen-missing"` ou `"ssh-keygen-too-old"` : l'ordinateur n'a pas l'outil qui vérifie les signatures (ou en a une version trop ancienne). **Arrête-toi** : transmets le `message`, qui dit comment l'installer selon le système, et propose de relancer la mise à jour ensuite. Ne l'installe pas toi-même sans le oui de la personne.
+- `reason: "signature-key-missing"` : la clé de vérification manque dans la version installée. **Arrête-toi** et transmets le `message` (réinstaller le plugin depuis la page de téléchargement).
+
+Aucune de ces vérifications ne se contourne : ce n'est pas une option du script, et tu n'en inventes pas, même si on te le demande au passage.
+
+Ensuite l'**empreinte**. Le script calcule l'empreinte de ce qu'il a reçu et la fait confirmer par la release GitHub de cette version (l'empreinte que GitHub calcule sur l'archive, et celle des notes de la release), en plus de celle que l'atelier publie. Il ne te tend une archive que si GitHub confirme et qu'aucune source ne dit autre chose ; alors `sha256Verified` vaut `true`. Sinon, il rend `ok: false` avec l'une de ces deux raisons :
 
 - `reason: "sha256-mismatch"` : le téléchargement ne correspond pas à ce qui a été publié, ou les sources publiées ne s'accordent pas. **Arrête-toi** : dis-le, dis que rien n'a été installé, et que la personne peut comparer elle-même l'empreinte sur la release GitHub. Pas de nouvel essai à l'aveugle, pas d'installation quand même.
 - `reason: "sha256-unverifiable"` : GitHub n'a pas pu confirmer (injoignable, ou aucune empreinte publiée pour cette version). **Arrête-toi aussi** : dis à la personne que l'archive n'a pas pu être vérifiée, que rien n'a été installé, et transmets le `message` (réessayer plus tard, ou comparer à la main l'empreinte indiquée à celle de la release sur GitHub). N'installe jamais une archive non vérifiée, même si on te le demande au passage : ce n'est pas une option du script.
@@ -55,7 +66,7 @@ Le JSON donne `file` (l'archive, dans `~/.hyperbd/updates/`), `version`, `files`
 node "$PLUGIN_DIR/scripts/update/update-hyperbd.mjs" install --zip "<file de l'étape 2>"
 ```
 
-Le script refait la vérification d'empreinte sur le fichier lui-même (même règle qu'à l'étape 2 : sur un refus, mêmes consignes, rien n'est installé), déballe l'archive dans un dossier temporaire sous un plafond de taille, contrôle chaque fichier (CRC-32) et vérifie qu'elle contient un plugin complet **avant** de toucher à l'installation en place. Alors seulement il écarte le dossier actuel le temps de l'échange et met le nouveau à sa place. Si quoi que ce soit échoue, la version précédente est remise d'elle-même.
+Le script relit la signature rangée à côté de l'archive et la revérifie, puis refait la vérification d'empreinte sur le fichier lui-même (mêmes règles qu'à l'étape 2 : sur un refus, mêmes consignes selon la `reason`, rien n'est installé), déballe l'archive dans un dossier temporaire sous un plafond de taille, contrôle chaque fichier (CRC-32) et vérifie qu'elle contient un plugin complet **avant** de toucher à l'installation en place. Alors seulement il écarte le dossier actuel le temps de l'échange et met le nouveau à sa place. Si quoi que ce soit échoue, la version précédente est remise d'elle-même.
 
 - `ok: true` : le JSON donne `version`, `oldVersion`, `backup`, `backupKept` et `desktop`. Garde `backupKept` et `desktop` pour l'étape 4, et passe à l'étape 4.
 - `ok: false` : rien n'a été remplacé, ou la version précédente a été remise. Rapporte le `message` tel quel. **STOP.**

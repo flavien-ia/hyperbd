@@ -1,0 +1,6 @@
+# Clé publique de publication d'HyperBD, au format allowed_signers d'OpenSSH.
+# /update-hyperbd vérifie avec CE fichier, celui de la version déjà installée, la
+# signature publiée avec chaque release (hyperbd-vX.Y.Z.zip.sig) :
+#   ssh-keygen -Y verify -f allowed_signers -I hyperbd-release -n file -s <sig> < <zip>
+# C'est la clé publiée dans SECURITY.md, celle qui signe aussi les commits et les tags.
+hyperbd-release namespaces="file" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqVH7FUXHPiorT/puz89VLIE9MvFuYIINFqIBG+erLm hypervibe-release-signing

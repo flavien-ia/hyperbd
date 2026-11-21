@@ -2,7 +2,7 @@
 name: bd-da
 description: Pose la direction artistique de l'univers avec l'atelier. Part d'un profil de la galerie (ligne claire, roman graphique, gouache…) ou la construit avec la personne (des pistes taillées pour l'univers, ou ses consignes et ses images), génère les pistes sur une même image clé, les fait juger sur leur robustesse sur soixante planches, laisse la personne essayer le style et garder ses images de référence, puis verrouille le texte du style, le style des cases, la police et la bible graphique. Deuxième étape de la phase univers (que /bd-univers enchaîne), après la bible et avant les personnages. Utiliser quand la personne dit « la direction artistique », « à quoi ça ressemble », « /bd-da », « le style de l'album ».
 argument-hint: "[projet] [--auto] [--budget 5]"
-compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js et curl."
+compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
 
 # La direction artistique : choisir un style qui tiendra soixante planches

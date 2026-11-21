@@ -102,6 +102,11 @@ function construire() {
     .filter((f) => f && !EXCLUS.has(f) && existsSync(path.join(RACINE, f)))
     .sort();
   if (suivis.length === 0) throw new Error("git ls-files ne rend rien : est-on bien dans le dépôt ?");
+  // Sans ces fichiers, la version publiée ne saurait plus vérifier la signature de la
+  // suivante : toutes ses mises à jour seraient refusées.
+  for (const requis of ["scripts/update/allowed_signers", "scripts/update/signature.mjs"]) {
+    if (!suivis.includes(requis)) throw new Error(`${requis} n'est pas suivi par git : il manquerait à l'archive (git add ${requis})`);
+  }
 
   // Les dossiers d'abord, chacun une fois, du plus court au plus long : un
   // extracteur strict les veut avant leurs fichiers.

@@ -4,6 +4,23 @@ Chaque version publiée a son entrée ici, écrite pour les gens qui utilisent l
 plugin, pas pour ceux qui le développent. Les versions antérieures à la 0.5.0
 n'avaient pas de journal : l'historique git en tient lieu.
 
+## v0.16.2 (21 novembre 2026)
+
+### Sécurité
+- **Chaque archive est signée** : `/update-hyperbd` vérifie la signature de la nouvelle version avec la clé de celle déjà installée, avant même de l'ouvrir, et refuse sinon. Cette garantie s'applique à partir de la prochaine mise à jour.
+- **Aucune commande ne s'accorde de droits d'office** : tout passe par les autorisations de ton Claude Code. Les images à juger se téléchargent par une commande de l'outil qui n'accepte que le stockage de l'atelier et que de vraies images ; plus de `curl`.
+- **Les fichiers secrets ne partent jamais vers l'atelier** : un `.env`, une clé SSH ou un certificat sont refusés, même si Claude se trompe de chemin.
+- La commande qui rend une planche en image passe elle aussi par le contrôle de l'adresse de l'atelier.
+
+### Améliorations
+- **Une retouche de case reste dans sa case** : l'atelier remet l'original au pixel près autour de la zone retouchée.
+- **Valider ne défait plus rien** : relancer `validate` laisse la variante validée ; `unvalidate` retire une validation.
+- **Des contraintes moins nombreuses font des planches moins chères** : deux à quatre consignes par case, ce qui bloque et ce qui est toléré écrit avant de générer, un seul assemblage puis le juge. Sur un album réel, le coût d'une double page est tombé de 2,68 $ à 0,81 $.
+- **Un devis plus juste** : un album de 24 pages coûte une vingtaine d'euros d'images, pas des centaines.
+- Une mise en garde sur les visages secondaires (une photo, un portrait), qui prennent les traits du personnage présent.
+
+Merci à Bastien, dont la relecture et l'album d'essai ont nourri toute cette version.
+
 ## v0.16.1 (17 novembre 2026)
 
 ### Améliorations

@@ -73,16 +73,18 @@ toi-même et justifie chaque réponse au journal.
    découpage.
 3. **Le format**, avec son coût :
 
-   | Format | Planches | Pour quoi | Ordre de grandeur |
+   | Format | Pages | Pour quoi | Ordre de grandeur |
    |---|---|---|---|
    | Strip | 1 à 4 | une histoire courte, un tract, une campagne | quelques euros |
-   | Livret | 8 à 16 | PDF, print léger | quelques dizaines d'euros |
-   | Album | 48 à 64 | édition, librairie | une à trois centaines d'euros |
+   | Livret | 8 à 16 | PDF, print léger | une dizaine d'euros |
+   | Album | 48 à 64 | édition, librairie | 40 à 80 euros |
    | Série | plusieurs tomes | univers au long cours | par tome |
 
    Ces montants sont ceux des images seules, sur la clé OpenAI de la personne.
-   Ils viennent d'un album réel : environ 0,06 $ la génération, et une planche
-   aboutie en demande une trentaine (on cherche, on écarte, on recommence).
+   Ils viennent d'albums réels : un album de 24 pages (12 doubles pages) a
+   coûté 20 $ en tout, références et planche test comprises. Une double page
+   demande de 6 à 20 générations, d'autant moins que chaque case porte peu de
+   contraintes, bien choisies.
    Annonce une fourchette, jamais un chiffre unique, et rappelle que le
    stockage et l'agrandissement final sont aussi à sa charge.
 

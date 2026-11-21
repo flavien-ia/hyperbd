@@ -2,7 +2,6 @@
 name: _recit
 description: Helper interne. Les conventions de travail dans la vue Scénario de l'atelier, le fil du récit (en bas) et l'établi (au-dessus) : ce que Claude pose où, comment il fait passer une carte de l'établi au récit, comment il reporte les arbitrages pris dans la conversation, ce qu'il ne touche jamais. Appelé par les skills du récit et de l'univers. Ne pas invoquer directement.
 user-invocable: false
-allowed-tools: Bash(node:*), Read, Write
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
 

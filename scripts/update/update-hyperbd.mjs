@@ -11,12 +11,18 @@
 //
 //   node update-hyperbd.mjs check    [--plugin-dir DIR]
 //   node update-hyperbd.mjs download [--plugin-dir DIR]
-//   node update-hyperbd.mjs install  --zip FICHIER [--plugin-dir DIR]
+//   node update-hyperbd.mjs install  --zip FICHIER [--sig FICHIER.sig] [--plugin-dir DIR]
 //
 // Aucun compte, aucune clé : le plugin est open source, la version publiée se lit sur
 // l'atelier (qui la lit sur GitHub) et l'archive se télécharge sans jeton. `download`
-// et `install` n'acceptent qu'une archive dont l'empreinte SHA-256 est confirmée par
-// la release GitHub de sa version (voir controlerEmpreinte), et refusent sinon.
+// et `install` n'acceptent qu'une archive
+//   - signée par la clé de publication que porte la version DÉJÀ INSTALLÉE
+//     (scripts/update/allowed_signers, vérifiée par ssh-keygen : voir signature.mjs),
+//     avant même d'ouvrir l'archive ;
+//   - dont l'empreinte SHA-256 est confirmée par la release GitHub de sa version
+//     (voir controlerEmpreinte).
+// Sinon, ils refusent. `download` range la signature à côté de l'archive
+// (`<archive>.sig`), où `install` la relit ; `--sig FICHIER` en désigne une autre.
 //
 // Sortie (stdout) : un objet JSON unique. Codes : 0 = fait, 1 = erreur, 2 = réseau injoignable.
 
@@ -27,6 +33,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { placeDuPlugin } from "../plugin-place.mjs";
+import { verifierSignature, TAILLE_MAX_SIGNATURE } from "./signature.mjs";
 
 const ATELIER = "https://app.studio-entremondes.fr";
 /** Ce que l'atelier annonce de la version publiée : numéro, empreinte, date. */
@@ -37,6 +44,8 @@ const TELECHARGEMENT = `${ATELIER}/api/plugin/download`;
 const RELEASE_GITHUB = "https://api.github.com/repos/flavien-ia/hyperbd/releases/latest";
 /** La release d'une version précise : GitHub y calcule lui-même l'empreinte de l'archive. */
 const RELEASE_GITHUB_TAG = (version) => `https://api.github.com/repos/flavien-ia/hyperbd/releases/tags/v${version}`;
+/** La signature de l'archive, publiée comme asset de la même release. */
+const SIGNATURE_GITHUB = (version) => `https://github.com/flavien-ia/hyperbd/releases/download/v${version}/hyperbd-v${version}.zip.sig`;
 /** Une version, et rien d'autre : elle finit dans des noms de fichiers et des adresses. */
 const FORMAT_VERSION = /^\d+\.\d+\.\d+$/;
 /** Plafonds : l'archive publiée pèse moins d'un mégaoctet, décompressée comprise. */
@@ -222,6 +231,35 @@ async function controlerEmpreinte(version, empreinte) {
   return null;
 }
 
+// ── Vérification de la signature ────────────────────────────────────────────
+// L'empreinte confirmée par GitHub ne protège pas de qui tiendrait à la fois l'atelier
+// et le compte GitHub : il publierait une archive piégée ET son empreinte. La signature,
+// elle, ne se fait qu'avec la clé privée de publication, qui ne vit ni sur l'atelier ni
+// sur GitHub. On la vérifie contre la clé publique de la version installée (jamais
+// celle de l'archive reçue), avant d'ouvrir l'archive. Pas de signature, pas de mise à
+// jour : il n'y a pas d'option pour passer outre.
+
+/** Le texte de la signature publiée pour cette version, ou null si la release n'en a pas. */
+async function telechargerSignature(version) {
+  let r;
+  try {
+    r = await fetch(SIGNATURE_GITHUB(version), { headers: { "User-Agent": ENTETES["User-Agent"] } });
+  } catch (e) {
+    return { texte: null, erreur: `GitHub injoignable (${e.message})` };
+  }
+  if (!r.ok) return { texte: null, erreur: `GitHub a répondu ${r.status}` };
+  const texte = await r.text();
+  if (texte.length > TAILLE_MAX_SIGNATURE) return { texte: null, erreur: "signature anormalement longue" };
+  return { texte, erreur: null };
+}
+
+/** Rend null si la signature est bonne, sinon l'objet de refus à renvoyer tel quel. */
+function controlerSignature(octets, signature, contexte = {}) {
+  const res = verifierSignature(octets, signature);
+  if (res.ok) return null;
+  return { ...res, ...contexte };
+}
+
 // ── Lecture d'archive zip (sans dépendance) ─────────────────────────────────
 // L'archive vient de `scripts/empaqueter.mjs` (deflate ou stockage, pas de zip64,
 // pas de chiffrement). Tout autre cas lève une erreur plutôt que d'écrire des
@@ -345,6 +383,14 @@ async function cmdCheck() {
 
 async function cmdDownload() {
   mkdirSync(DOSSIER_TRAVAIL, { recursive: true });
+  // La version annoncée dit quelle signature aller chercher. Elle ne prouve rien :
+  // l'archive doit être signée pour CETTE version, et porter ce numéro.
+  let attendue;
+  try {
+    attendue = (await versionPubliee()).version;
+  } catch (e) {
+    return rendre({ ok: false, offline: true, message: `Impossible de joindre l'atelier ni GitHub : ${e.message}` }, 2);
+  }
   let reponse;
   try {
     reponse = await fetch(TELECHARGEMENT, { headers: { "User-Agent": ENTETES["User-Agent"] } });
@@ -362,6 +408,11 @@ async function cmdDownload() {
   if (buf.length > TAILLE_MAX_ARCHIVE) {
     return rendre({ ok: false, message: `Archive refusée : ${buf.length} octets, au-delà du plafond.` }, 1);
   }
+
+  // La signature d'abord : une archive non signée n'est même pas ouverte.
+  const { texte: signature, erreur: erreurSignature } = await telechargerSignature(attendue);
+  const refusSignature = controlerSignature(buf, signature, erreurSignature ? { cause: erreurSignature } : {});
+  if (refusSignature) return rendre(refusSignature, 1);
 
   let entrees;
   try {
@@ -382,6 +433,16 @@ async function cmdDownload() {
   if (!versionValide(version)) {
     return rendre({ ok: false, message: "L'archive annonce un numéro de version illisible : rien n'a été gardé." }, 1);
   }
+  if (version !== attendue) {
+    return rendre(
+      {
+        ok: false,
+        reason: "version-mismatch",
+        message: `L'archive reçue porte la version ${version}, alors que la version publiée est la ${attendue}. Rien n'a été gardé. Réessayer plus tard.`,
+      },
+      1,
+    );
+  }
   const empreinte = createHash("sha256").update(buf).digest("hex");
 
   // L'empreinte de ce qu'on a reçu doit être confirmée par GitHub (voir
@@ -391,14 +452,17 @@ async function cmdDownload() {
 
   const fichier = path.join(DOSSIER_TRAVAIL, `hyperbd-${version}.zip`);
   writeFileSync(fichier, buf);
+  writeFileSync(`${fichier}.sig`, signature);
   rendre({
     ok: true,
     file: fichier,
+    signatureFile: `${fichier}.sig`,
     version,
     files: entrees.length,
     sizeBytes: buf.length,
     sha256: empreinte,
     sha256Verified: true,
+    signatureVerified: true,
   });
 }
 
@@ -431,6 +495,19 @@ async function cmdInstall() {
   if (octets.length > TAILLE_MAX_ARCHIVE) {
     return rendre({ ok: false, message: `Archive refusée : ${octets.length} octets, au-delà du plafond.` }, 1);
   }
+
+  // La signature, avant d'ouvrir l'archive : celle que `download` a rangée à côté
+  // (`<archive>.sig`), ou celle que désigne --sig. Vérifiée contre la clé de la version
+  // installée, celle qui tourne en ce moment.
+  const fichierSignature = arg("--sig") ?? `${zip}.sig`;
+  let signature = null;
+  if (existsSync(fichierSignature)) {
+    const brut = readFileSync(fichierSignature);
+    signature = brut.length > TAILLE_MAX_SIGNATURE ? "signature trop longue" : brut.toString("utf8");
+  }
+  const refusSignature = controlerSignature(octets, signature, signature === null ? { cherchee: fichierSignature } : {});
+  if (refusSignature) return rendre(refusSignature, 1);
+
   let entrees;
   try {
     entrees = lireArchive(octets);
@@ -522,6 +599,7 @@ async function cmdInstall() {
     ok: true,
     oldVersion: ancienne,
     version: nouvelle,
+    signatureVerified: true,
     pluginDir,
     backup: sauvegarde,
     backupKept,

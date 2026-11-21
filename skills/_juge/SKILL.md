@@ -2,7 +2,6 @@
 name: _juge
 description: Helper interne. Fait juger un artefact narratif par un subagent EN AVEUGLE, selon une grille du plugin (originalité, dramaturgie, cohérence, fidélité, incarnation), et rend un verdict parsable. Appelé par les skills du temps 0-1. Ne pas invoquer directement.
 user-invocable: false
-allowed-tools: Bash(node:*), Read, Write, Agent
 compatibility: "Agent Skills standard (Claude Code ou Codex). Nécessite Node.js."
 ---
 

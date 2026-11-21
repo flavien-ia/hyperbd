@@ -9,6 +9,12 @@
 // Tenu aussi : l'installation n'accepte qu'une archive dont l'empreinte est confirmée par
 // la release GitHub. Le réseau est remplacé par un faux `fetch` chargé avec `--require`
 // (fichier jetable), le script lui-même n'a aucune porte de contournement.
+// Tenu enfin : l'archive doit être signée par la clé que porte la version installée. Pour
+// le vérifier sans la clé privée de publication, la recette installe une copie de l'outil
+// de mise à jour dont le fichier `allowed_signers` porte une clé générée pour l'occasion
+// (ssh-keygen, dossier jetable), signe ses archives avec, et contrôle qu'une bonne
+// signature passe, qu'une archive modifiée, une signature d'une autre clé, une signature
+// absente, une clé installée absente ou un ssh-keygen introuvable sont refusés.
 //
 //   node scripts/update/recette-place.mjs
 //
@@ -17,7 +23,7 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { crc32 } from "node:zlib";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -25,6 +31,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const NOM = "hyperbd";
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const { placeDuPlugin } = await import(pathToFileURL(join(RACINE, "scripts", "plugin-place.mjs")).href);
+const { verifierSignature, trouverSshKeygen, PRINCIPAL } = await import(pathToFileURL(join(RACINE, "scripts", "update", "signature.mjs")).href);
 
 let echecs = 0;
 function ok(quoi, vrai, detail = "") {
@@ -95,16 +102,52 @@ try {
   writeFileSync(zip, archive(neuve));
   const sha = createHash("sha256").update(readFileSync(zip)).digest("hex");
 
+  // Les clés de la recette : celle que la « version installée » déclare, et une autre.
+  const keygen = trouverSshKeygen();
+  if (!keygen) throw new Error("ssh-keygen introuvable : la recette de la signature ne peut pas tourner");
+  const genererCle = (nom) => {
+    const f = join(boite, nom);
+    const r = spawnSync(keygen, ["-q", "-t", "ed25519", "-N", "", "-C", nom, "-f", f], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    if (r.status !== 0) throw new Error(`génération de clé impossible : ${r.stdout}${r.stderr}`);
+    return f;
+  };
+  const cleRecette = genererCle("cle-recette");
+  const cleIntruse = genererCle("cle-intruse");
+  const signer = (fichier, cle = cleRecette, espace = "file") => {
+    rmSync(`${fichier}.sig`, { force: true });
+    const r = spawnSync(keygen, ["-Y", "sign", "-f", cle, "-n", espace, fichier], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    if (r.status !== 0) throw new Error(`signature impossible : ${r.stdout}${r.stderr}`);
+    return `${fichier}.sig`;
+  };
+  signer(zip);
+
+  // La « version installée » : une copie de l'outil de mise à jour, avec la clé de la recette.
+  const outil = join(boite, "outil");
+  mkdirSync(join(outil, "scripts", "update"), { recursive: true });
+  for (const f of ["scripts/plugin-place.mjs", "scripts/update/update-hyperbd.mjs", "scripts/update/signature.mjs"]) {
+    copyFileSync(join(RACINE, f), join(outil, f));
+  }
+  const signatairesRecette = join(outil, "scripts", "update", "allowed_signers");
+  const clePublique = readFileSync(`${cleRecette}.pub`, "utf8").trim().split(/\s+/).slice(0, 2).join(" ");
+  writeFileSync(signatairesRecette, `# clé de la recette\n${PRINCIPAL} namespaces="file" ${clePublique}\n`);
+  const SCRIPT = join(outil, "scripts", "update", `update-${NOM}.mjs`);
+
   // Le faux réseau : ce que l'atelier et GitHub publieraient pour la 9.9.9.
-  const fauxReseau = (atelier, github) => {
+  // `fichiers.zip` : l'archive que sert le téléchargement de l'atelier ; `fichiers.sig` :
+  // la signature publiée sur la release GitHub (absente : 404).
+  const fauxReseau = (atelier, github, fichiers = {}) => {
     const p = join(boite, `reseau-${Math.random().toString(36).slice(2)}.cjs`);
     writeFileSync(
       p,
-      `const rep = (corps) => ({ ok: corps !== null, status: corps === null ? 404 : 200, json: async () => corps });
+      `const fs = require("node:fs");
+const rep = (corps) => ({ ok: corps !== null, status: corps === null ? 404 : 200, headers: { get: () => null }, json: async () => corps, text: async () => (typeof corps === "string" ? corps : JSON.stringify(corps)) });
+const fichier = (f) => (f === null || !fs.existsSync(f) ? rep(null) : { ok: true, status: 200, headers: { get: () => null }, text: async () => fs.readFileSync(f, "utf8"), arrayBuffer: async () => { const b = fs.readFileSync(f); return b.buffer.slice(b.byteOffset, b.byteOffset + b.length); } });
 globalThis.fetch = async (url) => {
   url = String(url);
+  if (url.includes("app.studio-entremondes.fr/api/plugin/download")) return fichier(${JSON.stringify(fichiers.zip ?? null)});
   if (url.includes("app.studio-entremondes.fr")) return rep(${JSON.stringify(atelier)});
   if (url.includes("api.github.com")) { if (${JSON.stringify(github)} === "panne") throw new Error("réseau coupé"); return rep(${JSON.stringify(github)}); }
+  if (url.startsWith("https://github.com/") && url.endsWith(".zip.sig")) return fichier(${JSON.stringify(fichiers.sig ?? null)});
   throw new Error("adresse inattendue : " + url);
 };\n`,
     );
@@ -113,10 +156,8 @@ globalThis.fetch = async (url) => {
   const githubBon = { tag_name: "v9.9.9", body: `SHA-256 : \`${sha}\``, assets: [{ name: `${NOM}-v9.9.9.zip`, digest: `sha256:${sha}` }] };
   const reseauBon = fauxReseau({ version: "9.9.9", sha256: sha }, githubBon);
 
-  const installer = (dossier, reseau = reseauBon) => {
-    mkdirSync(join(dossier, ".claude-plugin"), { recursive: true });
-    writeFileSync(join(dossier, ".claude-plugin", "plugin.json"), manifeste("1.0.0"));
-    const r = spawnSync(process.execPath, ["--require", reseau, join(RACINE, "scripts", "update", `update-${NOM}.mjs`), "install", "--zip", zip, "--plugin-dir", dossier], {
+  const lancer = (reseau, ...argv) => {
+    const r = spawnSync(process.execPath, ["--require", reseau, SCRIPT, ...argv], {
       encoding: "utf8",
       env: { ...process.env, HOME: maison, USERPROFILE: maison },
     });
@@ -125,6 +166,11 @@ globalThis.fetch = async (url) => {
     } catch {
       return { ok: false, brut: r.stdout + r.stderr };
     }
+  };
+  const installer = (dossier, reseau = reseauBon, archiveAPoser = zip) => {
+    mkdirSync(join(dossier, ".claude-plugin"), { recursive: true });
+    writeFileSync(join(dossier, ".claude-plugin", "plugin.json"), manifeste("1.0.0"));
+    return lancer(reseau, "install", "--zip", archiveAPoser, "--plugin-dir", dossier);
   };
   const version = (dossier) => JSON.parse(readFileSync(join(dossier, ".claude-plugin", "plugin.json"), "utf8")).version;
 
@@ -162,22 +208,98 @@ globalThis.fetch = async (url) => {
     abimee[i] = 0x46; // « Fichier » : même taille, CRC faux.
     const zipAbime = join(boite, "abimee.zip");
     writeFileSync(zipAbime, abimee);
+    // Signée et confirmée par GitHub : seul le CRC-32 peut l'arrêter.
+    signer(zipAbime);
     const shaAbime = createHash("sha256").update(abimee).digest("hex");
     const reseau = fauxReseau(null, { tag_name: "v9.9.9", body: "", assets: [{ name: `${NOM}-v9.9.9.zip`, digest: `sha256:${shaAbime}` }] });
     const d = join(boite, "abimee", NOM);
-    mkdirSync(join(d, ".claude-plugin"), { recursive: true });
-    writeFileSync(join(d, ".claude-plugin", "plugin.json"), manifeste("1.0.0"));
-    const brut = spawnSync(process.execPath, ["--require", reseau, join(RACINE, "scripts", "update", `update-${NOM}.mjs`), "install", "--zip", zipAbime, "--plugin-dir", d], {
-      encoding: "utf8",
-      env: { ...process.env, HOME: maison, USERPROFILE: maison },
-    });
-    let res;
-    try {
-      res = JSON.parse(brut.stdout);
-    } catch {
-      res = { brut: brut.stdout + brut.stderr };
-    }
+    const res = installer(d, reseau, zipAbime);
     ok("une entrée au CRC-32 faux : refusée, rien d'installé", res.ok === false && /CRC/.test(res.message || "") && version(d) === "1.0.0", JSON.stringify(res));
+  }
+
+  console.log("\nLa signature, avant d'ouvrir l'archive");
+  {
+    // Chaque cas a sa propre copie de l'archive, et donc sa propre signature (ou aucune).
+    const copie = (nom) => {
+      const f = join(boite, `${nom}.zip`);
+      copyFileSync(zip, f);
+      return f;
+    };
+    const refusSig = (quoi, archiveAPoser, raison, reseau = reseauBon) => {
+      const d = join(boite, `sig-${Math.random().toString(36).slice(2)}`, NOM);
+      const res = installer(d, reseau, archiveAPoser);
+      ok(quoi, res.ok === false && res.reason === raison && version(d) === "1.0.0" && typeof res.message === "string" && res.message.length > 40, JSON.stringify(res));
+    };
+
+    const bonne = installer(join(boite, "sig-bonne", NOM));
+    ok("une bonne signature : installée, et le JSON le dit", bonne.ok === true && bonne.signatureVerified === true, JSON.stringify(bonne));
+
+    refusSig("aucune signature à côté de l'archive : refus, rien d'installé", copie("sans-signature"), "signature-missing");
+
+    const modifiee = copie("modifiee");
+    copyFileSync(`${zip}.sig`, `${modifiee}.sig`);
+    {
+      // Un octet changé après la signature ; GitHub « confirme » cette archive-là, pour
+      // que seule la signature puisse l'arrêter.
+      const b = readFileSync(modifiee);
+      const i = b.indexOf(Buffer.from("fichier 1\n"));
+      b[i] = 0x46;
+      writeFileSync(modifiee, b);
+      const shaModifiee = createHash("sha256").update(b).digest("hex");
+      const reseauComplice = fauxReseau({ version: "9.9.9", sha256: shaModifiee }, { tag_name: "v9.9.9", body: `\`${shaModifiee}\``, assets: [{ name: `${NOM}-v9.9.9.zip`, digest: `sha256:${shaModifiee}` }] });
+      refusSig("une archive modifiée après la signature, même confirmée par GitHub : refus", modifiee, "signature-invalid", reseauComplice);
+    }
+
+    const intruse = copie("intruse");
+    signer(intruse, cleIntruse);
+    refusSig("une signature faite par une autre clé : refus", intruse, "signature-invalid");
+
+    const espaceGit = copie("espace-git");
+    signer(espaceGit, cleRecette, "git");
+    refusSig("une signature de la bonne clé, mais pour git et non pour un fichier : refus", espaceGit, "signature-invalid");
+
+    const illisible = copie("illisible");
+    writeFileSync(`${illisible}.sig`, "pas une signature\n");
+    refusSig("un fichier de signature illisible : refus", illisible, "signature-invalid");
+
+    // Sans la clé dans la version installée, rien ne passe, même une archive bien signée.
+    const sauve = readFileSync(signatairesRecette);
+    rmSync(signatairesRecette);
+    refusSig("la clé manque dans la version installée : refus", zip, "signature-key-missing");
+    writeFileSync(signatairesRecette, sauve);
+
+    // ssh-keygen introuvable, et la vraie clé de publication contre une archive de la recette.
+    const octets = readFileSync(zip);
+    const sig = readFileSync(`${zip}.sig`, "utf8");
+    const absent = verifierSignature(octets, sig, { signataires: signatairesRecette, sshKeygen: join(boite, "nulle-part", "ssh-keygen.exe") });
+    ok("ssh-keygen introuvable : refus, et le message dit comment l'installer", absent.ok === false && absent.reason === "ssh-keygen-missing" && /OpenSSH/.test(absent.message), JSON.stringify(absent));
+    const aucun = verifierSignature(octets, sig, { signataires: signatairesRecette, sshKeygen: null });
+    ok("aucun ssh-keygen sur la machine : refus", aucun.ok === false && aucun.reason === "ssh-keygen-missing", JSON.stringify(aucun));
+    const vraieCle = verifierSignature(octets, sig);
+    ok("la clé de publication du dépôt ne reconnaît pas une signature de la recette", vraieCle.ok === false && vraieCle.reason === "signature-invalid", JSON.stringify(vraieCle));
+  }
+
+  console.log("\nLe téléchargement, signature comprise");
+  {
+    const reseauComplet = (sig) => fauxReseau({ version: "9.9.9", sha256: sha }, githubBon, { zip, sig });
+    const res = lancer(reseauComplet(`${zip}.sig`), "download");
+    const range = join(maison, ".hyperbd", "updates", `${NOM}-9.9.9.zip`);
+    ok(
+      "archive signée : gardée, signature rangée à côté, et install la relit",
+      res.ok === true && res.signatureVerified === true && res.sha256Verified === true && res.signatureFile === `${range}.sig` && existsSync(`${range}.sig`),
+      JSON.stringify(res),
+    );
+    if (res.ok) {
+      const d = join(boite, "apres-download", NOM);
+      const posee = installer(d, reseauBon, range);
+      ok("l'archive téléchargée s'installe avec sa signature", posee.ok === true && version(d) === "9.9.9", JSON.stringify(posee));
+    }
+    rmSync(join(maison, ".hyperbd"), { recursive: true, force: true });
+    const sansSig = lancer(reseauComplet(null), "download");
+    ok("la release ne publie pas de signature : rien n'est gardé", sansSig.ok === false && sansSig.reason === "signature-missing" && !existsSync(join(maison, ".hyperbd", "updates", `${NOM}-9.9.9.zip`)), JSON.stringify(sansSig));
+    const intruseSig = join(boite, "intruse.zip.sig");
+    const fausse = lancer(reseauComplet(intruseSig), "download");
+    ok("la release publie une signature faite par une autre clé : rien n'est gardé", fausse.ok === false && fausse.reason === "signature-invalid", JSON.stringify(fausse));
   }
 } finally {
   rmSync(boite, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
@@ -199,5 +321,5 @@ console.log("\nLes textes");
   ok("SECURITY.md dit que Desktop efface la sauvegarde", /sauvegarde de la version précédente à côté du plugin \(sous Claude\s+Desktop,\s+qui efface les dossiers/.test(lire("SECURITY.md")));
 }
 
-console.log(echecs ? `\n${echecs} échec(s).` : "\nLa mise à jour dit vrai sur sa sauvegarde.");
+console.log(echecs ? `\n${echecs} échec(s).` : "\nLa mise à jour dit vrai sur sa sauvegarde, et n'installe que ce qui est signé.");
 process.exitCode = echecs ? 1 : 0;

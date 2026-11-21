@@ -73,7 +73,7 @@ emplacement.
    (`/bd-album`) vérifie avant de commencer. Dans cet ordre :
 
 ```bash
-node "$S" validate <varianteId>                # 1. l'image de la planche entière (une bascule : une seule fois)
+node "$S" validate <varianteId>                # 1. l'image de la planche entière
 node "$S" derive-lettrage <plancheId>          # 2. le lettrage naît du script
 node "$S" set-lettrage <plancheId> --valider   # 3. une fois les bulles à leur place
 ```

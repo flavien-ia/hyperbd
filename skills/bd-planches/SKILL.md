@@ -122,7 +122,14 @@ juge :
 - **la direction artistique principale** (son id en `plateIds`) ;
 - **la planche précédente VALIDÉE de la même scène**, pour la continuité.
 
-Deux pièges appris à la production, qui coûtent cher si on les ignore :
+**Un seul assemblage, puis le juge, puis une correction seulement si un
+point BLOQUANT tombe** (la liste écrite au découpage, voir `/bd-dialogues`).
+Un défaut que la liste dit TOLÉRÉ ne se corrige pas : il se note. Le juge
+regarde en aveugle, il ne connaît pas tes intentions : lis son verdict comme
+un diagnostic, pas comme un arbitre ; une irrégularité voulue n'est pas une
+faute.
+
+Trois pièges appris à la production, qui coûtent cher si on les ignore :
 
 - **Les images de référence de la DA ne portent pas l'identité d'un personnage.** Si l'une
   montre quelqu'un, détoure-le ou dis explicitement au juge de ne pas s'y fier
@@ -130,6 +137,12 @@ Deux pièges appris à la production, qui coûtent cher si on les ignore :
 - **Une image de référence peut contredire la bible qu'elle est censée
   incarner.** Quand les deux divergent, c'est la bible qui fait foi, et l'écart
   se consigne.
+- **Un visage secondaire prend les traits du personnage présent.** Une photo
+  au mur, un portrait, un écran qui montre quelqu'un : dans une case où figure
+  un personnage de référence, ce visage-là finit par lui ressembler (vu en
+  novembre 2026 : la photo d'un grand-père a pris le visage de l'expert assis
+  devant). Demande-toi d'abord si cette image dans l'image est nécessaire ; si
+  elle l'est, décris-la sans visage lisible, ou en silhouette.
 
 ### 3. Trancher, selon le verdict
 
@@ -137,9 +150,8 @@ Deux pièges appris à la production, qui coûtent cher si on les ignore :
   ```bash
   node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" validate <varianteId>
   ```
-  `validate` est une **bascule** : le rappeler sur une variante déjà retenue
-  la dévalide. Lis `validee` dans la réponse (ou `finalOutputId` dans
-  `planche <id>`), et ne le relance jamais « pour être sûr ».
+  `validate` laisse la variante validée, même relancé ; lis `validee` dans
+  la réponse. Pour retirer une validation : `unvalidate <varianteId>`.
 - **ITÉRER** : un défaut localisé. Repasse le delta du juge en `--extra`, sans
   toucher au reste du prompt. **Trois tours par planche au maximum**, et le
   coût cumulé s'affiche à chaque tour.
@@ -150,8 +162,12 @@ Deux pièges appris à la production, qui coûtent cher si on les ignore :
   node "${CLAUDE_SKILL_DIR}/../../scripts/studio.mjs" retouch <varianteId> --case <caseId> --consigne "<le delta, tel quel>" --wait
   ```
   Une image en retour, une variante de plus dans la mosaïque, l'originale
-  intacte. C'est le tour le moins cher et le plus sûr : à préférer à ITÉRER
-  dès que le juge nomme une case. Sur l'image entière d'une planche (ou d'une
+  intacte. Hors de la zone désignée, l'atelier remet l'original au pixel près :
+  seule la case change. C'est le tour le moins cher et le plus sûr : à
+  préférer à ITÉRER dès que le juge nomme une case. La consigne reste lue par
+  le modèle comme une règle : nomme ce qui change DANS la case, jamais un
+  motif en général (« retire la barre de l'engrenage », pas « retire les
+  barres »), puis regarde la double page entière. Sur l'image entière d'une planche (ou d'une
   couverture, qui a son gabarit et ses cases), `--case` suffit ; sur une
   image de case, ou pour une zone plus fine qu'une case, désigne-la par
   `--rect x,y,w,h` en fractions de l'image.

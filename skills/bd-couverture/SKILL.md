@@ -258,7 +258,7 @@ node "$S" generate <plancheId> --quality high --mode planche --wait
    depuis un « presque ».
 
 ```bash
-node "$S" validate <varianteId>     # une bascule : une seule fois, lis `validee` dans la réponse
+node "$S" validate <varianteId>     # relancé, il reste validé ; lis `validee` dans la réponse
 ```
 
 ## Étape 6 : le titre, le dos et les mentions, dans le lettrage

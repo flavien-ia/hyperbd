@@ -128,7 +128,7 @@ Le mode d'emploi détaillé est aussi écrit dans chaque carte, une fois ouverte
 ### OpenAI (indispensable pour dessiner)
 
 - **À quoi ça sert** : générer les images des planches, des personnages, des décors (GPT Image).
-- **Ce que ça coûte** : facturé à l'image, sur son compte OpenAI. Quelques centimes par image en qualité de travail, quelques dizaines de centimes en haute qualité. Une planche aboutie demande une trentaine de générations ; un strip revient à quelques euros, un album de soixante planches à une à trois centaines d'euros. Le harnais annonce un devis avant toute dépense.
+- **Ce que ça coûte** : facturé à l'image, sur son compte OpenAI. Quelques centimes par image en qualité de travail, quelques dizaines de centimes en haute qualité. Une double page aboutie demande de 6 à 20 générations ; un strip revient à quelques euros, un album de 24 pages à une vingtaine d'euros, un album de 48 à 64 pages à 40 à 80 euros. Le harnais annonce un devis avant toute dépense.
 - **Comment l'obtenir** : un compte sur platform.openai.com avec un moyen de paiement (sans crédit, l'API refuse) ; page **API keys**, « Create new secret key », un nom parlant ; copier la clé tout de suite (elle commence par `sk-` et ne sera plus affichée).
 
 ### Cloudflare R2 (indispensable pour ranger les images)

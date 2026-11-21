@@ -122,6 +122,16 @@ de ses cases, une case n'hérite plus de rien, ni de l'en-tête de la planche,
 ni de son ambiance, ni de ses références. Le script d'une case contient sa
 description ET ses répliques, au format `Nom : texte`, une par ligne.
 
+**Deux à quatre contraintes par case, pas plus.** Chaque contrainte de trop
+dilue les autres, et se paie en générations. Avant de générer, écris pour
+chaque planche ce qui est **BLOQUANT** (sans quoi la case ne raconte plus
+rien : un geste, un regard, un objet qui reviendra) et ce qui est **TOLÉRÉ**
+(un détail de décor, une couleur approximative), dans le journal du projet :
+c'est cette liste, et elle seule, qui décidera au verdict. Mesuré sur un
+album de 24 pages (novembre 2026) : de 20 générations pour la première
+double page à 6 pour la quatrième, validée du premier coup, à mesure que les
+contraintes se resserraient.
+
 ```json
 {
   "sceneId": "<id de la scène>",

@@ -228,11 +228,41 @@ for (const [nom, texte] of [
 }
 ok(perimes === 0, "aucun passage périmé connu dans les skills et gabarits");
 
+// Aucune skill ne s'accorde de droits d'office (allowed-tools) : SECURITY.md
+// le promet, et un `Bash(curl:*)` approuvé d'avance laisserait passer tout
+// envoi le jour où un contenu tromperait l'agent (relecture de Bastien, 18/11/2026).
+const avecDroits = skills.filter((d) => /^allowed-tools:/m.test(readFileSync(join(RACINE, "skills", d, "SKILL.md"), "utf8")));
+ok(avecDroits.length === 0, "aucune skill ne s'accorde de droits d'office", avecDroits.join(", "));
+
+// ── La clé de publication embarquée est celle que publie SECURITY.md ───────
+// /update-hyperbd vérifie la signature de chaque archive contre ce fichier, tel que la
+// version installée le porte : une clé qui dériverait de celle de SECURITY.md ferait
+// refuser toutes les mises à jour, ou en accepter d'une clé que personne n'a annoncée.
+{
+  const fSignataires = join(RACINE, "scripts/update/allowed_signers");
+  ok(existsSync(fSignataires), "la clé publique de publication est dans le dépôt", "scripts/update/allowed_signers");
+  if (existsSync(fSignataires)) {
+    const securite = readFileSync(join(RACINE, "SECURITY.md"), "utf8");
+    const publiee = /^ssh-ed25519 (AAAA[0-9A-Za-z+/=]+) hypervibe-release-signing\r?$/m.exec(securite)?.[1] ?? null;
+    const lignes = readFileSync(fSignataires, "utf8")
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith("#"));
+    const m = lignes.length === 1 ? /^hyperbd-release namespaces="file" ssh-ed25519 (AAAA[0-9A-Za-z+/=]+)(?: \S+)?$/.exec(lignes[0]) : null;
+    ok(m !== null, "allowed_signers : une seule clé, principal hyperbd-release, espace « file »", lignes.join(" | ").slice(0, 160));
+    ok(publiee !== null && m?.[1] === publiee, "la clé embarquée est celle de SECURITY.md", publiee ? "" : "aucune clé ssh-ed25519 dans SECURITY.md");
+    // Le principal et l'espace que lit le code sont ceux du fichier.
+    const sig = readFileSync(join(RACINE, "scripts/update/signature.mjs"), "utf8");
+    ok(/PRINCIPAL = "hyperbd-release"/.test(sig) && /ESPACE = "file"/.test(sig), "signature.mjs vérifie le principal et l'espace du fichier");
+  }
+}
+
 // ── La mise à jour : ce qu'elle promet selon l'endroit où vit le plugin ────
-// Une vraie installation, dans des dossiers jetables (scripts/update/recette-place.mjs).
+// Une vraie installation, dans des dossiers jetables (scripts/update/recette-place.mjs),
+// signature comprise : une clé jetable signe, une archive modifiée est refusée.
 const recettePlace = spawnSync(process.execPath, [join(RACINE, "scripts/update/recette-place.mjs")], { encoding: "utf8" });
 if (recettePlace.status !== 0) console.log(recettePlace.stdout + recettePlace.stderr);
-ok(recettePlace.status === 0, "la mise à jour ne promet une sauvegarde que là où elle dure");
+ok(recettePlace.status === 0, "la mise à jour ne promet une sauvegarde que là où elle dure, et n'installe que ce qui est signé");
 
 // ── Le client, contre un faux atelier local (scripts/recette-client.mjs) ────
 // Ce que le client envoie ou refuse d'envoyer, sans réseau et sans dépense.
